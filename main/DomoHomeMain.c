@@ -21,11 +21,11 @@
 #include "lvgl_port.h"    // Header for LVGL port initialization and locking
 //#include "wifi.h"         // Header for Wi-Fi functionality
 #include "sd_card.h"      // Header for SD card operations
-//#include "BME280.h"      // Header for SD card operations
-#include "BMP280.h"      // Header for SD card operations
+#include "BME280.h"      // Header for SD card operations
+//#include "BMP280.h"      // Header for SD card operations
 #include "ui.h"           // Header for user interface initialization
 #include "pcf8563.h"
-#include "aht10.h"
+//#include "aht10.h"
 
 static const char *TAG = "DomoHomeMain"; // Tag used for ESP log output
 
@@ -89,31 +89,23 @@ void app_main()
     // PWM is used to adjust the brightness of the LCD backlight.
    // pwm_init();
 
-  // aht10_init();
 
-   if(bmp280_init() < 0) {
+   //aht10_init();
+
+   if(bme280_init() < 0) {
         ESP_LOGE(TAG, "BMP280 Init Failed");
     }
         
- 
-    struct tm time = {
-		.tm_year = 2025,
-		.tm_mon  = 10,  // 0-based
-		.tm_mday = 9,
-		.tm_hour = 11,
-		.tm_min  = 52,
-		.tm_sec  = 00
-	};
-    pcf8563_init();
-   // pcf8563_reset();
-    pcf8563_set_time(&time);
 
+   
+    pcf8563_init();
+   
    
 
 
     // Initialize SD card operations
     // This sets up the Micro SD card for data storage and retrieval.
-    sd_init();
+   // sd_init();
 
     // Start the WIFI task to handle Wi-Fi functionality
     // This task manages Wi-Fi connections and hotspot creation.

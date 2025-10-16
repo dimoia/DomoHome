@@ -14,10 +14,19 @@ typedef struct _objects_t {
     lv_obj_t *middle;
     lv_obj_t *thermo;
     lv_obj_t *footer;
+    lv_obj_t *obj0;
+    lv_obj_t *lbl_percent;
+    lv_obj_t *lbl_c;
+    lv_obj_t *lbl_humidity_value;
+    lv_obj_t *lbl_humidity;
     lv_obj_t *lbl_temp_value;
     lv_obj_t *lbl_temperature;
-    lv_obj_t *lbl_pressure;
     lv_obj_t *lbl_press_value;
+    lv_obj_t *lbl_pressure;
+    lv_obj_t *img_humidity;
+    lv_obj_t *img_temperature;
+    lv_obj_t *img_humi;
+    lv_obj_t *chart_temp_humy;
 } objects_t;
 
 extern objects_t objects;

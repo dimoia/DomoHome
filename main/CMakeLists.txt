@@ -4,7 +4,7 @@ file(GLOB_RECURSE srcs *.c
                    ui/images/*.c
                    user/bme280/*.c
                    user/bmp280/*.c
-                   user/AHT10/*.c
+                  # user/AHT10/*.c
                    user/PCF8523/*.c
                    #user/add_password/*.c
                    #user/wifi/*.c
@@ -18,7 +18,7 @@ set(include_dirs
    ui
    user/bme280
    user/bmp280
-   user/AHT10
+  # user/AHT10
    user/PCF8523
    #user/add_password
   # user/wifi

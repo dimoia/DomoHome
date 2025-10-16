@@ -21,14 +21,14 @@
 #include "gpio.h"           // GPIO header for pin configuration
 
 // Define the SDA (data) and SCL (clock) pins for I2C communication
-#define EXAMPLE_I2C_MASTER_SDA GPIO_NUM_8  // SDA pin
-#define EXAMPLE_I2C_MASTER_SCL GPIO_NUM_9  // SCL pin
+#define I2C_MASTER_SDA GPIO_NUM_8  // SDA pin
+#define I2C_MASTER_SCL GPIO_NUM_9  // SCL pin
 
 // Define the I2C frequency (400 kHz)
-#define EXAMPLE_I2C_MASTER_FREQUENCY (400 * 1000)  // I2C speed
+#define I2C_MASTER_FREQUENCY (400 * 1000)  // I2C speed
 
 // Define the I2C master port number (I2C_NUM_0 in this case)
-#define EXAMPLE_I2C_MASTER_NUM I2C_NUM_0
+#define I2C_MASTER_NUM I2C_NUM_0
 
 
 typedef struct {
@@ -126,4 +126,15 @@ void DEV_I2C_Read_Nbyte(i2c_master_dev_handle_t dev_handle, uint8_t Cmd, uint8_t
  */
 void DEV_I2C_Read_Bytes(i2c_master_dev_handle_t dev_handle,uint8_t *pdata,uint8_t len);
 
+/// Extended function prototypes for I2C communication with timeout support 
+esp_err_t I2C_Add_Slave_Addr(i2c_master_dev_handle_t *dev_handle, uint8_t Addr);
+esp_err_t I2C_Read_Byte(i2c_master_dev_handle_t in_stDevHandle, uint8_t in_u8Cmd,uint8_t *out_ptrU8Data, int32_t in_stXferTimeoutMs);
+esp_err_t I2C_Read_Bytes(i2c_master_dev_handle_t in_stDevHandle, uint8_t in_u8Cmd,uint8_t *out_ptrU8Data, uint8_t in_u8DataLen, int32_t in_stXferTimeoutMs);
+
+esp_err_t I2C_Write_Byte(i2c_master_dev_handle_t in_stDevHandle, uint8_t in_u8Cmd,uint8_t in_u8Data,int32_t in_stXferTimeoutMs);
+esp_err_t I2C_Write_Bytes(i2c_master_dev_handle_t in_stDevHandle, uint8_t in_u8Cmd,const uint8_t *in_ptrU8Data, uint8_t in_u8DataLen,int32_t in_stXferTimeoutMs);
+esp_err_t I2C_Read_Word(i2c_master_dev_handle_t in_stDevHandle, uint8_t in_u8Cmd,uint16_t *out_ptrU16Data, int32_t in_stXferTimeoutMs);
+esp_err_t I2C_Read_WordLe(i2c_master_dev_handle_t in_stDevHandle, uint8_t in_u8Cmd,uint16_t *out_ptrU16Data, int32_t in_stXferTimeoutMs);
+
 #endif
+ 

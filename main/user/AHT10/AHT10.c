@@ -7,8 +7,10 @@
 #include "lvgl_port.h"    
 #include "ui.h"
 #include "screens.h"
+#include "aht.h"
 
-#define AHT10_I2CADDR_DEFAULT 0x39//0x38   ///< AHT default i2c address
+
+#define AHT10_I2CADDR_DEFAULT 0x38//0x38   ///< AHT default i2c address
 #define AHT10_I2CADDR_ALTERNATE 0x39 ///< AHT alternate i2c address
 
 #define AHT10_CMD_CALIBRATE 0xE1     ///< Calibration command
@@ -35,15 +37,39 @@ void aht10UpdateLvgObjectCb(lv_timer_t * timer)
 
 void aht10_task(void *arg)
 {     
+     aht_t dev = { 0 };
+    dev.mode = AHT_MODE_NORMAL;
+    dev.type = AHT_TYPE_AHT1x;
+
+    ESP_LOGI(TAG, "aht10_task Start "); // Log the PCF8563 initialization
+
+    
+
+    ESP_ERROR_CHECK(aht_init_desc(&dev, AHT10_I2CADDR_DEFAULT, 0, I2C_MASTER_SDA, I2C_MASTER_SCL));
+    ESP_LOGI(TAG, "aht_init_desc Start "); // Log the PCF8563 initialization
+
+    ESP_ERROR_CHECK(aht_init(&dev));
+    ESP_LOGI(TAG, "aht_init Start "); // Log the PCF8563 initialization
+
+     bool calibrated;
+    ESP_ERROR_CHECK(aht_get_status(&dev, NULL, &calibrated));
+      if (calibrated)
+        ESP_LOGI(TAG, "Sensor calibrated");
+    else
+        ESP_LOGW(TAG, "Sensor not calibrated!");
+
+
     float fTemperature;
     float fHumidity;
     while (1)
     {
-       
-        aht10_getCurrentTempAndHumidity(&fTemperature,&fHumidity);
-        ESP_LOGI(TAG,"AHT10 Humidity %02f %% Temperature %02f C",fHumidity,fTemperature);
+        esp_err_t res = aht_get_data(&dev, &fTemperature, &fHumidity);
+        if (res == ESP_OK)
+            ESP_LOGI(TAG, "Temperature: %.1f°C, Humidity: %.2f%%", fTemperature, fHumidity);
+        else
+            ESP_LOGE(TAG, "Error reading data: %d (%s)", res, esp_err_to_name(res));
 
-        vTaskDelay(pdMS_TO_TICKS(2000)); // Delay for 2 seconds
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
 
@@ -129,6 +155,7 @@ int8_t aht10_init()
 {
   ESP_LOGI(TAG, "Init AHT10 On I2C "); // Log the PCF8563 initialization
 
+  #if 0
   DEV_I2C_Set_Slave_Addr(&i2c_dev_obj,AHT10_I2CADDR_DEFAULT); // Set the I2C slave address for PCF8563
  
   
@@ -141,6 +168,8 @@ int8_t aht10_init()
   }
   ESP_LOGI(TAG, "AHT10 Calibration Done "); // Log the PCF8563 initialization
 	// Start the temperature monitoring task
+#endif
+  ESP_ERROR_CHECK(i2cdev_init());
   xTaskCreate(aht10_task, "ath10_task", 3 * 1024, NULL, 3, &aht10_TaskHandle);
   if (aht10_TaskHandle == NULL) {
       ESP_LOGE(TAG, "Failed to create ath10_task");

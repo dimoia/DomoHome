@@ -19,6 +19,15 @@
 #define PCF8563_ADDR_ALARM   0x09
 #define PCF8563_ADDR_CONTROL 0x0d
 #define PCF8563_ADDR_TIMER   0x0e
+#define BIT_YEAR_CENTURY 7
+
+#define MASK_MIN  0x7f
+#define MASK_HOUR 0x3f
+#define MASK_MDAY 0x3f
+#define MASK_WDAY 0x07
+#define MASK_MON  0x1f
+#define BIT_VL 7
+#define BV(x) ((uint8_t)(1 << (x)))
 
 static i2c_master_dev_handle_t i2c_dev_obj;
 static uint8_t bcd2dec(uint8_t val);
@@ -44,6 +53,21 @@ void pcf8523_task(void *arg)
 {  
     char strTemp[15];
     char strPressure[15];
+
+	 struct tm time = {
+		.tm_year = 120, // Year since 1900
+		.tm_mon  = 10,  // 0-based
+		.tm_mday = 16,
+		.tm_hour = 00,
+		.tm_min  = 02,
+		.tm_sec  = 00,
+		.tm_wday = 0  // days since Sunday - [0, 6]
+	};
+
+	//pcf8563_reset();
+    pcf8563_set_time(&time);
+
+
     while (1)
     {
         struct tm currentTime;
@@ -104,24 +128,43 @@ void pcf8563_reset()
 int8_t pcf8563_set_time(struct tm *time)
 {
     int8_t iRetVal = 0;
-	uint8_t u8Data[8];
+	//uint8_t u8Data[8];
 	if(time==NULL) {
 		iRetVal =  -1;
 	}
 	else 
 	{
+		 bool ovf = time->tm_year >= 200;
+#if 0		 
 		// Set the time time/date data */
 		u8Data[0]= PCF8563_ADDR_TIME;
-		u8Data[0] = dec2bcd(time->tm_sec);
-		u8Data[1] = dec2bcd(time->tm_min);
-		u8Data[2] = dec2bcd(time->tm_hour);
-		u8Data[3] = dec2bcd(time->tm_mday);
-		u8Data[4] = dec2bcd(time->tm_wday);		// tm_wday is 0 to 6
-		u8Data[5] = dec2bcd(time->tm_mon + 1);	// tm_mon is 0 to 11
-		u8Data[6] = dec2bcd(time->tm_year - 2000);
-
-		DEV_I2C_Write_Nbyte(i2c_dev_obj, &u8Data[0], 8);
-		//return i2c_dev_write_reg(dev, PCF8563_ADDR_TIME, data, 8);
+		u8Data[1] = dec2bcd(time->tm_sec);
+		u8Data[2] = dec2bcd(time->tm_min);
+		u8Data[3] = dec2bcd(time->tm_hour);
+		u8Data[4] = dec2bcd(time->tm_mday);
+		u8Data[5] = dec2bcd(time->tm_wday);		// tm_wday is 0 to 6
+		u8Data[6] = dec2bcd(time->tm_mon + 1);	// tm_mon is 0 to 11
+		u8Data[7] = dec2bcd(time->tm_year - 2000);
+#endif
+        uint8_t data[7] =
+		{   
+			dec2bcd(time->tm_sec),
+			dec2bcd(time->tm_min),
+			dec2bcd(time->tm_hour),
+			dec2bcd(time->tm_mday),
+			dec2bcd(time->tm_wday),
+			dec2bcd(time->tm_mon + 1) | (ovf ? BV(BIT_YEAR_CENTURY) : 0),
+			dec2bcd(time->tm_year - (ovf ? 200 : 100))
+		};
+		ESP_LOGI("", "data=%02x %02x %02x %02x %02x %02x %02x",
+					data[0],data[1],data[2],data[3],data[4],data[5],data[6]);
+        if(I2C_Write_Bytes(i2c_dev_obj, PCF8563_ADDR_TIME,data, 7,100) != ESP_OK) 
+		{
+			ESP_LOGE(TAG, "Failed to set PCF8563 time");
+			iRetVal = -1; // Return error if writing time fails
+		}
+		//DEV_I2C_Write_Nbyte(i2c_dev_obj, &data[0], 8);
+		
 	}
 	return iRetVal;	
 }
@@ -135,16 +178,18 @@ int8_t pcf8563_get_time(struct tm *time)
 	}
     else 
 	{
-		DEV_I2C_Read_Nbyte(i2c_dev_obj, PCF8563_ADDR_TIME, &data[0], 7);
-
-		/* read time */
-		//esp_err_t res = i2c_dev_read_reg(dev, PCF8563_ADDR_TIME, data, 7);
-		//	if (res != ESP_OK) return res;
+		//DEV_I2C_Read_Nbyte(i2c_dev_obj, PCF8563_ADDR_TIME, &data[0], 7);
+        if(I2C_Read_Bytes(i2c_dev_obj, PCF8563_ADDR_TIME, &data[0], 7, 100)	!= ESP_OK) 
+		{
+			ESP_LOGE(TAG, "Failed to read PCF8563 time");
+			iRetVal = -1; // Return error if reading time fails
+		}
 
 		/* convert to unix time structure */
-		ESP_LOGD("", "data=%02x %02x %02x %02x %02x %02x %02x",
-					data[0],data[1],data[2],data[3],data[4],data[5],data[6]);
+		//ESP_LOGD("", "data=%02x %02x %02x %02x %02x %02x %02x",
+		//			data[0],data[1],data[2],data[3],data[4],data[5],data[6]);
 
+					/*
 		time->tm_sec  = bcd2dec(data[0] & 0x7F);
 		time->tm_min  = bcd2dec(data[1] & 0x7F);
 		time->tm_hour = bcd2dec(data[2] & 0x3F);
@@ -152,7 +197,15 @@ int8_t pcf8563_get_time(struct tm *time)
 		time->tm_wday = bcd2dec(data[4] & 0x07);		// tm_wday is 0 to 6
 		time->tm_mon  = bcd2dec(data[5] & 0x1F) - 1;	// tm_mon is 0 to 11
 		time->tm_year = bcd2dec(data[6]) + 2000;
-		time->tm_isdst = 0;
+		time->tm_isdst = 0; */
+
+		time->tm_sec  = bcd2dec(data[0] & ~BV(BIT_VL));
+		time->tm_min  = bcd2dec(data[1] & MASK_MIN);
+		time->tm_hour = bcd2dec(data[2] & MASK_HOUR);
+		time->tm_mday = bcd2dec(data[3] & MASK_MDAY);
+		time->tm_wday = bcd2dec(data[4] & MASK_WDAY);
+		time->tm_mon  = bcd2dec(data[5] & MASK_MON) - 1;
+		time->tm_year = bcd2dec(data[6]) + (data[5] & BV(BIT_YEAR_CENTURY) ? 200 : 100);
 	}
 	return iRetVal;
 }

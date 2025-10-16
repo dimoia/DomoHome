@@ -12,7 +12,11 @@
  ******************************************************************************/
 
 #include "i2c.h"  // Include I2C driver header for I2C functions
+
 static const char *TAG = "i2c";  // Define a tag for logging
+
+#define AHT_I2C_ADDRESS_GND 0x38 //!< Device address when ADDR pin connected to GND
+#define AHT_I2C_ADDRESS_VCC 0x39 //!< Device address when ADDR pin connected to VCC
 
 // Global handle for the I2C master bus
 // i2c_master_bus_handle_t bus_handle = NULL;
@@ -31,9 +35,9 @@ DEV_I2C_Port DEV_I2C_Init()
     // Define I2C bus configuration parameters
     i2c_master_bus_config_t i2c_bus_config = {
         .clk_source = I2C_CLK_SRC_DEFAULT,       // Default clock source for I2C
-        .i2c_port = EXAMPLE_I2C_MASTER_NUM,     // I2C master port number
-        .scl_io_num = EXAMPLE_I2C_MASTER_SCL,   // I2C SCL (clock) pin
-        .sda_io_num = EXAMPLE_I2C_MASTER_SDA,   // I2C SDA (data) pin
+        .i2c_port = I2C_MASTER_NUM,     // I2C master port number
+        .scl_io_num = I2C_MASTER_SCL,   // I2C SCL (clock) pin
+        .sda_io_num = I2C_MASTER_SDA,   // I2C SDA (data) pin
         .glitch_ignore_cnt = 7,                  // Ignore glitches in the I2C signal
     };
 
@@ -42,7 +46,7 @@ DEV_I2C_Port DEV_I2C_Init()
     
     // Configure the device's I2C parameters
     i2c_device_config_t i2c_dev_conf = {
-        .scl_speed_hz = EXAMPLE_I2C_MASTER_FREQUENCY,  // Set I2C communication speed
+        .scl_speed_hz = I2C_MASTER_FREQUENCY,  // Set I2C communication speed
     };
     
     // Add the I2C device to the bus
@@ -66,7 +70,7 @@ void DEV_I2C_Set_Slave_Addr(i2c_master_dev_handle_t *dev_handle, uint8_t Addr)
 {
     // Configure the new device address
     i2c_device_config_t i2c_dev_conf = {
-        .scl_speed_hz = EXAMPLE_I2C_MASTER_FREQUENCY,  // I2C frequency
+        .scl_speed_hz = I2C_MASTER_FREQUENCY,  // I2C frequency
         .device_address = Addr,                        // Set new device address
         };
     
@@ -156,4 +160,75 @@ void DEV_I2C_Write_Nbyte(i2c_master_dev_handle_t dev_handle, uint8_t *pdata, uin
 void DEV_I2C_Read_Nbyte(i2c_master_dev_handle_t dev_handle, uint8_t Cmd, uint8_t *pdata, uint8_t len)
 {
     ESP_ERROR_CHECK(i2c_master_transmit_receive(dev_handle, &Cmd, 1, pdata, len, 100));  // Send command and receive data
+}
+
+// Additional functions for easier I2C operations
+esp_err_t I2C_Add_Slave_Addr(i2c_master_dev_handle_t *dev_handle, uint8_t Addr)
+{
+    esp_err_t err = ESP_OK;
+    if(dev_handle != NULL)
+    {
+        DEV_I2C_Set_Slave_Addr(dev_handle, Addr);
+    }
+    else
+    {
+        ESP_LOGE(TAG, "I2C device handle is NULL");
+        err = ESP_FAIL;
+    }
+    return err;
+}
+
+esp_err_t I2C_Read_Byte(i2c_master_dev_handle_t in_stDevHandle, uint8_t in_u8Cmd,uint8_t *out_ptrU8Data, int32_t in_stXferTimeoutMs)
+{
+    esp_err_t err = ESP_OK;
+    err = i2c_master_transmit_receive(in_stDevHandle, &in_u8Cmd, 1, out_ptrU8Data, 1, in_stXferTimeoutMs);
+    return err;
+
+}
+esp_err_t I2C_Read_Bytes(i2c_master_dev_handle_t in_stDevHandle, uint8_t in_u8Cmd,uint8_t *out_ptrU8Data, uint8_t in_u8DataLen, int32_t in_stXferTimeoutMs)
+{
+    esp_err_t err = ESP_OK;
+    err = i2c_master_transmit_receive(in_stDevHandle, &in_u8Cmd, 1, out_ptrU8Data, in_u8DataLen, in_stXferTimeoutMs);
+    return err;
+}
+
+esp_err_t I2C_Write_Byte(i2c_master_dev_handle_t in_stDevHandle, uint8_t in_u8Cmd,uint8_t in_u8Data,int32_t in_stXferTimeoutMs)
+{
+    esp_err_t err = ESP_OK;
+    uint8_t data[2] = {in_u8Cmd, in_u8Data};  // Create an array with command and value
+    err = i2c_master_transmit(in_stDevHandle, data, sizeof(data), 100);  // Send the data to the device
+    return err;    
+}
+esp_err_t I2C_Write_Bytes(i2c_master_dev_handle_t in_stDevHandle, uint8_t in_u8Cmd,const uint8_t *in_ptrU8Data, uint8_t in_u8DataLen,int32_t in_stXferTimeoutMs)
+{
+    esp_err_t err = ESP_OK;    
+    uint8_t data [sizeof(uint8_t)+1];
+    data[0] = in_u8Cmd;
+    memcpy(&data[1], in_ptrU8Data, in_u8DataLen);
+    err = i2c_master_transmit(in_stDevHandle, &data[0], in_u8DataLen+1, 100);  // Send the data to the device    
+    return err; 
+}
+
+esp_err_t I2C_Read_WordLe(i2c_master_dev_handle_t in_stDevHandle, uint8_t in_u8Cmd,uint16_t *out_ptrU16Data, int32_t in_stXferTimeoutMs)
+{    
+    esp_err_t err = ESP_OK;   
+    uint8_t data[2] = {in_u8Cmd};  // Create an array with the command byte
+    err = i2c_master_transmit_receive(in_stDevHandle, data, 1, data, 2, in_stXferTimeoutMs);
+    if(err == ESP_OK)
+    {
+        *out_ptrU16Data = (data[1] << 8) | data[0];  // Combine the two bytes into a word (16-bit)
+    }   
+    return err;
+}
+  
+esp_err_t I2C_Read_Word(i2c_master_dev_handle_t in_stDevHandle, uint8_t in_u8Cmd,uint16_t *out_ptrU16Data, int32_t in_stXferTimeoutMs)
+{    
+    esp_err_t err = ESP_OK;   
+    uint8_t data[2] = {in_u8Cmd};  // Create an array with the command byte
+    err = i2c_master_transmit_receive(in_stDevHandle, data, 1, data, 2, in_stXferTimeoutMs);
+    if(err == ESP_OK)
+    {
+        *out_ptrU16Data = (data[0] << 8) | data[1];  // Combine the two bytes into a word (16-bit)
+    }   
+    return err;
 }

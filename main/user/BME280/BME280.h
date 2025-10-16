@@ -35,6 +35,26 @@ extern TaskHandle_t bme280_TaskHandle;  // Declare the task handle for the BMP28
 #define BME280_DATA_LENGTH          8
 #define BME280_CALIBRATION_LENGTH   32
 
+#define BME280_REGISTER_DIG_T1              0x88
+#define BME280_REGISTER_DIG_T2              0x8A
+#define BME280_REGISTER_DIG_T3              0x8C
+
+#define BME280_REGISTER_DIG_P1              0x8E
+#define BME280_REGISTER_DIG_P2              0x90
+#define BME280_REGISTER_DIG_P3              0x92
+#define BME280_REGISTER_DIG_P4              0x94
+#define BME280_REGISTER_DIG_P5              0x96
+#define BME280_REGISTER_DIG_P6              0x98
+#define BME280_REGISTER_DIG_P7              0x9A
+#define BME280_REGISTER_DIG_P8              0x9C
+#define BME280_REGISTER_DIG_P9              0x9E
+
+#define BME280_REGISTER_DIG_H1              0xA1
+#define BME280_REGISTER_DIG_H2              0xE1
+#define BME280_REGISTER_DIG_H3              0xE3
+#define BME280_REGISTER_DIG_H4              0xE4
+#define BME280_REGISTER_DIG_H5              0xE5
+#define BME280_REGISTER_DIG_H6              0xE7
 
 typedef enum bme280_oversampling_e {
     SKIPPED = 0,
@@ -103,30 +123,7 @@ typedef struct bme280_s
     int32_t fine_temperature;
 } bme280_t;
 
-int8_t bme280_init    ();
-int8_t bme280_read_all(bme280_t* config, uint32_t* pressure, uint32_t* humidity, int32_t* temperature);
-
-
-#if 0
-
-/* Structure to represent the IO EXTENSION device */
-typedef struct _bme280_obj_t 
-{
-    i2c_master_dev_handle_t addr;      // Handle for mode configuration
-} bme280_obj_t ;
-
-/**
- * @brief Task for handling CAN communication.
- *
- * This task initializes the CAN interface, listens for CAN messages, 
- * processes the messages, and updates the user interface accordingly.
- * It continuously runs in a loop to read and process incoming CAN data.
- *
- * @param arg Argument passed to the task (not used in this function).
- */
-void bme280_init();
-
-int readTemperature(float *fTemperatureC);
-#endif
+int8_t bme280_init();
+int8_t bme280_Read_Pressure_Temperature_Humidity (bme280_t* config, uint32_t* pressure, uint32_t* humidity, int32_t* temperature);
 
 #endif

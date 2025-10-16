@@ -7,6 +7,7 @@
 #include "touch.h"
 #include "lvgl.h"
 
+
 /**
  * LVGL related parameters, can be adjusted by users
  *
