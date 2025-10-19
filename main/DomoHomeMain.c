@@ -22,10 +22,9 @@
 //#include "wifi.h"         // Header for Wi-Fi functionality
 #include "sd_card.h"      // Header for SD card operations
 #include "BME280.h"      // Header for SD card operations
-//#include "BMP280.h"      // Header for SD card operations
 #include "ui.h"           // Header for user interface initialization
-#include "pcf8563.h"
-//#include "aht10.h"
+#include "pcf8523.h"
+
 
 static const char *TAG = "DomoHomeMain"; // Tag used for ESP log output
 
@@ -95,12 +94,22 @@ void app_main()
    if(bme280_init() < 0) {
         ESP_LOGE(TAG, "BMP280 Init Failed");
     }
-        
+    
+    Pcf8523_Init();
+    /*
+   	struct tm time = {
+		.tm_year = 2025, // Year since 1900
+		.tm_mon  = 10,  // 0-based
+		.tm_mday = 18,
+		.tm_hour = 12,
+		.tm_min  = 11,
+		.tm_sec  = 00,
+		.tm_wday = 0  // days since Sunday - [0, 6]
+	};
 
-   
-    pcf8563_init();
-   
-   
+	pcf8563_reset();
+    Pcf8523_Set_Time(&time);
+    */
 
 
     // Initialize SD card operations

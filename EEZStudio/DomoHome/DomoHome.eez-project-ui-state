@@ -1,7 +1,7 @@
 {
   "navigation": {
     "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/0",
-    "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/0",
+    "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/9",
     "subnavigationSelectedItems": {}
   },
   "layoutModel": {
@@ -22,7 +22,7 @@
           },
           {
             "type": "border",
-            "selected": 3,
+            "selected": 2,
             "size": 137.5,
             "location": "right",
             "children": [
@@ -71,6 +71,7 @@
           {
             "type": "border",
             "selected": 0,
+            "size": 80.5,
             "location": "bottom",
             "children": [
               {
@@ -117,7 +118,7 @@
             {
               "type": "row",
               "id": "#597fece4-c835-4dfc-ba11-f2d9ea4c4b1d",
-              "weight": 10.632183908045977,
+              "weight": 19.07484507553821,
               "children": [
                 {
                   "type": "tabset",
@@ -188,7 +189,7 @@
             {
               "type": "tabset",
               "id": "EDITORS",
-              "weight": 57.96831314072694,
+              "weight": 59.580410011883124,
               "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
@@ -212,16 +213,17 @@
                   "component": "editor",
                   "config": {
                     "objectPath": "[DomoHome.eez-project]:/userPages/0",
-                    "permanent": false
+                    "permanent": true
                   },
                   "icon": "svg:page"
                 }
-              ]
+              ],
+              "active": true
             },
             {
               "type": "row",
               "id": "#5cbf9b4d-bc35-413b-af80-2a2b0b90dcb9",
-              "weight": 31.399502951227095,
+              "weight": 21.344744912578722,
               "children": [
                 {
                   "type": "tabset",
@@ -236,8 +238,7 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -986,24 +987,25 @@
     "[DomoHome.eez-project]:/userPages/0[flow-state]": {
       "selection": {
         "0": {
-          "1": {},
+          "0": {},
           "2": {
-            "0": {
-              "1": {}
-            }
+            "4": {},
+            "6": {},
+            "12": {},
+            "$selected": true
           },
           "3": {},
-          "7": {
-            "$selected": true
-          }
+          "7": {},
+          "8": {},
+          "11": {}
         }
       },
       "transform": {
         "translate": {
-          "x": -268.0768275613275,
-          "y": -211.10086940836953
+          "x": -438.6343437574031,
+          "y": -187.40362473347545
         },
-        "scale": 0.67
+        "scale": 1.1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1025,13 +1027,14 @@
   "showComponentDescriptions": true,
   "logsPanelFilter": "all",
   "selectedStylePropertyName": "",
-  "lvglPart": "MAIN",
+  "lvglPart": "TICKS",
   "lvglState": "DEFAULT",
   "lvglExpandedPropertiesGroup": [
-    "TEXT"
+    "BACKGROUND",
+    "IMAGE"
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 0.67,
+  "flowZoom": 1.1,
   "implementationLanguage": "C"
 }

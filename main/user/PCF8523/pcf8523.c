@@ -6,7 +6,7 @@
 #include "esp_log.h"
 #include "driver/i2c.h"
 #include "i2c.h"
-#include "pcf8563.h"
+#include "pcf8523.h"
 #include "lvgl_port.h"    
 #include "ui.h"
 #include "screens.h"
@@ -117,12 +117,48 @@ void pcf8523UpdateLvgObjectCb(lv_timer_t * timer)
     #endif
 }
 
+static lv_obj_t * meter;
 /* Global Function */
 void pcf8523_task(void *arg)
 {  
+	char user_data[50];
 	struct tm currentTime;
 	ESP_LOGI(TAG, "PCF8523 Task Started");
+    objects_t objs = objects;
+    lv_obj_t *LblDate  = objs.lbl_date;
+	lv_obj_t *LblYear  = objs.lbl_year;
+	lv_obj_t *LblTime  = objs.lbl_time;
+    lv_obj_t *LblPaneltemp  = objs.temp_humi_panel;	
+	lv_obj_t *LblPanelTime  = objs.panel_data_time;	
+	lv_obj_set_scrollbar_mode(LblPaneltemp, LV_SCROLLBAR_MODE_OFF);
+	lv_obj_set_scrollbar_mode(LblPanelTime, LV_SCROLLBAR_MODE_OFF);
+    //lv_obj_t *meter = objs.lbl_time;
 
+	//lv_meter_indicator_t * indic_hour = lv_meter_add_needle_img(meter, scale_min, &img_hand, 5, 5);
+	//lv_meter_set_indicator_value(meter, meter, 7);
+
+	meter = lv_meter_create(lv_scr_act());
+    lv_obj_set_size(meter, 220, 220);
+    lv_obj_set_pos(meter, 226, 300);
+
+    /*Create a scale for the minutes*/
+    /*61 ticks in a 360 degrees range (the last and the first line overlaps)*/
+    lv_meter_scale_t * scale_min = lv_meter_add_scale(meter);
+    lv_meter_set_scale_ticks(meter, scale_min, 61, 1, 10, lv_palette_main(LV_PALETTE_GREY));
+    lv_meter_set_scale_range(meter, scale_min, 0, 60, 360, 270);
+
+    /*Create another scale for the hours. It's only visual and contains only major ticks*/
+    lv_meter_scale_t * scale_hour = lv_meter_add_scale(meter);
+    lv_meter_set_scale_ticks(meter, scale_hour, 12, 0, 0, lv_palette_main(LV_PALETTE_GREY));               /*12 ticks*/
+    lv_meter_set_scale_major_ticks(meter, scale_hour, 1, 2, 20, lv_color_black(), 10);    /*Every tick is major*/
+    lv_meter_set_scale_range(meter, scale_hour, 1, 12, 330, 300);       /*[1..12] values in an almost full circle*/
+
+    LV_IMG_DECLARE(img_hand)
+
+    /*Add a the hands from images*/
+    lv_meter_indicator_t * indic_min = lv_meter_add_needle_img(meter, scale_min, &img_hand, 5, 5);
+    lv_meter_indicator_t * indic_hour = lv_meter_add_needle_img(meter, scale_min, &img_hand, 5, 5);
+    
     while (1)
     {        
 		if(Pcf8523_Get_Time(&currentTime) < 0) 
@@ -130,13 +166,14 @@ void pcf8523_task(void *arg)
 			ESP_LOGE(TAG, "Failed to get time from PCF8563");
 		} else 
 		{
+			/*
 			ESP_LOGI(TAG, "Current Date/Time: %04d-%02d-%02d %02d:%02d:%02d",
 					 currentTime.tm_mday, 
 					 currentTime.tm_mon, 
 					 currentTime.tm_year,
 					 currentTime.tm_hour, 
 					 currentTime.tm_min, 
-					 currentTime.tm_sec);
+					 currentTime.tm_sec);*/
             int iWeekDay = Pcf8523_Get_WeekDay(currentTime.tm_year, currentTime.tm_mon, currentTime.tm_mday);
 			
 			ESP_LOGI(TAG, "%s %02d %s %04d %02d:%02d:%02d", 
@@ -146,10 +183,32 @@ void pcf8523_task(void *arg)
 				currentTime.tm_year,
 				currentTime.tm_hour,
 				currentTime.tm_min,
-				currentTime.tm_sec);				
-		}	
-      
+				currentTime.tm_sec);	
+            
+			memset(user_data,0,sizeof(user_data));					
+			sprintf((char*)user_data, "%s %02d %s",			
+			  Pcf8523_Get_MountName(currentTime.tm_mon),
+			  currentTime.tm_mday,
+			  strWeekDay[iWeekDay]);
+			
+			lvgl_port_lock(-1);
+			lv_label_set_text(LblDate, user_data);
+			memset(user_data,0,sizeof(user_data));
+            sprintf((char*)user_data, "%04d",currentTime.tm_year);
+			lv_label_set_text(LblYear, user_data);
+			memset(user_data,0,sizeof(user_data));
+			sprintf((char*)user_data, "%02d:%02d:%02d",currentTime.tm_hour,currentTime.tm_min,currentTime.tm_sec);
+			lv_label_set_text(LblTime, user_data);
+			if((currentTime.tm_hour % 12) == 0)
+            	lv_meter_set_indicator_value(meter, indic_hour, currentTime.tm_hour*5);
+            else
+			    lv_meter_set_indicator_value(meter, indic_hour, (currentTime.tm_hour%12)*5);
 
+			lv_meter_set_indicator_value(meter, indic_min, currentTime.tm_min);
+			lvgl_port_unlock();
+			
+      
+		}
         vTaskDelay(pdMS_TO_TICKS(1000)); // Delay for 1 seconds
     }
 }
