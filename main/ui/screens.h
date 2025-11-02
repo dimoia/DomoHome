@@ -32,11 +32,11 @@ typedef struct _objects_t {
     lv_obj_t *ble_on;
     lv_obj_t *battery_off;
     lv_obj_t *panel_data_time;
-    lv_obj_t *lbl_date;
-    lv_obj_t *clk_meter;
-    lv_obj_t *lbl_year;
-    lv_obj_t *settings_panel;
+    lv_obj_t *conteiner_time;
     lv_obj_t *lbl_time;
+    lv_obj_t *lbl_year;
+    lv_obj_t *clk_meter;
+    lv_obj_t *lbl_date;
 } objects_t;
 
 extern objects_t objects;

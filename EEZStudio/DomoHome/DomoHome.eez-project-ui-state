@@ -1,7 +1,7 @@
 {
   "navigation": {
     "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/0",
-    "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/9",
+    "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/10",
     "subnavigationSelectedItems": {}
   },
   "layoutModel": {
@@ -217,8 +217,7 @@
                   },
                   "icon": "svg:page"
                 }
-              ],
-              "active": true
+              ]
             },
             {
               "type": "row",
@@ -238,7 +237,8 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -991,19 +991,24 @@
           "2": {
             "4": {},
             "6": {},
-            "12": {},
-            "$selected": true
+            "12": {}
           },
           "3": {},
           "7": {},
           "8": {},
-          "11": {}
+          "10": {},
+          "11": {
+            "2": {
+              "$selected": true
+            },
+            "3": {}
+          }
         }
       },
       "transform": {
         "translate": {
           "x": -438.6343437574031,
-          "y": -187.40362473347545
+          "y": -287.40362473347545
         },
         "scale": 1.1
       },
@@ -1027,11 +1032,13 @@
   "showComponentDescriptions": true,
   "logsPanelFilter": "all",
   "selectedStylePropertyName": "",
-  "lvglPart": "TICKS",
+  "lvglPart": "INDICATOR",
   "lvglState": "DEFAULT",
   "lvglExpandedPropertiesGroup": [
     "BACKGROUND",
-    "IMAGE"
+    "BORDER",
+    "MISCELLANEOUS",
+    "ARC"
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,

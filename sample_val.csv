@@ -1,0 +1,5 @@
+key,type,encoding,value
+storage,namespace,,
+default_factory,data,u8,0
+ssid,data,string,"admin"
+pass,data,string,"password"

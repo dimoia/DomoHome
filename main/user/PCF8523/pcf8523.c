@@ -139,8 +139,10 @@ void pcf8523_task(void *arg)
 
 	meter = lv_meter_create(lv_scr_act());
     lv_obj_set_size(meter, 220, 220);
-    lv_obj_set_pos(meter, 226, 300);
+   // lv_obj_set_pos(meter, 226, 300);
+	lv_obj_set_pos(meter, 474, 54);
 
+	//474, 54
     /*Create a scale for the minutes*/
     /*61 ticks in a 360 degrees range (the last and the first line overlaps)*/
     lv_meter_scale_t * scale_min = lv_meter_add_scale(meter);
