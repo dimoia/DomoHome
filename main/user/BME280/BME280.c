@@ -192,15 +192,52 @@ int8_t bme280_init()
                ESP_LOGI(TAG,"BME280 Dumping calibration...");
                bme280_Write_Configuration(&bme280Obj);
             }    
-            
+            #if 0
             // Start the temperature monitoring task
             xTaskCreate(bmp280_task, "bmp280_task", 3 * 1024, NULL, 3, &bme280_TaskHandle);
             if (bme280_TaskHandle == NULL) {
                 ESP_LOGE(TAG, "Failed to create bmp280_task");
             }    
+            #endif
         }
     }
     
+    return iRetVal;
+}
+
+int8_t bme280_run()
+{
+    // Start the temperature monitoring task
+    xTaskCreate(bmp280_task, "bmp280_task", 3 * 1024, NULL, 3, &bme280_TaskHandle);
+    if (bme280_TaskHandle == NULL) {
+        ESP_LOGE(TAG, "Failed to create bmp280_task");
+    } 
+    return 0;   
+}
+
+int8_t bme280_Pbit(uint8_t* deviceID)
+{
+    bme280_t *ptrConfigObj = &bme280Obj;
+    int8_t iRetVal = 0;
+    uint8_t u8ChipID = 0;
+
+    if (!ptrConfigObj || !deviceID)
+    {  
+        iRetVal = -1;
+    }
+    else
+    {
+        if(I2C_Read_Byte(ptrConfigObj->addr, BME280_ID_REG, &u8ChipID, 100) != ESP_OK) 
+        {
+            ESP_LOGE(TAG, "Failed to read BME280 chip ID");
+            iRetVal = -1; // Return error if reading chip ID fails
+        }      
+        else
+        {
+            *deviceID = u8ChipID;
+        }   
+    }
+
     return iRetVal;
 }
 

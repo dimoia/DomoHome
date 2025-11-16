@@ -1,5 +1,26 @@
 # Name,   Type, SubType, Offset,  Size, Flags
 # Note: if you have increased the bootloader size, make sure to update the offsets to avoid overlap
-nvs,      data, nvs,     0x9000,  0x6000,
-phy_init, data, phy,     0xf000,  0x1000,
-factory,  app,  factory, 0x10000, 8M,
+#nvs,      data, nvs,     0x9000,  0x6000,
+#phy_init, data, phy,     0xf000,  0x1000,
+#factory,  app,  factory, 0x10000, 8M,
+
+nvs,      data, nvs,      ,        16K,
+otadata,  data, ota,      ,        8K,
+phy_init, data, phy,      ,        4K,
+coredump, data, coredump, ,        64K,
+#factory,  app,  factory,  ,        1M,
+ota_0,    app,  ota_0,    ,        4M,
+ota_1,    app,  ota_1,    ,        4M,
+spiffs,  data,  spiffs,   ,        5M,
+fat   ,  data,  fat,      ,        2880K,
+
+# ESP-IDF Partition Table
+# Name    , Type ,SubType , Offset, Size, Flags
+# nvs     , data ,nvs     , 0x9000, 16K,
+# otadata ,data  ,ota     , 0xd000,  8K,
+# phy_init,data  ,phy     , 0xf000,  4K,
+# coredump,data  ,coredump, 0x10000, 64K,
+# ota_0   ,app   ,ota_0   , 0x20000,4M,
+# ota_1   ,app   ,ota_1   , 0x420000,4M,
+# spiffs  ,data  ,spiffs  , 0x820000,4M,
+# fat     ,data  ,fat     , 0xd20000,2880K

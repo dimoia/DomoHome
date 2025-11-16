@@ -31,7 +31,9 @@
         "array": "c",
         "stdbool.h": "c",
         "aht10.h": "c",
-        "i2c.h": "c"
+        "i2c.h": "c",
+        "pcf8523.h": "c",
+        "esp_task_wdt.h": "c"
     },
     "cmake.sourceDirectory": "D:/ESPWorkSpace/DomoHome",
     "idf.portWin": "COM35",

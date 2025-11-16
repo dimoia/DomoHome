@@ -4,8 +4,6 @@
 #include "i2c.h"
 #include <stdint.h>
 
-extern TaskHandle_t bme280_TaskHandle;  // Declare the task handle for the BMP280 task
-
 #define BME280_I2C_ADDRESS  0x76
 #define BME280_CHIP_ID      0x60
 
@@ -124,6 +122,7 @@ typedef struct bme280_s
 } bme280_t;
 
 int8_t bme280_init();
+int8_t bme280_run();
 int8_t bme280_Read_Pressure_Temperature_Humidity (bme280_t* config, uint32_t* pressure, uint32_t* humidity, int32_t* temperature);
-
+int8_t bme280_Pbit(uint8_t* deviceID);
 #endif

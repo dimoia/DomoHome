@@ -52,6 +52,8 @@
 #define PCF8523_CONTROL_2_CTAIE_BIT		1
 #define PCF8523_CONTROL_2_CTBIE_BIT		0
 
+#define PCF8523_CONTROL_3_BLF_BIT	    2
+
 #define PCF8523_SECONDS_OS_BIT			7
 #define PCF8523_SECONDS_10_BIT       	6
 #define PCF8523_SECONDS_10_LENGTH   	3
@@ -223,15 +225,30 @@ int8_t Pcf8523_Init()
     ESP_LOGI(TAG, "Init PCF8523 On I2C "); // Log the PCF8523 initialization
 
     DEV_I2C_Set_Slave_Addr(&i2c_dev_obj,I2C_PCF8523_ADDR); // Set the I2C slave address for PCF8523
-
-	// Start the temperature monitoring task
+#if 0
+	// Start the time monitoring task
     xTaskCreate(pcf8523_task, "pcf8523_task", 3 * 1024, NULL, 3, &pcf8523_TaskHandle);
     if (pcf8523_TaskHandle == NULL) 
 	{
 		iRetVal = -1;
         ESP_LOGE(TAG, "Failed to create pcf8523_task");
     }
+#endif		
     return iRetVal;    
+}
+
+int8_t Pcf8523_Run()
+{
+	int8_t iRetVal = 0;
+
+	// Start the time monitoring task
+    xTaskCreate(pcf8523_task, "pcf8523_task", 3 * 1024, NULL, 3, &pcf8523_TaskHandle);
+    if (pcf8523_TaskHandle == NULL) 
+	{
+		iRetVal = -1;
+        ESP_LOGE(TAG, "Failed to create pcf8523_task");
+    }
+    return iRetVal;  
 }
 
 int8_t Pcf8523_Reset()
@@ -361,4 +378,24 @@ static char* Pcf8523_Get_MountName(int iMouth)
 		default:
 			return "Unknown";
 	}
+}
+
+int8_t Pcf8523_PBit_Battery_Status()
+{
+	int8_t iRetVal = 0;
+	uint8_t data[7];	
+
+	if(I2C_Read_Bytes(i2c_dev_obj, PCF8523_CONTROL_3, &data[0], 7, 100)	!= ESP_OK) 
+	{
+		ESP_LOGE(TAG, "Pcf8523_Status: Failed to read PCF8523 status");
+		iRetVal = -1; // Return error if reading time fails
+	}
+	else
+	{		
+		if((data[2] & PCF8523_CONTROL_3_BLF_BIT) == 0)
+		{
+			iRetVal = 1;
+		}
+	}
+	return iRetVal;
 }

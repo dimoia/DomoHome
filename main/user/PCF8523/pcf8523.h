@@ -2,12 +2,14 @@
 #define _PCF8523_H_
 
 #include <time.h>
-#include <stdbool.h>
+//#include <stdbool.h>
 
 
 int8_t Pcf8523_Reset();
 int8_t Pcf8523_Init();
+int8_t Pcf8523_Run();
 int8_t Pcf8523_Set_Time(struct tm *time);
 int8_t Pcf8523_Get_Time(struct tm *out_stTime);
+int8_t Pcf8523_PBit_Battery_Status();
 
 #endif /* MAIN_PCF8563_H_ */

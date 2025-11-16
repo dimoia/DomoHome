@@ -16,11 +16,13 @@
  *
  ******************************************************************************/
 #include <time.h>
+#include <string.h>
+#include <assert.h>
 #include "rgb_lcd_port.h" // Header for Waveshare RGB LCD driver
 #include "gt911.h"        // Header for touch screen operations (GT911)
 #include "lvgl_port.h"    // Header for LVGL port initialization and locking
 //#include "wifi.h"         // Header for Wi-Fi functionality
-#include "sd_card.h"      // Header for SD card operations
+//#include "sd_card.h"      // Header for SD card operations
 #include "BME280.h"      // Header for SD card operations
 #include "ui.h"           // Header for user interface initialization
 #include "pcf8523.h"
@@ -30,18 +32,22 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
+#include "esp_partition.h"
+#include "screens.h"
+#include "sys_info.h"
+
 
 static const char    *TAG = "DomoHomeMain"; // Tag used for ESP log output
 static QueueHandle_t gpio_evt_queue = NULL;
 static TaskHandle_t  boot_TaskHandle;
 static const uint32_t u32BootPressedForSeconds = 5 * 1000 * 1000; // Time in seconds to consider a long press
 
-
 static void IRAM_ATTR gpio_isr_handler(void* arg)
 {
     uint32_t gpio_num = (uint32_t) arg;
     xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
 }
+
 static void event_cb(lv_event_t * e)
 {
     lv_obj_t * obj = lv_event_get_current_target(e);
@@ -174,6 +180,9 @@ static void boot_task(void* arg)
  */
 void app_main()
 {
+
+  
+
     // Initialize the Non-Volatile Storage (NVS) for settings and data persistence
     // This ensures that user data and settings are retained even after power loss.
     //init_nvs();
@@ -195,9 +204,7 @@ void app_main()
 
     // Initialize the LVGL library, linking it to the LCD and touch panel handles
     // LVGL is a lightweight graphics library used for rendering UI elements.
-    ESP_ERROR_CHECK(lvgl_port_init(panel_handle, tp_handle));
-
-    ESP_LOGI(TAG, "Display LVGL demos");
+    ESP_ERROR_CHECK(lvgl_port_init(panel_handle, tp_handle));    
 
     // Lock the LVGL port to ensure thread safety during API calls
     // This prevents concurrent access issues when using LVGL functions.
@@ -206,14 +213,45 @@ void app_main()
 
         // Initialize the UI components with LVGL (e.g., demo screens, sliders)
         // This sets up the user interface elements using the LVGL library.
-        ui_init();
-
+       // ui_init();
+        create_screens();
+        loadScreen(SCREEN_ID_BOOT);
+      
         // Release the mutex after LVGL operations are complete
         // This allows other tasks to access the LVGL port.
-        lvgl_port_unlock();
+        lvgl_port_unlock();        
     }
+
+    if(bme280_init() < 0) 
+    {
+        ESP_LOGE(TAG, "BMP280 Init Failed");
+    }
+    Pcf8523_Init();
+
+   // if (lvgl_port_lock(-1))
+   // {
+        objects_t objs = objects;
+        lv_obj_t *txt_boot_area = objs.txt_boot_area;
+        lvgl_port_lock(-1);
+        vPrintBootInfo( txt_boot_area );        
+        lvgl_port_unlock();
+     //   lvgl_port_unlock();
+   // }
+
+    if (lvgl_port_lock(-1))
+    {
+        vTaskDelay(5000); // Delay for a short period to ensure stable initialization
+        lvgl_port_unlock();
+        loadScreen(SCREEN_ID_MAIN);
+        
+    }
+
     vTaskDelay(100); // Delay for a short period to ensure stable initialization
 
+    bme280_run();
+    vTaskDelay(100); // Delay for a short period to ensure stable initialization
+    Pcf8523_Run();
+    
     // Initialize PWM for controlling backlight brightness (if applicable)
     // PWM is used to adjust the brightness of the LCD backlight.
    // pwm_init();
@@ -221,11 +259,9 @@ void app_main()
 
    //aht10_init();
 
-   if(bme280_init() < 0) {
-        ESP_LOGE(TAG, "BMP280 Init Failed");
-    }
+   
     
-    Pcf8523_Init();
+   
     /*
    	struct tm time = {
 		.tm_year = 2025, // Year since 1900
