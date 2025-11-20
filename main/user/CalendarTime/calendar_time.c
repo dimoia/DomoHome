@@ -66,7 +66,7 @@ void initialize_data_and_time( )
 
 
   // #if 0
-    objects_t objs = objects;
+     objects_t objs = objects;
     lv_obj_t *ptr_lvCalendar_Data  = objs.calendar_data;
 
     struct tm stCurrDataAndTime;
