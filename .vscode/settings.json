@@ -33,7 +33,11 @@
         "aht10.h": "c",
         "i2c.h": "c",
         "pcf8523.h": "c",
-        "esp_task_wdt.h": "c"
+        "esp_task_wdt.h": "c",
+        "chrono": "c",
+        "gptimer.h": "c",
+        "actions.h": "c",
+        "freertos.h": "c"
     },
     "cmake.sourceDirectory": "D:/ESPWorkSpace/DomoHome",
     "idf.portWin": "COM35",

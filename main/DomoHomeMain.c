@@ -35,7 +35,7 @@
 #include "esp_partition.h"
 #include "screens.h"
 #include "sys_info.h"
-
+#include "calendar_time.h"
 
 static const char    *TAG = "DomoHomeMain"; // Tag used for ESP log output
 static QueueHandle_t gpio_evt_queue = NULL;
@@ -163,7 +163,7 @@ static void boot_task(void* arg)
     }
 }
 
- 
+
 /**
  * @brief Main application function.
  *
@@ -178,6 +178,7 @@ static void boot_task(void* arg)
  *
  * @return None
  */
+
 void app_main()
 {
 
@@ -206,6 +207,12 @@ void app_main()
     // LVGL is a lightweight graphics library used for rendering UI elements.
     ESP_ERROR_CHECK(lvgl_port_init(panel_handle, tp_handle));    
 
+    if(bme280_init() < 0) 
+    {
+        ESP_LOGE(TAG, "BMP280 Init Failed");
+    }
+    Pcf8523_Init();
+
     // Lock the LVGL port to ensure thread safety during API calls
     // This prevents concurrent access issues when using LVGL functions.
     if (lvgl_port_lock(-1))
@@ -213,43 +220,36 @@ void app_main()
 
         // Initialize the UI components with LVGL (e.g., demo screens, sliders)
         // This sets up the user interface elements using the LVGL library.
-       // ui_init();
-        create_screens();
-        loadScreen(SCREEN_ID_BOOT);
+        ui_init();
       
         // Release the mutex after LVGL operations are complete
         // This allows other tasks to access the LVGL port.
         lvgl_port_unlock();        
     }
 
-    if(bme280_init() < 0) 
-    {
-        ESP_LOGE(TAG, "BMP280 Init Failed");
-    }
-    Pcf8523_Init();
-
-   // if (lvgl_port_lock(-1))
-   // {
-        objects_t objs = objects;
-        lv_obj_t *txt_boot_area = objs.txt_boot_area;
-        lvgl_port_lock(-1);
-        vPrintBootInfo( txt_boot_area );        
-        lvgl_port_unlock();
-     //   lvgl_port_unlock();
-   // }
 
     if (lvgl_port_lock(-1))
     {
-        vTaskDelay(5000); // Delay for a short period to ensure stable initialization
-        lvgl_port_unlock();
-        loadScreen(SCREEN_ID_MAIN);
-        
-    }
+      //  loadScreen(SCREEN_ID_MAIN);
+       
+        initialize_data_and_time();
+        /*
+         lv_obj_t  * calendar = lv_calendar_create(lv_scr_act());
+    lv_obj_set_size(calendar, 185, 185);
+    lv_obj_align(calendar, LV_ALIGN_CENTER, 0, 27);
+    lv_obj_add_event_cb(calendar, event_handler, LV_EVENT_ALL, NULL);
 
+    lv_calendar_set_today_date(calendar, 2021, 02, 23);
+   lv_calendar_set_showed_date(calendar, 2021, 02);
+   */
+        lvgl_port_unlock();
+         
+    }
+    // Delay to ensure all initializations are stable
     vTaskDelay(100); // Delay for a short period to ensure stable initialization
 
     bme280_run();
-    vTaskDelay(100); // Delay for a short period to ensure stable initialization
+//    vTaskDelay(100); // Delay for a short period to ensure stable initialization
     Pcf8523_Run();
     
     // Initialize PWM for controlling backlight brightness (if applicable)

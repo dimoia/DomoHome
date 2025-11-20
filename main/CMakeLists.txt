@@ -13,6 +13,7 @@ file(GLOB_RECURSE srcs *.c
                    #user/pwm/*.c
                    user/sd_card/*.c
                    user/SYSInfo/*.c
+                   user/CalendarTime/*.c
                    )
 set(include_dirs 
    . 
@@ -28,6 +29,7 @@ set(include_dirs
    #user/pwm
    user/sd_card
    user/SYSInfo
+   user/CalendarTime
    )
 idf_component_register( SRCS ${srcs}
                        INCLUDE_DIRS ${include_dirs}

@@ -8,10 +8,7 @@ extern "C" {
 #endif
 
 typedef struct _objects_t {
-    lv_obj_t *boot;
     lv_obj_t *main;
-    lv_obj_t *txt_boot_area;
-    lv_obj_t *lbl_home_1;
     lv_obj_t *header;
     lv_obj_t *lbl_home;
     lv_obj_t *footer;
@@ -34,23 +31,21 @@ typedef struct _objects_t {
     lv_obj_t *wifi_off;
     lv_obj_t *ble_on;
     lv_obj_t *battery_off;
-    lv_obj_t *panel_data_time;
     lv_obj_t *conteiner_time;
     lv_obj_t *lbl_time;
     lv_obj_t *lbl_year;
     lv_obj_t *clk_meter;
     lv_obj_t *lbl_date;
+    lv_obj_t *roller_hour;
+    lv_obj_t *roller_minute;
+    lv_obj_t *calendar_data;
 } objects_t;
 
 extern objects_t objects;
 
 enum ScreensEnum {
-    SCREEN_ID_BOOT = 1,
-    SCREEN_ID_MAIN = 2,
+    SCREEN_ID_MAIN = 1,
 };
-
-void create_screen_boot();
-void tick_screen_boot();
 
 void create_screen_main();
 void tick_screen_main();

@@ -131,9 +131,9 @@ void pcf8523_task(void *arg)
 	lv_obj_t *LblYear  = objs.lbl_year;
 	lv_obj_t *LblTime  = objs.lbl_time;
     lv_obj_t *LblPaneltemp  = objs.temp_humi_panel;	
-	lv_obj_t *LblPanelTime  = objs.panel_data_time;	
+	//lv_obj_t *LblPanelTime  = objs.panel_data_time;	
 	lv_obj_set_scrollbar_mode(LblPaneltemp, LV_SCROLLBAR_MODE_OFF);
-	lv_obj_set_scrollbar_mode(LblPanelTime, LV_SCROLLBAR_MODE_OFF);
+	//lv_obj_set_scrollbar_mode(LblPanelTime, LV_SCROLLBAR_MODE_OFF);
     //lv_obj_t *meter = objs.lbl_time;
 
 	//lv_meter_indicator_t * indic_hour = lv_meter_add_needle_img(meter, scale_min, &img_hand, 5, 5);
