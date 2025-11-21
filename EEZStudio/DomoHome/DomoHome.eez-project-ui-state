@@ -1,8 +1,8 @@
 {
   "navigation": {
     "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/0",
-    "selectedActionObject": "[DomoHome.eez-project]:/actions/3",
-    "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/10",
+    "selectedActionObject": "[DomoHome.eez-project]:/actions/-1",
+    "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/11",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
     }
@@ -74,7 +74,7 @@
           {
             "type": "border",
             "selected": 0,
-            "size": 80.5,
+            "size": 246.5,
             "location": "bottom",
             "children": [
               {
@@ -193,7 +193,6 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 59.580410011883124,
-              "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
@@ -990,22 +989,35 @@
     "[DomoHome.eez-project]:/userPages/0[flow-state]": {
       "selection": {
         "0": {
-          "0": {},
-          "2": {},
+          "0": {
+            "0": {},
+            "1": {},
+            "2": {},
+            "3": {}
+          },
           "3": {},
+          "4": {},
+          "5": {},
+          "6": {},
+          "7": {},
           "8": {},
-          "11": {
+          "9": {},
+          "10": {},
+          "11": {},
+          "12": {},
+          "13": {
             "$selected": true
           },
-          "14": {}
+          "14": {},
+          "15": {}
         }
       },
       "transform": {
         "translate": {
-          "x": -438.6343437574031,
-          "y": -387.40362473347545
+          "x": -235.47796165277475,
+          "y": -238.53656231827864
         },
-        "scale": 1.1
+        "scale": 0.8
       },
       "timeline": {
         "isEditorActive": false,
@@ -1016,14 +1028,25 @@
     },
     "[DomoHome.eez-project]:/userPages/1[flow-state]": {
       "selection": {
-        "0": {}
+        "0": {
+          "0": {
+            "0": {},
+            "1": {},
+            "2": {},
+            "4": {}
+          },
+          "1": {},
+          "2": {},
+          "3": {},
+          "4": {}
+        }
       },
       "transform": {
         "translate": {
-          "x": -512,
-          "y": -300
+          "x": -571.4666666666667,
+          "y": -146.95000000000002
         },
-        "scale": 1.1
+        "scale": 0.8
       },
       "timeline": {
         "isEditorActive": false,
@@ -1045,11 +1068,18 @@
   "showComponentDescriptions": true,
   "logsPanelFilter": "all",
   "selectedStylePropertyName": "",
-  "lvglPart": "ITEMS",
-  "lvglState": "PRESSED",
-  "lvglExpandedPropertiesGroup": [],
+  "lvglPart": "MAIN",
+  "lvglState": "DEFAULT",
+  "lvglExpandedPropertiesGroup": [
+    "TEXT",
+    "BACKGROUND",
+    "MISCELLANEOUS",
+    "BORDER",
+    "LINE",
+    "IMAGE"
+  ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 1.1,
+  "flowZoom": 0.8,
   "implementationLanguage": "C"
 }

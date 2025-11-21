@@ -1,6 +1,6 @@
 #include "images.h"
 
-const ext_img_desc_t images[11] = {
+const ext_img_desc_t images[12] = {
     { "BG_MainScreen", &img_bg_main_screen },
     { "ico_temp", &img_ico_temp },
     { "ico_humidity", &img_ico_humidity },
@@ -12,4 +12,5 @@ const ext_img_desc_t images[11] = {
     { "ico_weater", &img_ico_weater },
     { "ico_settings", &img_ico_settings },
     { "ico_pressure", &img_ico_pressure },
+    { "img_floor_heating", &img_img_floor_heating },
 };

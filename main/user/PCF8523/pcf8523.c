@@ -131,6 +131,11 @@ void pcf8523_task(void *arg)
 	lv_obj_t *LblYear  = objs.lbl_year;
 	lv_obj_t *LblTime  = objs.lbl_time;
     lv_obj_t *LblPaneltemp  = objs.temp_humi_panel;	
+
+	lv_obj_t *LblDate_1  = objs.lbl_date_1;
+	lv_obj_t *LblYear_1  = objs.lbl_year_1;
+	lv_obj_t *LblTime_1  = objs.lbl_time_1;
+
 	//lv_obj_t *LblPanelTime  = objs.panel_data_time;	
 	lv_obj_set_scrollbar_mode(LblPaneltemp, LV_SCROLLBAR_MODE_OFF);
 	//lv_obj_set_scrollbar_mode(LblPanelTime, LV_SCROLLBAR_MODE_OFF);
@@ -191,9 +196,7 @@ void pcf8523_task(void *arg)
             
 			memset(user_data,0,sizeof(user_data));					
 			sprintf((char*)user_data, "%s %02d %s",			
-			  Pcf8523_Get_MountName(currentTime.tm_mon),
-			  currentTime.tm_mday,
-			  strWeekDay[iWeekDay]);
+			Pcf8523_Get_MountName(currentTime.tm_mon),currentTime.tm_mday,strWeekDay[iWeekDay]);
 			
 			lvgl_port_lock(-1);
 			lv_label_set_text(LblDate, user_data);
@@ -203,6 +206,17 @@ void pcf8523_task(void *arg)
 			memset(user_data,0,sizeof(user_data));
 			sprintf((char*)user_data, "%02d:%02d:%02d",currentTime.tm_hour,currentTime.tm_min,currentTime.tm_sec);
 			lv_label_set_text(LblTime, user_data);
+
+			lv_label_set_text(LblDate_1, user_data);
+			memset(user_data,0,sizeof(user_data));
+            sprintf((char*)user_data, "%04d",currentTime.tm_year);
+			lv_label_set_text(LblYear_1, user_data);
+			memset(user_data,0,sizeof(user_data));
+			sprintf((char*)user_data, "%02d:%02d:%02d",currentTime.tm_hour,currentTime.tm_min,currentTime.tm_sec);
+			lv_label_set_text(LblTime_1, user_data);
+
+
+
 			if((currentTime.tm_hour % 12) == 0)
             	lv_meter_set_indicator_value(meter, indic_hour, currentTime.tm_hour*5);
             else

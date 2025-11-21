@@ -18,6 +18,7 @@ extern const lv_img_dsc_t img_ico_no_battery;
 extern const lv_img_dsc_t img_ico_weater;
 extern const lv_img_dsc_t img_ico_settings;
 extern const lv_img_dsc_t img_ico_pressure;
+extern const lv_img_dsc_t img_img_floor_heating;
 
 #ifndef EXT_IMG_DESC_T
 #define EXT_IMG_DESC_T
@@ -27,7 +28,7 @@ typedef struct _ext_img_desc_t {
 } ext_img_desc_t;
 #endif
 
-extern const ext_img_desc_t images[11];
+extern const ext_img_desc_t images[12];
 
 
 #ifdef __cplusplus

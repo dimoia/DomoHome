@@ -163,6 +163,30 @@ static void boot_task(void* arg)
     }
 }
 
+void action_goto_heating_screen(lv_event_t *e) {
+    // TODO: Implement action goto_heating_screen here
+    lv_event_code_t code = lv_event_get_code(e);
+   // lv_obj_t * obj = lv_event_get_current_target(e);
+
+    if(code == LV_EVENT_CLICKED) {
+        LV_LOG_USER("Clicked");
+         loadScreen(SCREEN_ID_HEATING_SCREEN);
+        //lv_scr_load(obj);
+       
+    }
+}
+
+void action_goto_home(lv_event_t *e) 
+{
+    lv_event_code_t code = lv_event_get_code(e);
+      if(code == LV_EVENT_CLICKED) {
+        LV_LOG_USER("Clicked");
+         loadScreen(SCREEN_ID_MAIN );
+        
+       
+    }
+}
+
 
 /**
  * @brief Main application function.
@@ -213,6 +237,8 @@ void app_main()
     }
     Pcf8523_Init();
 
+   
+
     // Lock the LVGL port to ensure thread safety during API calls
     // This prevents concurrent access issues when using LVGL functions.
     if (lvgl_port_lock(-1))
@@ -228,12 +254,44 @@ void app_main()
     }
 
 
-    if (lvgl_port_lock(-1))
-    {
-      //  loadScreen(SCREEN_ID_MAIN);
-       
-        initialize_data_and_time();
-        /*
+    lvgl_port_lock(-1);
+    
+   // loadScreen(SCREEN_ID_MAIN);
+    
+    
+    objects_t objs_goto_heating_screen = objects;
+    lv_obj_t *btn_goto_heating_screen  = objs_goto_heating_screen.btn_heating_screen;
+    lv_obj_add_event_cb(btn_goto_heating_screen, action_goto_heating_screen, LV_EVENT_CLICKED, NULL);  
+    
+    objects_t objs_btn_goto_home = objects;
+    lv_obj_t *btn_goto_home  =  objs_btn_goto_home.btn_goto_home_from_heater_screen;
+    lv_obj_add_event_cb(btn_goto_home, action_goto_home, LV_EVENT_CLICKED, NULL);  
+
+
+    #if 0
+    lv_obj_t  * bottone_hating_screen = lv_btn_create(lv_scr_act());
+    lv_obj_set_size(bottone_hating_screen, 100, 50);  
+    lv_obj_set_pos(bottone_hating_screen, 263, 329);  
+   // lv_obj_align(bottone_hating_screen, LV_ALIGN_CENTER, -100, 0);
+    lv_obj_add_event_cb(bottone_hating_screen, action_goto_heating_screen, LV_EVENT_CLICKED, NULL);  
+    lv_obj_t * label = lv_label_create(bottone_hating_screen);
+    lv_label_set_text(label, "Heating Screen");
+    lv_obj_center(label);
+
+    lv_obj_t  * bottone_home = lv_btn_create(lv_scr_act());
+    lv_obj_set_size(bottone_home, 37, 33);
+    //lv_obj_align(bottone_home, LV_ALIGN_CENTER, -200, 0);   
+    lv_obj_set_pos(bottone_home, 425, 10); 
+    lv_obj_add_event_cb(bottone_home, action_goto_home, LV_EVENT_CLICKED, NULL);  
+    lv_obj_t * label_home = lv_label_create(bottone_home);
+    lv_label_set_text(label_home, "Home Screen");
+    lv_obj_center(label_home);
+    #endif 
+
+    initialize_data_and_time();
+
+    lvgl_port_unlock();
+      /*  
          lv_obj_t  * calendar = lv_calendar_create(lv_scr_act());
     lv_obj_set_size(calendar, 185, 185);
     lv_obj_align(calendar, LV_ALIGN_CENTER, 0, 27);
@@ -242,9 +300,9 @@ void app_main()
     lv_calendar_set_today_date(calendar, 2021, 02, 23);
    lv_calendar_set_showed_date(calendar, 2021, 02);
    */
-        lvgl_port_unlock();
+        
          
-    }
+    
     // Delay to ensure all initializations are stable
     vTaskDelay(100); // Delay for a short period to ensure stable initialization
 
