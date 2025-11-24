@@ -16,7 +16,7 @@ uint32_t active_theme_index = 0;
 
 static lv_meter_scale_t * scale0;
 static lv_meter_indicator_t * indicator1;
- static lv_meter_indicator_t * indicator2;
+static lv_meter_indicator_t * indicator2;
 
 void create_screen_heating_screen() {
     lv_obj_t *obj = lv_obj_create(0);
