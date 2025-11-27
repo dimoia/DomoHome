@@ -1,8 +1,8 @@
 {
   "navigation": {
     "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/0",
-    "selectedActionObject": "[DomoHome.eez-project]:/actions/6",
-    "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/11",
+    "selectedActionObject": "[DomoHome.eez-project]:/actions/3",
+    "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/15",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
     }
@@ -26,7 +26,7 @@
           {
             "type": "border",
             "selected": 2,
-            "size": 137.5,
+            "size": 206.5,
             "location": "right",
             "children": [
               {
@@ -193,17 +193,16 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 59.42941064765168,
-              "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
                 {
                   "type": "tab",
-                  "id": "#dbc30f62-4e30-4476-9cca-1b277f264556",
-                  "name": "Main",
+                  "id": "#1a42077c-38fb-4ed3-b3af-003ff291e60d",
+                  "name": "test",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[DomoHome.eez-project]:/userPages/1",
+                    "objectPath": "[DomoHome.eez-project]:/userPages/3",
                     "permanent": false
                   },
                   "icon": "svg:page"
@@ -211,7 +210,7 @@
                 {
                   "type": "tab",
                   "id": "#d547cae4-4131-4f5a-8838-f51f1f55ff6a",
-                  "name": "settings_screen",
+                  "name": "Main",
                   "component": "editor",
                   "config": {
                     "objectPath": "[DomoHome.eez-project]:/userPages/0",
@@ -1001,15 +1000,13 @@
     "[DomoHome.eez-project]:/userPages/0[flow-state]": {
       "selection": {
         "0": {
-          "0": {},
-          "2": {},
-          "6": {}
+          "1": {}
         }
       },
       "transform": {
         "translate": {
-          "x": -384,
-          "y": -225
+          "x": -512,
+          "y": -300
         },
         "scale": 0.75
       },
@@ -1023,15 +1020,23 @@
     "[DomoHome.eez-project]:/userPages/1[flow-state]": {
       "selection": {
         "0": {
-          "0": {},
           "2": {},
-          "6": {}
+          "3": {},
+          "4": {},
+          "6": {},
+          "11": {},
+          "12": {},
+          "14": {},
+          "15": {
+            "6": {},
+            "$selected": true
+          }
         }
       },
       "transform": {
         "translate": {
           "x": -384,
-          "y": -225
+          "y": -125
         },
         "scale": 0.75
       },
@@ -1046,11 +1051,10 @@
       "selection": {
         "0": {
           "0": {
-            "0": {}
-          },
-          "1": {
+            "0": {},
             "$selected": true
           },
+          "1": {},
           "2": {},
           "3": {},
           "4": {},
@@ -1061,6 +1065,28 @@
         "translate": {
           "x": -349.5387500000001,
           "y": -212.484375
+        },
+        "scale": 0.75
+      },
+      "timeline": {
+        "isEditorActive": false,
+        "position": 0,
+        "secondToPx": 200,
+        "scrollLeft": 0
+      }
+    },
+    "[DomoHome.eez-project]:/userPages/3[flow-state]": {
+      "selection": {
+        "0": {
+          "0": {
+            "$selected": true
+          }
+        }
+      },
+      "transform": {
+        "translate": {
+          "x": -512,
+          "y": -300
         },
         "scale": 0.75
       },
@@ -1084,11 +1110,12 @@
   "showComponentDescriptions": true,
   "logsPanelFilter": "all",
   "selectedStylePropertyName": "",
-  "lvglPart": "MAIN",
+  "lvglPart": "INDICATOR",
   "lvglState": "DEFAULT",
   "lvglExpandedPropertiesGroup": [
-    "TEXT",
-    "BORDER"
+    "MARGIN",
+    "BORDER",
+    "BACKGROUND"
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,

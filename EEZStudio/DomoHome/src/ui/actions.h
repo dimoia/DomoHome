@@ -14,6 +14,7 @@ extern void action_minute_change(lv_event_t * e);
 extern void action_goto_heating_screen(lv_event_t * e);
 extern void action_goto_home(lv_event_t * e);
 extern void action_slider_temp1_change(lv_event_t * e);
+extern void action_goto_settings_screen(lv_event_t * e);
 
 
 #ifdef __cplusplus

@@ -171,8 +171,7 @@ void action_goto_heating_screen(lv_event_t *e) {
     if(code == LV_EVENT_CLICKED) {
         LV_LOG_USER("Clicked");
          loadScreen(SCREEN_ID_HEATING_SCREEN);
-        //lv_scr_load(obj);
-       
+        //lv_scr_load(obj);       
     }
 }
 
@@ -187,6 +186,21 @@ void action_goto_home(lv_event_t *e)
     }
 }
 
+void action_goto_settings_screen(lv_event_t *e) {
+    // TODO: Implement action goto_settings_screen here
+    lv_event_code_t code = lv_event_get_code(e);
+      if(code == LV_EVENT_CLICKED) {
+        LV_LOG_USER("Clicked");
+         loadScreen(SCREEN_ID_SETTINGS_SCREEN );
+               
+    }
+}
+
+
+void action_slider_temp1_change(lv_event_t *e) {
+    // TODO: Implement action slider_temp1_change here
+     LV_LOG_USER("Slider 1 Changeed");
+}
 
 /**
  * @brief Main application function.
@@ -256,17 +270,26 @@ void app_main()
 
     lvgl_port_lock(-1);
     
-   // loadScreen(SCREEN_ID_MAIN);
-    
+   // loadScreen(SCREEN_ID_MAIN);    
     
     objects_t objs_goto_heating_screen = objects;
     lv_obj_t *btn_goto_heating_screen  = objs_goto_heating_screen.btn_heating_screen;
     lv_obj_add_event_cb(btn_goto_heating_screen, action_goto_heating_screen, LV_EVENT_CLICKED, NULL);  
     
     objects_t objs_btn_goto_home = objects;
-    lv_obj_t *btn_goto_home  =  objs_btn_goto_home.btn_goto_home_from_heater_screen;
-    lv_obj_add_event_cb(btn_goto_home, action_goto_home, LV_EVENT_CLICKED, NULL);  
+    lv_obj_t *btn_goto_home      =  objs_btn_goto_home.btn_goto_home_from_heater_screen;         
+    lv_obj_t *btn_goto_home_1    =  objs_btn_goto_home.btn_goto_home_from_heater_screen_1;
+    lv_obj_add_event_cb(btn_goto_home_1, action_goto_home, LV_EVENT_CLICKED, NULL);  
+    lv_obj_add_event_cb(btn_goto_home,   action_goto_home, LV_EVENT_CLICKED, NULL); 
 
+    objects_t objs_goto_settings_screen = objects;
+    lv_obj_t *btn_goto_settings_screen  = objs_goto_heating_screen.btn_settings_screen;
+    lv_obj_add_event_cb(btn_goto_settings_screen, action_goto_settings_screen, LV_EVENT_CLICKED, NULL);
+
+    /* Slider Temperature 1*/
+    objects_t objs_slider_temperature_1 = objects;
+    lv_obj_t *slider_temp_1  = objs_slider_temperature_1.slider_temp_1;
+    lv_obj_add_event_cb(slider_temp_1, action_slider_temp1_change, LV_EVENT_VALUE_CHANGED, NULL);       
 
     #if 0
     lv_obj_t  * bottone_hating_screen = lv_btn_create(lv_scr_act());
