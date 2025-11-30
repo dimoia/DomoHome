@@ -1,6 +1,6 @@
 #include "images.h"
 
-const ext_img_desc_t images[18] = {
+const ext_img_desc_t images[27] = {
     { "BG_MainScreen", &img_bg_main_screen },
     { "ico_temp", &img_ico_temp },
     { "ico_humidity", &img_ico_humidity },
@@ -19,4 +19,13 @@ const ext_img_desc_t images[18] = {
     { "ico_high_temp", &img_ico_high_temp },
     { "ico_low_temperature", &img_ico_low_temperature },
     { "ico_low_humidity_32_32", &img_ico_low_humidity_32_32 },
+    { "img_ball_temp_indicator", &img_img_ball_temp_indicator },
+    { "img_ball_humidity_16_16", &img_img_ball_humidity_16_16 },
+    { "img_battery_not_present", &img_img_battery_not_present },
+    { "img_wifi_off", &img_img_wifi_off },
+    { "img_Bluetooth_disabled", &img_img_bluetooth_disabled },
+    { "img_sdcard", &img_img_sdcard },
+    { "img_meteo_sun", &img_img_meteo_sun },
+    { "img_meteo_sun_clougy", &img_img_meteo_sun_clougy },
+    { "img_wifi_on", &img_img_wifi_on },
 };

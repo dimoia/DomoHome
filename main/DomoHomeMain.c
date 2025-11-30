@@ -21,7 +21,7 @@
 #include "rgb_lcd_port.h" // Header for Waveshare RGB LCD driver
 #include "gt911.h"        // Header for touch screen operations (GT911)
 #include "lvgl_port.h"    // Header for LVGL port initialization and locking
-//#include "wifi.h"         // Header for Wi-Fi functionality
+#include "wifi.h"         // Header for Wi-Fi functionality
 //#include "sd_card.h"      // Header for SD card operations
 #include "BME280.h"      // Header for SD card operations
 #include "ui.h"           // Header for user interface initialization
@@ -36,6 +36,8 @@
 #include "screens.h"
 #include "sys_info.h"
 #include "calendar_time.h"
+#include "nvs_flash.h"
+#include "nvs.h"
 
 static const char    *TAG = "DomoHomeMain"; // Tag used for ESP log output
 static QueueHandle_t gpio_evt_queue = NULL;
@@ -219,12 +221,17 @@ void action_slider_temp1_change(lv_event_t *e) {
 
 void app_main()
 {
-
-  
-
+    ESP_LOGI(TAG, "DomoHome Main Application Starting...");
     // Initialize the Non-Volatile Storage (NVS) for settings and data persistence
     // This ensures that user data and settings are retained even after power loss.
-    //init_nvs();
+    // Initialize the Non-Volatile Storage (NVS) for Wi-Fi settings
+    esp_err_t err = nvs_flash_init();
+    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
+        // If NVS has no free pages or a new version is found, erase and reinitialize NVS
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        err = nvs_flash_init();
+    }
 
     static esp_lcd_panel_handle_t panel_handle = NULL; // Handle for the LCD panel
     static esp_lcd_touch_handle_t tp_handle = NULL;    // Handle for the touch panel  
@@ -251,6 +258,7 @@ void app_main()
     }
     Pcf8523_Init();
 
+    wifi_init();
    
 
     // Lock the LVGL port to ensure thread safety during API calls
@@ -366,6 +374,9 @@ void app_main()
     // Start the WIFI task to handle Wi-Fi functionality
     // This task manages Wi-Fi connections and hotspot creation.
    // xTaskCreate(wifi_task, "wifi_task", 6 * 1024, NULL, 9, &wifi_TaskHandle);
+    
+    // Initialize SoftAP (Wi-Fi Access Point) with SSID, password, and channel
+   // wifi_sta_init((uint8_t *)"HUAWEI-B535-13F7", (uint8_t *)"DMINGL6Intrepido123.", WIFI_AUTH_WPA2_PSK);
 
     gpio_config_t button_config = {
      .pin_bit_mask = (1ULL << GPIO_NUM_0),
@@ -384,3 +395,7 @@ void app_main()
     //hook isr handler for specific gpio pin
     gpio_isr_handler_add(GPIO_NUM_0, gpio_isr_handler, (void*) GPIO_NUM_0);
 }
+/*
+            LV_IMG_DECLARE(img_wifi_on);    
+            lv_img_set_src(img_wifi, &img_wifi_on);
+            */

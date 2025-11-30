@@ -21,6 +21,17 @@ static uint32_t bme280_Compensate_Presure    (const bme280_t *config, int32_t ad
 static uint32_t bme280_Compensate_Humidity   (const bme280_t *config, int32_t adc_H);
 
 
+#include "vars.h"
+
+int32_t temp_indicator;
+
+int32_t get_var_temp_indicator() {
+    return temp_indicator;
+}
+
+void set_var_temp_indicator(int32_t value) {
+    temp_indicator = value;
+}
 
 void bme280UpdateLvgObjectCb(lv_timer_t * timer) 
 {
@@ -40,18 +51,38 @@ void bmp280_task(void *arg)
     uint32_t u32Humidity;
     int32_t  i32Temperature;
     char user_data[100];
-    char strTemp[15];
+    char strTempC[15];
+    char strTempF[15];
     char strPressure[15];
     char strHumidity[15];
     objects_t objs = objects;
+    
+    /* Meter Object For Temperature */
+    lv_meter_t           *meter_temp     = objs.meter_temp;
+    lv_meter_indicator_t *temp_indicator = meter_temp->indicator_ll.tail;
+
+    /* Meter Object For Humidity */
+    lv_meter_t           *meter_humidity     = objs.meter_humidity;
+    lv_meter_indicator_t *humidity_indicator = meter_humidity->indicator_ll.tail;
+
+    /* Meter Object For Pressure */    
+    lv_meter_t           *meter_pressure     = objs.meter_pressure;
+    lv_meter_indicator_t *pressure_indicator = meter_pressure->indicator_ll.head;
+
+    lv_obj_t *img_wifi            = objs.img_wifi;
     lv_obj_t *Lbl_temperature    = objs.lbl_temperature;
     lv_obj_t *Lbl_temp_value     = objs.lbl_temp_value;
 
+    lv_obj_t *Lbl_temp_value_1           = objs.lbl_temp_value_1;
+    lv_obj_t *Lbl_temp_value_farheneit   = objs.lbl_temp_value_farheneit;
+    lv_obj_t *Lbl_humi_value             = objs.lbl_humi_value;
+    lv_obj_t *Lbl_press_value            = objs.lbl_press_value;
+
     lv_obj_t *Lbl_pressure       = objs.lbl_pressure;
-    lv_obj_t *Lbl_press_value    = objs.lbl_press_value;
+    //lv_obj_t *Lbl_press_value    = objs.lbl_press_value;
 
     lv_obj_t *Lbl_humidity       = objs.lbl_humidity;
-    lv_obj_t *Lbl_humidity_value = objs.lbl_humidity_value;
+    lv_obj_t *Lbl_humidity_value = objs.lbl_humi_value;
 
     lv_obj_t * chart_temp_humy =  objs.chart_temp_humy;
 
@@ -82,14 +113,18 @@ void bmp280_task(void *arg)
          float fPressure    = (u32Pressure   / 256.0f)/100.0f; // Convert to hPa
          float fHumidity    = u32Humidity    / 1024.0f;        // Convert to %RH
          float fTemperature = i32Temperature / 100.0f;         // Convert to °C
+         float fTemperatureF = (fTemperature * 9.0f / 5.0f) + 32.0f; // Convert to °F
+
          sprintf((char*)user_data, "Pressure: %03f Pa, Temperature: %03f degrees C, Humidity %03f%%\r\n",fPressure,fTemperature,fHumidity);
-         //ESP_LOGI(TAG, "%s", user_data);
+         ESP_LOGI(TAG, "%s", user_data);
 
 
-         memset(strTemp,0,sizeof(strTemp));
+         memset(strTempC,0,sizeof(strTempC));
+         memset(strTempF,0,sizeof(strTempC));
          memset(strPressure,0,sizeof(strPressure));
          memset(strHumidity,0,sizeof(strHumidity));
-         sprintf((char*)strTemp, "%.01f",fTemperature);
+         sprintf((char*)strTempC, "%.01f",fTemperature);
+         sprintf((char*)strTempF, "%.01f",fTemperatureF);
          sprintf((char*)strPressure, "%.00f",fPressure);
          sprintf((char*)strHumidity, "%.01f",fHumidity);
 
@@ -99,9 +134,9 @@ void bmp280_task(void *arg)
         else if( (fTemperature < 15) && (fTemperature >=0))
             iColor = lv_color_hex(0x03bce4);
         else if( (fTemperature >= 15) && (fTemperature < 25))
-            iColor = lv_color_hex(0x0fc372);
+            iColor = lv_color_hex(0x0fc372);              
         else if( (fTemperature >= 25) && (fTemperature < 30)) 
-            iColor = lv_color_hex(0xf4f10f);
+            iColor = lv_color_hex(0xf4f10f); 
         else
             iColor = lv_color_hex(0xaa0000);
 
@@ -110,13 +145,25 @@ void bmp280_task(void *arg)
        
        // lv_label_set_text(Lbl_temperature, "Temp [°C]: ");
         lv_obj_set_style_text_color(Lbl_temp_value, iColor, 0);
-        lv_label_set_text(Lbl_temp_value, strTemp);        
+        lv_label_set_text(Lbl_temp_value, strTempC);        
 
        // lv_label_set_text(Lbl_pressure, "Pressure [hPa]: ");
         lv_label_set_text(Lbl_press_value, strPressure);
 
        // lv_label_set_text(Lbl_Humidity, "Humidity [%]: ");
         lv_label_set_text(Lbl_humidity_value, strHumidity);
+
+        lv_label_set_text(Lbl_temp_value_1, strTempC);
+        lv_label_set_text(Lbl_temp_value_farheneit, strTempF); // Convert to Fahrenheit
+
+        lv_label_set_text(Lbl_humi_value, strHumidity);
+        lv_label_set_text(Lbl_press_value, strPressure);
+       
+        lv_meter_set_indicator_value(( lv_obj_t*)meter_temp, temp_indicator, (int32_t)fTemperature);        
+        lv_meter_set_indicator_value(( lv_obj_t*)meter_humidity, humidity_indicator, (int32_t)fHumidity);
+        lv_meter_set_indicator_value(( lv_obj_t*)meter_pressure, pressure_indicator, (int32_t)fPressure);
+
+       // set_var_temp_indicator(fTemperature);
 
         lv_chart_set_next_value(chart_temp_humy, ser_temp, fTemperature);
         lv_chart_set_next_value(chart_temp_humy, ser_humi, fHumidity);

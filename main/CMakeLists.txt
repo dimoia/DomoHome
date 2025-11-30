@@ -7,7 +7,7 @@ file(GLOB_RECURSE srcs *.c
                   # user/AHT10/*.c
                    user/PCF8523/*.c
                    #user/add_password/*.c
-                   #user/wifi/*.c
+                   user/Wifi/*.c
                    #user/rs485/*.c
                    #user/can/*.c
                    #user/pwm/*.c
@@ -23,7 +23,7 @@ set(include_dirs
   # user/AHT10
    user/PCF8523
    #user/add_password
-  # user/wifi
+   user/Wifi
    #user/rs485
    #user/can
    #user/pwm

@@ -21,7 +21,19 @@ extern const lv_img_dsc_t img_ico_pressure;
 extern const lv_img_dsc_t img_ico_heating_64x64;
 extern const lv_img_dsc_t img_ico_heating_32x32;
 extern const lv_img_dsc_t img_ico_energy_power_64x64;
-extern const lv_img_dsc_t img_uuyu;
+extern const lv_img_dsc_t img_ico_humidity_64_64;
+extern const lv_img_dsc_t img_ico_high_temp;
+extern const lv_img_dsc_t img_ico_low_temperature;
+extern const lv_img_dsc_t img_ico_low_humidity_32_32;
+extern const lv_img_dsc_t img_img_ball_temp_indicator;
+extern const lv_img_dsc_t img_img_ball_humidity_16_16;
+extern const lv_img_dsc_t img_img_battery_not_present;
+extern const lv_img_dsc_t img_img_wifi_off;
+extern const lv_img_dsc_t img_img_bluetooth_disabled;
+extern const lv_img_dsc_t img_img_sdcard;
+extern const lv_img_dsc_t img_img_meteo_sun;
+extern const lv_img_dsc_t img_img_meteo_sun_clougy;
+extern const lv_img_dsc_t img_img_wifi_on;
 
 #ifndef EXT_IMG_DESC_T
 #define EXT_IMG_DESC_T
@@ -31,7 +43,7 @@ typedef struct _ext_img_desc_t {
 } ext_img_desc_t;
 #endif
 
-extern const ext_img_desc_t images[15];
+extern const ext_img_desc_t images[27];
 
 
 #ifdef __cplusplus
