@@ -1,8 +1,7 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/1",
+    "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/0",
     "selectedActionObject": "[DomoHome.eez-project]:/actions/3",
-    "selectedGlobalVariableObject": "[DomoHome.eez-project]:/variables/globalVariables/-1",
     "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/26",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -1001,6 +1000,30 @@
     "[DomoHome.eez-project]:/userPages/0[flow-state]": {
       "selection": {
         "0": {
+          "0": {},
+          "1": {},
+          "42": {},
+          "43": {},
+          "44": {}
+        }
+      },
+      "transform": {
+        "translate": {
+          "x": -409.6,
+          "y": -240
+        },
+        "scale": 0.8
+      },
+      "timeline": {
+        "isEditorActive": false,
+        "position": 0,
+        "secondToPx": 200,
+        "scrollLeft": 0
+      }
+    },
+    "[DomoHome.eez-project]:/userPages/1[flow-state]": {
+      "selection": {
+        "0": {
           "2": {},
           "3": {},
           "4": {},
@@ -1019,31 +1042,6 @@
         "translate": {
           "x": -563.2,
           "y": -430
-        },
-        "scale": 0.8
-      },
-      "timeline": {
-        "isEditorActive": false,
-        "position": 0,
-        "secondToPx": 200,
-        "scrollLeft": 0
-      }
-    },
-    "[DomoHome.eez-project]:/userPages/1[flow-state]": {
-      "selection": {
-        "0": {
-          "0": {},
-          "1": {},
-          "42": {},
-          "43": {
-            "$selected": true
-          }
-        }
-      },
-      "transform": {
-        "translate": {
-          "x": -512,
-          "y": -300
         },
         "scale": 0.8
       },

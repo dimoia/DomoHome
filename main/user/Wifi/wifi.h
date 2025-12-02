@@ -11,7 +11,7 @@ extern esp_netif_ip_info_t ip_info; // Stores IP information
 
 #define DEFAULT_SCAN_LIST_SIZE 15 // Max number of APs to store (0 to 20)
 
-void wifi_init(void);  // Function to initialize Wi-Fi
+int8_t wifi_init(void);  // Function to initialize Wi-Fi
 void wifi_scan(void);  // Function to scan available Wi-Fi networks
 
 // Initialize Wi-Fi in STA mode with SSID, password, and auth mode

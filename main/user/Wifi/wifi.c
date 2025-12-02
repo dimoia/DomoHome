@@ -3,23 +3,48 @@
 #include "freertos/task.h"
 
 TaskHandle_t wifi_TaskHandle;
+const char *TAG_STA = "wifi";    // Tag for Station mode (Wi-Fi client mode)
+esp_netif_ip_info_t ip_info; // Stores the IP information once connected to Wi-Fi
 
 // Initialize Wi-Fi for STA (Station) and AP (Access Point) modes
-void wifi_init(void)
+int8_t wifi_init(void)
 {
-    // Initialize the TCP/IP stack
-    ESP_ERROR_CHECK(esp_netif_init());
-    
-    // Create the default event loop
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    int8_t iRet = 0;
 
-    // Initialize the Wi-Fi driver with default configuration
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    iRet = esp_netif_init();
+    if (iRet != ESP_OK)
+    {
+        ESP_LOGE(TAG, "esp_netif_init failed: %d", iRet);
+        iRet = -1;
+    } 
+    else
+    {
+        iRet = esp_event_loop_create_default();
+        if (iRet != ESP_OK)
+        {
+            ESP_LOGE(TAG, "esp_event_loop_create_default failed: %d", iRet);
+            iRet = -1;
+        }
+        else
+        {
+            wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+            iRet = esp_wifi_init(&cfg);
+            if (iRet != ESP_OK)
+            {
+                ESP_LOGE(TAG, "esp_wifi_init failed: %d", iRet);
+                iRet = -1;
+            }
+            else
+            {
+                ESP_LOGI(TAG, "Wi-Fi initialized successfully");
+                iRet = 0;
+            }
+        }
+    }  
+    return iRet;
 }
 
-const char *TAG_STA = "wifi_sta";    // Tag for Station mode (Wi-Fi client mode)
-esp_netif_ip_info_t ip_info; // Stores the IP information once connected to Wi-Fi
+
 
 // Function to wait for Wi-Fi connection and obtain IP address
 void wifi_task(wifi_config_t *wifi_config)
