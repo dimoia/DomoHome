@@ -35,7 +35,7 @@ void set_var_temp_indicator(int32_t value) {
 
 void bme280UpdateLvgObjectCb(lv_timer_t * timer) 
 {
-    ESP_LOGI(TAG, "BME280 bme280UpdateLvgObjectCb");
+  //  ESP_LOGI(TAG, "BME280 bme280UpdateLvgObjectCb");
     #if 0
     if (CAN_Clear) {
         memset(can_data, 0, sizeof(can_data));  // Clear the buffer when flag is set
@@ -114,10 +114,10 @@ void bmp280_task(void *arg)
          float fHumidity    = u32Humidity    / 1024.0f;        // Convert to %RH
          float fTemperature = i32Temperature / 100.0f;         // Convert to °C
          float fTemperatureF = (fTemperature * 9.0f / 5.0f) + 32.0f; // Convert to °F
-
+/*
          sprintf((char*)user_data, "Pressure: %03f Pa, Temperature: %03f degrees C, Humidity %03f%%\r\n",fPressure,fTemperature,fHumidity);
          ESP_LOGI(TAG, "%s", user_data);
-
+*/
 
          memset(strTempC,0,sizeof(strTempC));
          memset(strTempF,0,sizeof(strTempC));

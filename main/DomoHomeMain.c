@@ -64,6 +64,8 @@ void lv_example_msgbox_1(void)
     lv_obj_add_event_cb(mbox1, event_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_obj_center(mbox1);
 }
+
+
 static void boot_task(void* arg)
 {
     gptimer_handle_t gptimer = NULL;
@@ -394,6 +396,7 @@ void app_main()
     gpio_install_isr_service(0);
     //hook isr handler for specific gpio pin
     gpio_isr_handler_add(GPIO_NUM_0, gpio_isr_handler, (void*) GPIO_NUM_0);
+    ESP_LOGI(TAG, "DomoHome Main Application Finished Initialization.");
 }
 /*
             LV_IMG_DECLARE(img_wifi_on);    

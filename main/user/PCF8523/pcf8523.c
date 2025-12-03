@@ -109,7 +109,7 @@ static char *Pcf8523_Get_MountName(int iMouth);
 
 void pcf8523UpdateLvgObjectCb(lv_timer_t * timer) 
 {
-    ESP_LOGI(TAG, "pcf8523 pcf8523UpdateLvgObjectCb");
+ //   ESP_LOGI(TAG, "pcf8523 pcf8523UpdateLvgObjectCb");
     #if 0
     if (CAN_Clear) {
         memset(can_data, 0, sizeof(can_data));  // Clear the buffer when flag is set
@@ -184,7 +184,7 @@ void pcf8523_task(void *arg)
 					 currentTime.tm_min, 
 					 currentTime.tm_sec);*/
             int iWeekDay = Pcf8523_Get_WeekDay(currentTime.tm_year, currentTime.tm_mon, currentTime.tm_mday);
-			
+		/*	
 			ESP_LOGI(TAG, "%s %02d %s %04d %02d:%02d:%02d", 
 				strWeekDay[iWeekDay],
 				currentTime.tm_mday,
@@ -193,7 +193,7 @@ void pcf8523_task(void *arg)
 				currentTime.tm_hour,
 				currentTime.tm_min,
 				currentTime.tm_sec);	
-
+*/
             lvgl_port_lock(-1);
 			memset(user_data,0,sizeof(user_data));
             sprintf((char*)user_data, "%04d %s %02d %s",
