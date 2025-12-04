@@ -1,3 +1,4 @@
+#include <string.h>
 #include "wifi.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -5,14 +6,12 @@
 #include "lvgl_port.h" 
 #include "lvgl.h"
 #include "ui.h"
+#include "pcf8523.h"
 
 #define DEFAULT_SCAN_LIST_SIZE 15 // Max number of APs to store (0 to 20)
 static wifi_ap_record_t wifi_scann_list[DEFAULT_SCAN_LIST_SIZE];  // Array to store the AP records
 static USER_CONFIG stUSerConfig;
-
-
 TaskHandle_t wifi_TaskHandle;
-
 const char *TAG_WIFI = "wifi";    // Tag for Station mode (Wi-Fi client mode)
 esp_netif_ip_info_t ip_info; // Stores the IP information once connected to Wi-Fi
 
@@ -23,6 +22,7 @@ int8_t wifi_init(void)
 
     /* Clear stUSerConfig*/
     memset(&stUSerConfig, 0, sizeof(USER_CONFIG));
+
     iRet = esp_netif_init();
     if (iRet != ESP_OK)
     {
@@ -157,7 +157,7 @@ void wifi_scan()
 {
     objects_t objs           = objects;  
     lv_obj_t *list_wifi_ssid = objs.drp_wifi_ssid;
-    lv_obj_t *btn_wifi_scann = objs.btn_wifi_scann;
+   // lv_obj_t *btn_wifi_scann = objs.btn_wifi_scann;
 
     uint16_t number           = DEFAULT_SCAN_LIST_SIZE;  // Maximum number of APs to be stored
     char wifiAppInfo[128]; // Array to hold SSID strings of found APs
@@ -223,77 +223,30 @@ void action_wifi_scann(lv_event_t *e)
         lvgl_port_unlock();
     }
 }
-/* Action Callback When RealTme edit box are clicked */
-void action_txt_relatime_clock(lv_event_t *e) 
-{
-    objects_t objs    = objects;
-    lv_keyboard_t *kb = objs.kek_keyboard;
-    uint8_t userData  = (uint32_t)(uintptr_t)lv_event_get_user_data(e); /* Get user data parameter */
-
-    /* Keyboard size and posistion */
-    lv_obj_set_size(kb, lv_pct(100), lv_pct(40)); // Set size
-    lv_obj_align_to(kb, lv_scr_act(), LV_ALIGN_TOP_MID, 0, 0); // Align to bottom
-
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t *ta         = lv_event_get_target(e);
- 
-    if(code == LV_EVENT_CLICKED ) 
-    {
-        lv_obj_clear_flag(kb, LV_OBJ_FLAG_HIDDEN);
-        lv_keyboard_set_textarea(kb, ta);
-        lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_NUMBER ); // Set keyboard to number mode for IP address input
-        
-        switch(userData)
-        {
-            case 1:
-                ESP_LOGI(TAG_WIFI, "Click On Day Textbox ");
-                break;
-            case 2:
-                ESP_LOGI(TAG_WIFI, "Click On Month Textbox ");
-                break;
-            case 3:
-                ESP_LOGI(TAG_WIFI, "Click On Year Textbox ");
-                break;
-            case 4:
-                ESP_LOGI(TAG_WIFI, "Click On Hour Textbox ");
-                break;
-            case 5:
-                ESP_LOGI(TAG_WIFI, "Click On Minute Textbox ");
-                break;    
-            default:
-                break;
-        }               
-    }  
-    if(code == LV_EVENT_DEFOCUSED) 
-    {
-        lv_keyboard_set_textarea(kb, NULL);
-        lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
-        ESP_LOGI(TAG_WIFI, "Defocus On IP Addr Textbox ");
-    }
-}
 
 
 void action_wifi_txt_psw(lv_event_t *e) 
 {      
     objects_t objs    = objects;
-    lv_keyboard_t *kb = objs.kek_keyboard;
+    lv_keyboard_t *kb = (lv_keyboard_t *)objs.kek_keyboard;
    
-    lv_obj_set_size(kb, lv_pct(100), lv_pct(40)); // Set size
-    lv_obj_align_to(kb, lv_scr_act(), LV_ALIGN_BOTTOM_MID, 0, 0); // Align to bottom
+    lv_obj_set_size((lv_obj_t *)kb, lv_pct(100), lv_pct(40)); // Set size
+    lv_obj_align_to((lv_obj_t *)kb, lv_scr_act(), LV_ALIGN_BOTTOM_MID, 0, 0); // Align to bottom
 
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t *ta         = lv_event_get_target(e);
  
-    if(code == LV_EVENT_CLICKED || code == LV_EVENT_FOCUSED) 
+    if(code == LV_EVENT_FOCUSED) 
     {
-        lv_obj_clear_flag(kb, LV_OBJ_FLAG_HIDDEN);
-        lv_keyboard_set_textarea(kb, ta);
+        lv_obj_clear_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
+        lv_keyboard_set_textarea((lv_obj_t *)kb, ta);
+        lv_keyboard_set_mode((lv_obj_t *)kb, LV_KEYBOARD_MODE_TEXT_LOWER ); // Set keyboard to number mode for IP address input  
         ESP_LOGI(TAG_WIFI, "Click On Wifi Psw Textbox ");
     }  
     if(code == LV_EVENT_DEFOCUSED) 
     {
-        lv_keyboard_set_textarea(kb, NULL);
-        lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
+        lv_keyboard_set_textarea((lv_obj_t *)kb, NULL);
+        lv_obj_add_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
         memcpy(stUSerConfig.strWifiPassword, lv_textarea_get_text(ta), sizeof(stUSerConfig.strWifiPassword));        
         ESP_LOGI(TAG_WIFI, "Defocus On Wifi Psw Textbox ");
     }
@@ -302,48 +255,48 @@ void action_wifi_txt_psw(lv_event_t *e)
 void action_txt_net_cb(lv_event_t *e) 
 {
     objects_t objs    = objects;
-    lv_keyboard_t *kb = objs.kek_keyboard;
+    lv_keyboard_t *kb = (lv_keyboard_t *)objs.kek_keyboard;
     uint8_t userData = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
-    lv_obj_set_size(kb, lv_pct(100), lv_pct(40)); // Set size
-    lv_obj_align_to(kb, lv_scr_act(), LV_ALIGN_TOP_MID, 0, 0); // Align to bottom
+    lv_obj_set_size((lv_obj_t *)kb, lv_pct(100), lv_pct(40)); // Set size
+    lv_obj_align_to((lv_obj_t *)kb, lv_scr_act(), LV_ALIGN_TOP_MID, 0, 0); // Align to bottom
 
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t *ta         = lv_event_get_target(e);
  
     if(code == LV_EVENT_FOCUSED) 
     {
-        lv_obj_clear_flag(kb, LV_OBJ_FLAG_HIDDEN);
-        lv_keyboard_set_textarea(kb, ta);
-        lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_NUMBER ); // Set keyboard to number mode for IP address input              
+        lv_obj_clear_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
+        lv_keyboard_set_textarea((lv_obj_t *)kb, ta);
+        lv_keyboard_set_mode((lv_obj_t *)kb, LV_KEYBOARD_MODE_NUMBER ); // Set keyboard to number mode for IP address input              
     }  
     if(code == LV_EVENT_DEFOCUSED) 
     {
-        lv_keyboard_set_textarea(kb, NULL);
-        lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
+        lv_keyboard_set_textarea((lv_obj_t *)kb, NULL);
+        lv_obj_add_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
         if(userData == 1)
         {
             // Ip Address
-            memecpy(stUSerConfig.stNetworkConfig.sIpAddr, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.sIpAddr));
+            memcpy(stUSerConfig.stNetworkConfig.strIpAddr, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.strIpAddr));
             ESP_LOGI(TAG_WIFI, "Click On IP Addr Textbox ");
         }
         else if(userData == 2)
         {
-            memcpy(stUSerConfig.stNetworkConfig.sNetMask, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.sNetMask));
+            memcpy(stUSerConfig.stNetworkConfig.strNetMAsk, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.strNetMAsk));
             ESP_LOGI(TAG_WIFI, "Click On NetMask Textbox ");
         }
         else if(userData == 3)
         {
-            memcpy(stUSerConfig.stNetworkConfig.sGateway, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.sGateway));
+            memcpy(stUSerConfig.stNetworkConfig.strGateway, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.strGateway));
             ESP_LOGI(TAG_WIFI, "Click On Gateway Textbox ");
         }
         else if(userData == 4)
         {
-            memcpy(stUSerConfig.stNetworkConfig.sDns, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.sDns));
+            memcpy(stUSerConfig.stNetworkConfig.strDns, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.strDns));
             ESP_LOGI(TAG_WIFI, "Click On Dns Textbox ");
         }      
     }
 }
-
+#if 0
 void action_txt_ip_addr(lv_event_t *e) 
 {
     objects_t objs    = objects;
@@ -417,12 +370,13 @@ void action_txt_day(lv_event_t *e)
         ESP_LOGI(TAG_WIFI, "Defocus On IP Addr Textbox ");
     }
 }
+#endif
 
 // Select SSID from Dropdown
 void action_ssid_select(lv_event_t *e) 
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t * obj = lv_event_get_target(e);    
+    lv_obj_t * obj       = lv_event_get_target(e);    
     if(code == LV_EVENT_VALUE_CHANGED) 
     {
        // char buf[64];
@@ -430,15 +384,11 @@ void action_ssid_select(lv_event_t *e)
         
        // LV_LOG_USER("Option: %s", buf);
         ESP_LOGI(TAG_WIFI, "%s ", wifi_scann_list[lv_dropdown_get_selected(obj)].ssid);  // Log RSSI (signal strength)
-        memcpy(stUSerConfig.strWifiSsid, wifi_scann_list[lv_dropdown_get_selected(obj)].ssid, sizeof(stUSerConfig.stNetworkConfig.sSsid));
+        memcpy(stUSerConfig.strWifiSsid, wifi_scann_list[lv_dropdown_get_selected(obj)].ssid, sizeof(stUSerConfig.strWifiSsid));
     }    
 }
 
-// Save Configuration
-void action_set_clock(lv_event_t *e) {
-    // TODO: Implement action save_configuration here
-    ESP_LOGI(TAG_WIFI, "Save Config Clicked ");
-}
+
 
 // Connect To WiFi
 void action_wifi_connect(lv_event_t *e) {
@@ -455,23 +405,7 @@ void action_btn_cancell(lv_event_t *e) {
     // TODO: Implement action btn_cancell here
 }
 
-void action_btn_real_time_set_clock(lv_event_t *e) 
-{
-    //sw_ManualRTC_NtpServer
-    objects_t objs               = objects;
-    lv_obj_t *SwManRTC_NtpServer = objs.sw_manual_rtc_ntp_server;
-}
 
-void action_sw_manual_rtc_ntp_server(lv_event_t *e)
-{
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t        *obj = lv_event_get_target(e);
-    if(code == LV_EVENT_VALUE_CHANGED) 
-    {
-        ESP_LOGI(TAG_WIFI, "State: %s\n", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
-        stUSerConfig.eRtcManualAuto = lv_obj_has_state(obj, LV_STATE_CHECKED) ? RTC_MANUAL : RTC_AUTO;
-    }
-}
 
 void action_sw_static_dynamic_ip(lv_event_t *e) 
 {
@@ -505,3 +439,176 @@ void action_txt_hostname_cb(lv_event_t *e)
         memcpy(stUSerConfig.strHostname, lv_textarea_get_text(obj), sizeof(stUSerConfig.strHostname));
     }
 }
+#if 0
+// Save Configuration
+void action_set_clock(lv_event_t *e) {
+    // TODO: Implement action save_configuration here
+    ESP_LOGI(TAG_WIFI, "Save Config Clicked ");
+}
+#endif 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// RealtimeClock Related Actions
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Calculate Day of Week from Date
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+static int dayofweek(int day,int month,int year)
+{
+    int arr[] = {0,3,2,5,3,5,1,4,6,2,4};
+    if(month<3)
+        year--;
+    return ((year+year/4-year/100+year/400+arr[month-1]+day)%7);
+}
+
+void action_settings_screen_cb(lv_event_t *e) 
+{
+    struct tm currentTime;
+    objects_t objs               = objects;
+    lv_obj_t *dropdown           = objs.drop_day;
+    uint8_t id                   = 0;
+
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t        *obj = lv_event_get_target(e);
+
+    if(Pcf8523_Get_Time(&currentTime) < 0) 
+    {
+        ESP_LOGE(TAG_WIFI, "Failed to get time from PCF8563");
+    } else 
+    {
+        stUSerConfig.stRtcClock.tm_year = currentTime.tm_year;
+        stUSerConfig.stRtcClock.tm_mon  = currentTime.tm_mon;   
+        stUSerConfig.stRtcClock.tm_mday = currentTime.tm_mday;
+        stUSerConfig.stRtcClock.tm_hour = currentTime.tm_hour;
+        stUSerConfig.stRtcClock.tm_min  = currentTime.tm_min;
+        stUSerConfig.stRtcClock.tm_sec  = currentTime.tm_sec;
+
+        
+        ESP_LOGI(TAG_WIFI, "Current Date/Time: %04d-%02d-%02d %02d:%02d:%02d",
+                    currentTime.tm_mday, 
+                    currentTime.tm_mon, 
+                    currentTime.tm_year,
+                    currentTime.tm_hour, 
+                    currentTime.tm_min, 
+                    currentTime.tm_sec);
+                   
+        int iWeekDay = dayofweek(currentTime.tm_year, currentTime.tm_mon, currentTime.tm_mday);        
+        stUSerConfig.stRtcClock.tm_wday = iWeekDay;
+        lv_dropdown_set_selected(dropdown, stUSerConfig.stRtcClock.tm_mday - 1); // Days are 1-31, dropdown index starts from 0
+
+        // Months
+        dropdown = objs.drop_month;
+        lv_dropdown_set_selected(dropdown, stUSerConfig.stRtcClock.tm_mon - 1); // Months are 1-12, dropdown index starts from 0
+
+        // Years        
+        dropdown = objs.drop_year;
+        id = stUSerConfig.stRtcClock.tm_year - 2025; // Assuming dropdown starts from 2020      
+        lv_dropdown_set_selected(dropdown, id);
+
+        // Hours
+        dropdown = objs.drop_hour;
+        lv_dropdown_set_selected(dropdown, stUSerConfig.stRtcClock.tm_hour); // Hours are 0-23
+
+        // Minutes  
+        dropdown = objs.drop_minute;
+        lv_dropdown_set_selected(dropdown, stUSerConfig.stRtcClock.tm_min); // Minutes are 0-59
+    
+    }    
+    // TODO: Implement action settings_screen_cb here
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Action Callback When RealTme Set Clock Button is clicked
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+void action_btn_real_time_set_clock_cb(lv_event_t *e) 
+{
+    //sw_ManualRTC_NtpServer
+    objects_t objs               = objects;
+    lv_obj_t *SwManRTC_NtpServer = objs.sw_manual_rtc_ntp_server;
+    lv_event_code_t code = lv_event_get_code(e);
+    int iDayOfweek;
+    if(code == LV_EVENT_CLICKED) 
+    {
+        if(stUSerConfig.eRtcManualAuto == RTC_MANUAL)
+        {
+            ESP_LOGI(TAG_WIFI, "Set RTC Manual ");
+
+            iDayOfweek = dayofweek(stUSerConfig.stRtcClock.tm_mday,
+                                   stUSerConfig.stRtcClock.tm_mon,
+                                   stUSerConfig.stRtcClock.tm_year);
+            if(iDayOfweek < 0)
+            {
+                iDayOfweek = 0;
+            }
+            stUSerConfig.stRtcClock.tm_wday = iDayOfweek;
+            Pcf8523_Set_Time(&stUSerConfig.stRtcClock);            
+	    }
+        else
+        {
+            ESP_LOGI(TAG_WIFI, "Set RTC From NTP Server ");
+        }
+    }
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////
+/// Action Callback When RealTme Switch Manual/NTP Server is clicked
+//////////////////////////////////////////////////////////////////////////////////////////////////
+void action_sw_manual_rtc_ntp_server(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t        *obj = lv_event_get_target(e);
+    if(code == LV_EVENT_VALUE_CHANGED) 
+    {
+        ESP_LOGI(TAG_WIFI, "State: %s\n", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
+        stUSerConfig.eRtcManualAuto = lv_obj_has_state(obj, LV_STATE_CHECKED) ? RTC_MANUAL : RTC_FROM_NTP_SERVER;
+    }
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Action Callback When RealTme Date/Time Dropdown is changed
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+void action_drop_date_time(lv_event_t *e) 
+{
+    char strBuffer[16];
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *obj        = lv_event_get_target(e);    
+    uint8_t userData     = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+
+    if(code == LV_EVENT_VALUE_CHANGED) 
+    { 
+        switch(userData)
+        {
+            case 1:
+                ESP_LOGI(TAG_WIFI, "Day Selected ");                
+                lv_dropdown_get_selected_str(obj,strBuffer,sizeof(strBuffer));
+                ESP_LOGI(TAG_WIFI, "%s ",strBuffer);
+                stUSerConfig.stRtcClock.tm_mday = atoi(strBuffer);                
+                break;
+            case 2:
+                ESP_LOGI(TAG_WIFI, "Month Selected ");                
+                lv_dropdown_get_selected_str(obj,strBuffer,sizeof(strBuffer));
+                ESP_LOGI(TAG_WIFI, "%s ",strBuffer);
+                stUSerConfig.stRtcClock.tm_mon = lv_dropdown_get_selected(obj) + 1; // Months are 0-11 in struct tm               
+                break;
+            case 3:
+                ESP_LOGI(TAG_WIFI, "Year Selected ");                
+                lv_dropdown_get_selected_str(obj,strBuffer,sizeof(strBuffer));
+                ESP_LOGI(TAG_WIFI, "%s ",strBuffer);
+                stUSerConfig.stRtcClock.tm_year = atoi(strBuffer);                
+                break;
+            case 4:
+                ESP_LOGI(TAG_WIFI, "Hour Selected ");
+                lv_dropdown_get_selected_str(obj,strBuffer,sizeof(strBuffer));
+                ESP_LOGI(TAG_WIFI, "%s ",strBuffer);
+                stUSerConfig.stRtcClock.tm_hour = atoi(strBuffer);
+                break;
+            case 5:
+                ESP_LOGI(TAG_WIFI, "Minute Selected ");
+                lv_dropdown_get_selected_str(obj,strBuffer,sizeof(strBuffer));
+                ESP_LOGI(TAG_WIFI, "%s ",strBuffer);
+                stUSerConfig.stRtcClock.tm_min = atoi(strBuffer);
+                break;    
+            default:
+                break;
+        }        
+    } 
+}
+

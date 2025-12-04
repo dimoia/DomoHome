@@ -18,11 +18,6 @@ typedef struct _objects_t {
     lv_obj_t *lbl_time_2;
     lv_obj_t *lbl_str_date_2;
     lv_obj_t *obj0;
-    lv_obj_t *txt_day;
-    lv_obj_t *txt_month;
-    lv_obj_t *txt_year;
-    lv_obj_t *txt_hour;
-    lv_obj_t *txt_minute;
     lv_obj_t *txt_ntp_server;
     lv_obj_t *sw_manual_automatic_time;
     lv_obj_t *sw_manual_rtc_ntp_server;
@@ -43,6 +38,11 @@ typedef struct _objects_t {
     lv_obj_t *obj2;
     lv_obj_t *btn_apply;
     lv_obj_t *btn_cancell;
+    lv_obj_t *drop_day;
+    lv_obj_t *drop_month;
+    lv_obj_t *drop_year;
+    lv_obj_t *drop_hour;
+    lv_obj_t *drop_minute;
     lv_obj_t *btn_goto_home;
     lv_obj_t *lbl_home;
     lv_obj_t *lbl_time;

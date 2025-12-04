@@ -10,17 +10,19 @@
 #include "esp_wifi.h"  // Include ESP32 Wi-Fi driver functions
 #include "esp_log.h"   // Include ESP32 logging functions
 
+#define DEFAULT_SCAN_LIST_SIZE 15 // Max number of APs to store (0 to 20)
+
 typedef enum _RTC_MANUAL_AUTO
 {
     RTC_MANUAL = 0,
     RTC_FROM_NTP_SERVER
 } RTC_MANUAL_AUTO;
 
-typedef enum __DYNAMIC_IP_STATIC_IP
+typedef enum _DYNAMIC_IP_STATIC_IP
 {
     STATIC_IP = 0,
     DYNAMIC_IP
-} RTC_MANUAL_AUTO;
+} DYNAMIC_IP_STATIC_IP;
 
 typedef struct _NETWORK_CONFIG
 {
@@ -42,13 +44,9 @@ typedef struct _USER_CONFIG
     NETWORK_CONFIG stNetworkConfig;
     
 } USER_CONFIG;
-USER_CONFIG stUSerConfig;
 
-extern wifi_ap_record_t ap_info[];  // Declare an array to store the AP records
-
-extern esp_netif_ip_info_t ip_info; // Stores IP information
-
-#define DEFAULT_SCAN_LIST_SIZE 15 // Max number of APs to store (0 to 20)
+extern wifi_ap_record_t    ap_info[];  // Declare an array to store the AP records
+extern esp_netif_ip_info_t ip_info;    // Stores IP information
 
 int8_t wifi_init(void);  // Function to initialize Wi-Fi
 void wifi_scan(void);  // Function to scan available Wi-Fi networks

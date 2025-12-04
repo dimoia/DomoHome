@@ -1,7 +1,7 @@
 {
   "navigation": {
     "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/0",
-    "selectedActionObject": "[DomoHome.eez-project]:/actions/29",
+    "selectedActionObject": "[DomoHome.eez-project]:/actions/21",
     "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/26",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -193,17 +193,18 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 55.42654841719798,
+              "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
                 {
                   "type": "tab",
                   "id": "#1a42077c-38fb-4ed3-b3af-003ff291e60d",
-                  "name": "Main",
+                  "name": "test",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[DomoHome.eez-project]:/userPages/0",
-                    "permanent": false
+                    "objectPath": "[DomoHome.eez-project]:/userPages/3",
+                    "permanent": true
                   },
                   "icon": "svg:page"
                 },
@@ -230,8 +231,7 @@
                   },
                   "icon": "material:settings"
                 }
-              ],
-              "active": true
+              ]
             },
             {
               "type": "row",
@@ -251,7 +251,8 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -1002,11 +1003,10 @@
         "0": {
           "0": {},
           "1": {},
-          "5": {},
-          "37": {},
-          "38": {},
-          "39": {},
-          "40": {}
+          "32": {},
+          "33": {},
+          "34": {},
+          "35": {}
         }
       },
       "transform": {
@@ -1028,8 +1028,11 @@
         "0": {
           "0": {},
           "1": {},
-          "9": {},
-          "15": {}
+          "5": {},
+          "37": {},
+          "38": {},
+          "39": {},
+          "40": {}
         }
       },
       "transform": {
@@ -1079,6 +1082,9 @@
           "0": {},
           "1": {
             "3": {}
+          },
+          "6": {
+            "$selected": true
           }
         }
       },
@@ -1097,6 +1103,22 @@
       }
     },
     "[DomoHome.eez-project]:/userWidgets/0[flow-state]": {
+      "selection": {},
+      "transform": {
+        "translate": {
+          "x": -512,
+          "y": -300
+        },
+        "scale": 0.8
+      },
+      "timeline": {
+        "isEditorActive": false,
+        "position": 0,
+        "secondToPx": 200,
+        "scrollLeft": 0
+      }
+    },
+    "[DomoHome.eez-project]:/userPages/4[flow-state]": {
       "selection": {},
       "transform": {
         "translate": {
