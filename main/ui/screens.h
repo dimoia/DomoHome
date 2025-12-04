@@ -25,6 +25,7 @@ typedef struct _objects_t {
     lv_obj_t *txt_minute;
     lv_obj_t *txt_ntp_server;
     lv_obj_t *sw_manual_automatic_time;
+    lv_obj_t *sw_manual_rtc_ntp_server;
     lv_obj_t *drp_wifi_ssid;
     lv_obj_t *txt_wifi_psw;
     lv_obj_t *obj1;
@@ -40,6 +41,8 @@ typedef struct _objects_t {
     lv_obj_t *btn_connect;
     lv_obj_t *kek_keyboard;
     lv_obj_t *obj2;
+    lv_obj_t *btn_apply;
+    lv_obj_t *btn_cancell;
     lv_obj_t *btn_goto_home;
     lv_obj_t *lbl_home;
     lv_obj_t *lbl_time;

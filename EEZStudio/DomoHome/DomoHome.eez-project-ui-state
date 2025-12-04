@@ -1,7 +1,7 @@
 {
   "navigation": {
     "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/0",
-    "selectedActionObject": "[DomoHome.eez-project]:/actions/18",
+    "selectedActionObject": "[DomoHome.eez-project]:/actions/29",
     "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/26",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -25,7 +25,6 @@
           },
           {
             "type": "border",
-            "selected": 2,
             "size": 206.5,
             "location": "right",
             "children": [
@@ -126,7 +125,8 @@
                 {
                   "type": "tabset",
                   "id": "#751090f9-898a-494d-8ac2-845ed731e798",
-                  "weight": 0.7020109689213894,
+                  "weight": 1.262127088859336,
+                  "selected": 2,
                   "enableClose": false,
                   "children": [
                     {
@@ -158,7 +158,7 @@
                 {
                   "type": "tabset",
                   "id": "#c5edcf08-d000-450b-a241-a938ba8aabef",
-                  "weight": 1.6246928818453867,
+                  "weight": 1.06457676190744,
                   "enableClose": false,
                   "children": [
                     {
@@ -193,7 +193,6 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 55.42654841719798,
-              "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
@@ -231,7 +230,8 @@
                   },
                   "icon": "material:settings"
                 }
-              ]
+              ],
+              "active": true
             },
             {
               "type": "row",
@@ -251,8 +251,7 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -1003,9 +1002,7 @@
         "0": {
           "0": {},
           "1": {},
-          "5": {
-            "$selected": true
-          },
+          "5": {},
           "37": {},
           "38": {},
           "39": {},

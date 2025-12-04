@@ -8,7 +8,8 @@
 
 #define DEFAULT_SCAN_LIST_SIZE 15 // Max number of APs to store (0 to 20)
 static wifi_ap_record_t wifi_scann_list[DEFAULT_SCAN_LIST_SIZE];  // Array to store the AP records
-//static lv_obj_t * g_keyboard;
+static USER_CONFIG stUSerConfig;
+
 
 TaskHandle_t wifi_TaskHandle;
 
@@ -19,12 +20,9 @@ esp_netif_ip_info_t ip_info; // Stores the IP information once connected to Wi-F
 int8_t wifi_init(void)
 {    
     int8_t iRet = 0;
-#if 0
-    g_keyboard = lv_keyboard_create(lv_scr_act()); // Create the keyboard on the screen
-    lv_obj_set_size(g_keyboard, lv_pct(100), lv_pct(40)); // Set size
-    lv_obj_align_to(g_keyboard, lv_scr_act(), LV_ALIGN_BOTTOM_MID, 0, 0); // Align to bottom
-    lv_obj_add_flag(g_keyboard, LV_OBJ_FLAG_HIDDEN); // Initially hide the keyboard
-#endif
+
+    /* Clear stUSerConfig*/
+    memset(&stUSerConfig, 0, sizeof(USER_CONFIG));
     iRet = esp_netif_init();
     if (iRet != ESP_OK)
     {
@@ -225,6 +223,55 @@ void action_wifi_scann(lv_event_t *e)
         lvgl_port_unlock();
     }
 }
+/* Action Callback When RealTme edit box are clicked */
+void action_txt_relatime_clock(lv_event_t *e) 
+{
+    objects_t objs    = objects;
+    lv_keyboard_t *kb = objs.kek_keyboard;
+    uint8_t userData  = (uint32_t)(uintptr_t)lv_event_get_user_data(e); /* Get user data parameter */
+
+    /* Keyboard size and posistion */
+    lv_obj_set_size(kb, lv_pct(100), lv_pct(40)); // Set size
+    lv_obj_align_to(kb, lv_scr_act(), LV_ALIGN_TOP_MID, 0, 0); // Align to bottom
+
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *ta         = lv_event_get_target(e);
+ 
+    if(code == LV_EVENT_CLICKED ) 
+    {
+        lv_obj_clear_flag(kb, LV_OBJ_FLAG_HIDDEN);
+        lv_keyboard_set_textarea(kb, ta);
+        lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_NUMBER ); // Set keyboard to number mode for IP address input
+        
+        switch(userData)
+        {
+            case 1:
+                ESP_LOGI(TAG_WIFI, "Click On Day Textbox ");
+                break;
+            case 2:
+                ESP_LOGI(TAG_WIFI, "Click On Month Textbox ");
+                break;
+            case 3:
+                ESP_LOGI(TAG_WIFI, "Click On Year Textbox ");
+                break;
+            case 4:
+                ESP_LOGI(TAG_WIFI, "Click On Hour Textbox ");
+                break;
+            case 5:
+                ESP_LOGI(TAG_WIFI, "Click On Minute Textbox ");
+                break;    
+            default:
+                break;
+        }               
+    }  
+    if(code == LV_EVENT_DEFOCUSED) 
+    {
+        lv_keyboard_set_textarea(kb, NULL);
+        lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
+        ESP_LOGI(TAG_WIFI, "Defocus On IP Addr Textbox ");
+    }
+}
+
 
 void action_wifi_txt_psw(lv_event_t *e) 
 {      
@@ -247,12 +294,54 @@ void action_wifi_txt_psw(lv_event_t *e)
     {
         lv_keyboard_set_textarea(kb, NULL);
         lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
+        memcpy(stUSerConfig.strWifiPassword, lv_textarea_get_text(ta), sizeof(stUSerConfig.strWifiPassword));        
         ESP_LOGI(TAG_WIFI, "Defocus On Wifi Psw Textbox ");
     }
 }
 
-void action_hostname_txt(lv_event_t *e) {
-    // TODO: Implement action hostname_txt here
+void action_txt_net_cb(lv_event_t *e) 
+{
+    objects_t objs    = objects;
+    lv_keyboard_t *kb = objs.kek_keyboard;
+    uint8_t userData = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+    lv_obj_set_size(kb, lv_pct(100), lv_pct(40)); // Set size
+    lv_obj_align_to(kb, lv_scr_act(), LV_ALIGN_TOP_MID, 0, 0); // Align to bottom
+
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *ta         = lv_event_get_target(e);
+ 
+    if(code == LV_EVENT_FOCUSED) 
+    {
+        lv_obj_clear_flag(kb, LV_OBJ_FLAG_HIDDEN);
+        lv_keyboard_set_textarea(kb, ta);
+        lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_NUMBER ); // Set keyboard to number mode for IP address input              
+    }  
+    if(code == LV_EVENT_DEFOCUSED) 
+    {
+        lv_keyboard_set_textarea(kb, NULL);
+        lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
+        if(userData == 1)
+        {
+            // Ip Address
+            memecpy(stUSerConfig.stNetworkConfig.sIpAddr, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.sIpAddr));
+            ESP_LOGI(TAG_WIFI, "Click On IP Addr Textbox ");
+        }
+        else if(userData == 2)
+        {
+            memcpy(stUSerConfig.stNetworkConfig.sNetMask, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.sNetMask));
+            ESP_LOGI(TAG_WIFI, "Click On NetMask Textbox ");
+        }
+        else if(userData == 3)
+        {
+            memcpy(stUSerConfig.stNetworkConfig.sGateway, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.sGateway));
+            ESP_LOGI(TAG_WIFI, "Click On Gateway Textbox ");
+        }
+        else if(userData == 4)
+        {
+            memcpy(stUSerConfig.stNetworkConfig.sDns, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.sDns));
+            ESP_LOGI(TAG_WIFI, "Click On Dns Textbox ");
+        }      
+    }
 }
 
 void action_txt_ip_addr(lv_event_t *e) 
@@ -341,6 +430,7 @@ void action_ssid_select(lv_event_t *e)
         
        // LV_LOG_USER("Option: %s", buf);
         ESP_LOGI(TAG_WIFI, "%s ", wifi_scann_list[lv_dropdown_get_selected(obj)].ssid);  // Log RSSI (signal strength)
+        memcpy(stUSerConfig.strWifiSsid, wifi_scann_list[lv_dropdown_get_selected(obj)].ssid, sizeof(stUSerConfig.stNetworkConfig.sSsid));
     }    
 }
 
@@ -354,4 +444,64 @@ void action_set_clock(lv_event_t *e) {
 void action_wifi_connect(lv_event_t *e) {
     // TODO: Implement action wifi_connect here
     ESP_LOGI(TAG_WIFI, "Connect Clicked ");
+}
+
+
+void action_btn_apply(lv_event_t *e) {
+    // TODO: Implement action btn_apply here
+}
+
+void action_btn_cancell(lv_event_t *e) {
+    // TODO: Implement action btn_cancell here
+}
+
+void action_btn_real_time_set_clock(lv_event_t *e) 
+{
+    //sw_ManualRTC_NtpServer
+    objects_t objs               = objects;
+    lv_obj_t *SwManRTC_NtpServer = objs.sw_manual_rtc_ntp_server;
+}
+
+void action_sw_manual_rtc_ntp_server(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t        *obj = lv_event_get_target(e);
+    if(code == LV_EVENT_VALUE_CHANGED) 
+    {
+        ESP_LOGI(TAG_WIFI, "State: %s\n", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
+        stUSerConfig.eRtcManualAuto = lv_obj_has_state(obj, LV_STATE_CHECKED) ? RTC_MANUAL : RTC_AUTO;
+    }
+}
+
+void action_sw_static_dynamic_ip(lv_event_t *e) 
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t        *obj = lv_event_get_target(e);
+    if(code == LV_EVENT_VALUE_CHANGED) 
+    {
+        ESP_LOGI(TAG_WIFI, "State: %s\n", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
+        stUSerConfig.stNetworkConfig.eStaticDynamic = lv_obj_has_state(obj, LV_STATE_CHECKED) ? DYNAMIC_IP : STATIC_IP;
+    }
+}
+
+void action_txt_ntp_server_cb(lv_event_t *e)
+ {
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t        *obj = lv_event_get_target(e);
+    if(code == LV_EVENT_FOCUSED) 
+    {
+        ESP_LOGI(TAG_WIFI, "Click On Ntp Server Textbox ");
+        memcpy(stUSerConfig.strNtpServer, lv_textarea_get_text(obj), sizeof(stUSerConfig.strNtpServer));
+    }   
+}
+
+void action_txt_hostname_cb(lv_event_t *e) 
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t        *obj = lv_event_get_target(e);
+    if(code == LV_EVENT_FOCUSED) 
+    {
+        ESP_LOGI(TAG_WIFI, "Click On Hostname Textbox ");
+        memcpy(stUSerConfig.strHostname, lv_textarea_get_text(obj), sizeof(stUSerConfig.strHostname));
+    }
 }
