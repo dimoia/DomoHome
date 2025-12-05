@@ -21,7 +21,7 @@
 #include "rgb_lcd_port.h" // Header for Waveshare RGB LCD driver
 #include "gt911.h"        // Header for touch screen operations (GT911)
 #include "lvgl_port.h"    // Header for LVGL port initialization and locking
-#include "wifi.h"         // Header for Wi-Fi functionality
+//#include "wifi.h"         // Header for Wi-Fi functionality
 //#include "sd_card.h"      // Header for SD card operations
 #include "BME280.h"      // Header for SD card operations
 #include "ui.h"           // Header for user interface initialization
@@ -38,6 +38,7 @@
 #include "calendar_time.h"
 #include "nvs_flash.h"
 #include "nvs.h"
+#include "config.h"
 
 static const char    *TAG = "DomoHomeMain"; // Tag used for ESP log output
 static QueueHandle_t gpio_evt_queue = NULL;
@@ -224,6 +225,7 @@ void action_slider_temp1_change(lv_event_t *e) {
 void app_main()
 {
     ESP_LOGI(TAG, "DomoHome Main Application Starting...");
+#if 0
     // Initialize the Non-Volatile Storage (NVS) for settings and data persistence
     // This ensures that user data and settings are retained even after power loss.
     // Initialize the Non-Volatile Storage (NVS) for Wi-Fi settings
@@ -234,7 +236,7 @@ void app_main()
         ESP_ERROR_CHECK(nvs_flash_erase());
         err = nvs_flash_init();
     }
-
+#endif
     static esp_lcd_panel_handle_t panel_handle = NULL; // Handle for the LCD panel
     static esp_lcd_touch_handle_t tp_handle = NULL;    // Handle for the touch panel  
 
@@ -259,8 +261,8 @@ void app_main()
         ESP_LOGE(TAG, "BMP280 Init Failed");
     }
     Pcf8523_Init();
-
-    wifi_init();
+    //iConfigInit();
+    //wifi_init();
    
 
     // Lock the LVGL port to ensure thread safety during API calls

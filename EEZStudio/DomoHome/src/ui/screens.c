@@ -419,7 +419,7 @@ void create_screen_settings_screen() {
             objects.btn_wifi_connect = obj;
             lv_obj_set_pos(obj, 896, 149);
             lv_obj_set_size(obj, 100, 42);
-            lv_obj_add_event_cb(obj, action_wifi_connect, LV_EVENT_CLICKED, (void *)0);
+            lv_obj_add_event_cb(obj, action_wifi_connect_cb, LV_EVENT_CLICKED, (void *)0);
             {
                 lv_obj_t *parent_obj = obj;
                 {

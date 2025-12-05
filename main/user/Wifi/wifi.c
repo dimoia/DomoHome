@@ -7,6 +7,8 @@
 #include "lvgl.h"
 #include "ui.h"
 #include "pcf8523.h"
+#include "nvs_flash.h"
+#include "nvs.h"
 
 #define DEFAULT_SCAN_LIST_SIZE 15 // Max number of APs to store (0 to 20)
 static wifi_ap_record_t wifi_scann_list[DEFAULT_SCAN_LIST_SIZE];  // Array to store the AP records
@@ -14,6 +16,42 @@ static USER_CONFIG stUSerConfig;
 TaskHandle_t wifi_TaskHandle;
 const char *TAG_WIFI = "wifi";    // Tag for Station mode (Wi-Fi client mode)
 esp_netif_ip_info_t ip_info; // Stores the IP information once connected to Wi-Fi
+wifi_ap_record_t    ap_info[];  // Declare an array to store the AP records
+/* FreeRTOS event group to signal when we are connected/disconnected */
+static EventGroupHandle_t s_wifi_event_group;
+
+
+static void wifi_event_handler(void *arg, esp_event_base_t event_base,
+                               int32_t event_id, void *event_data)
+{
+    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_AP_STACONNECTED) 
+    {
+        wifi_event_ap_staconnected_t *event = (wifi_event_ap_staconnected_t *) event_data;
+        ESP_LOGI(TAG_AP, "Station "MACSTR" joined, AID=%d", MAC2STR(event->mac), event->aid);
+    } 
+    else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_AP_STADISCONNECTED) 
+    {
+        wifi_event_ap_stadisconnected_t *event = (wifi_event_ap_stadisconnected_t *) event_data;
+        ESP_LOGI(TAG_AP, "Station "MACSTR" left, AID=%d, reason:%d", MAC2STR(event->mac), event->aid, event->reason);
+    } 
+    else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
+    {
+        esp_wifi_connect();
+        ESP_LOGI(TAG_WIFI, "Station started");
+    } 
+    else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) 
+    {
+        ip_event_got_ip_t *event = (ip_event_got_ip_t *) event_data;
+        ESP_LOGI(TAG_WIFI, "Got IP:" IPSTR, IP2STR(&event->ip_info.ip));
+        s_retry_num = 0;
+        xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+    } 
+    else if (event_base == IP_EVENT && event_id == IP_EVENT_ASSIGNED_IP_TO_CLIENT)
+    {
+        const ip_event_assigned_ip_to_client_t *e = (const ip_event_assigned_ip_to_client_t *)event_data;
+        ESP_LOGI(TAG_AP, "Assigned IP to client: " IPSTR ", MAC=" MACSTR ", hostname='%s'", IP2STR(&e->ip), MAC2STR(e->mac), e->hostname);
+    }
+}
 
 // Initialize Wi-Fi for STA (Station) and AP (Access Point) modes
 int8_t wifi_init(void)
@@ -39,6 +77,34 @@ int8_t wifi_init(void)
         }
         else
         {
+#if 0            
+            //Initialize NVS
+            esp_err_t ret = nvs_flash_init();
+            if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) 
+            {
+                ESP_ERROR_CHECK(nvs_flash_erase());
+                ret = nvs_flash_init();
+            }
+            ESP_ERROR_CHECK(ret); // Check for NVS initialization errors
+
+            /* Register Event handler */
+            ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
+                    ESP_EVENT_ANY_ID,
+                    &wifi_event_handler,
+                    NULL,
+                    NULL));
+            ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
+                    IP_EVENT_STA_GOT_IP,
+                    &wifi_event_handler,
+                    NULL,
+                    NULL));
+            ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
+                    IP_EVENT_ASSIGNED_IP_TO_CLIENT,
+                    &wifi_event_handler,
+                    NULL,
+                    NULL));
+
+#endif
             wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
             iRet = esp_wifi_init(&cfg);
             if (iRet != ESP_OK)
@@ -56,7 +122,164 @@ int8_t wifi_init(void)
     return iRet;
 }
 
+int iWifiScan(wifi_ap_record_t out_stWifiScannList[], uint8_t u8MaxApCount)
+{    
+    int iRet = 0;
+    objects_t objs           = objects;  
+    lv_obj_t *list_wifi_ssid = objs.drp_wifi_ssid;
+    uint16_t number          = MIN(DEFAULT_SCAN_LIST_SIZE,u8MaxApCount);  // Maximum number of APs to be stored
+    uint16_t ap_count        = 0;  // Variable to hold the actual number of APs found
 
+    if(out_stWifiScannList == NULL) 
+    {
+        ESP_LOGE(TAG_WIFI, "wifi_scann_list is NULL");
+        iRet = -1;
+    }
+    else
+    {                
+
+        // Set the WiFi operating mode as station, soft-AP, station+soft-AP or NAN. The default mode is station mode.
+        if(ESP_OK !=  esp_wifi_set_mode(WIFI_MODE_STA))
+        {
+            ESP_LOGE(TAG_WIFI, "Failed to set WiFi mode to STA");
+            iRet = -1;
+        }
+        else
+        {
+            ESP_LOGI(TAG_WIFI, "WiFi mode set to STA");
+
+            /* Start WiFi according to current configuration If mode is WIFI_MODE_STA, it creates station control block and starts station 
+               If mode is WIFI_MODE_AP, it creates soft-AP control block and starts soft-AP If mode is WIFI_MODE_APSTA, it creates soft-AP 
+               and station control block and starts soft-AP and station If mode is WIFI_MODE_NAN, it creates NAN control block and starts NAN.*/
+            if(ESP_OK != esp_wifi_start())
+            {
+                ESP_LOGE(TAG_WIFI, "Failed to start WiFi");
+                iRet = -1;
+            }
+            else
+            {
+                ESP_LOGI(TAG_WIFI, "WiFi started successfully");
+
+                // Scan all available APs.
+                // The scan is blocking, the function will not return until the scan is done.
+                if(ESP_OK !=  esp_wifi_scan_start(NULL, true))
+                {
+                    ESP_LOGE(TAG_WIFI, "Failed to scan WiFi scan");
+                    iRet = -1;
+                }
+                else
+                {
+                    ESP_LOGI(TAG_WIFI, "WiFi scan started successfully");
+                    ESP_LOGI(TAG_WIFI, "Max AP number wifi_scann_list can hold = %u", number);  // Log the max AP number that can be stored
+
+                    // Get number of APs found in last scan.
+                    if(ESP_OK != esp_wifi_scan_get_ap_num(&ap_count))
+                    {
+                        ESP_LOGE(TAG_WIFI, "Failed to get number of APs found in last scan");
+                        iRet = -1;
+                    }
+                    else
+                    {
+                        memset(wifi_scann_list, 0, sizeof(wifi_scann_list));  // Clear the wifi_scann_list array
+
+                        esp_wifi_scan_get_ap_records(&number, wifi_scann_list);  // Get the AP records into wifi_scann_list array
+                        //ESP_LOGI(TAG_WIFI, "Number of APs found in last scan: %u", ap_count);
+                        ESP_LOGI(TAG_WIFI, "Total APs scanned = %u, actual AP number wifi_scann_list holds = %u", ap_count, number);  // Log total and actual scanned APs
+
+                        memcpy(out_stWifiScannList, wifi_scann_list, sizeof(wifi_ap_record_t) * number);
+                                                
+                        esp_wifi_stop(); // Stop WiFi to save power
+                        iRet = number;
+                    }
+                }
+            }           
+        }       
+    }
+    return iRet;
+}
+
+void softap_set_dns_addr(esp_netif_t *esp_netif_sta)
+{
+    esp_netif_dns_info_t dns;
+    esp_netif_get_dns_info(esp_netif_sta,ESP_NETIF_DNS_MAIN,&dns);
+    uint8_t dhcps_offer_option = DHCPS_OFFER_DNS;
+}
+
+int iWifiConnectInStationMode(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t authmode)
+{
+    int iRet = 0;
+    wifi_config_t wifi_sta_config = {
+        .sta = {
+            .ssid               = ssid,
+            .password           = pwd,
+            .scan_method        = CONFIG_ESP_WIFI_AP_CHANNEL,
+            .failure_retry_cnt  = CONFIG_ESP_MAXIMUM_STA_RETRY,
+            /* Authmode threshold resets to WPA2 as default if password matches WPA2 standards (password len => 8).
+             * If you want to connect the device to deprecated WEP/WPA networks, Please set the threshold value
+             * to WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK and set the password with length and format matching to
+            * WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK standards.
+             */
+            .threshold.authmode = WIFI_AUTH_WPA_WPA2_PSK,
+            .sae_pwe_h2e        = WPA3_SAE_PWE_BOTH,
+        },
+    };
+    if(ERR_OK != esp_wifi_set_config(WIFI_IF_STA, &wifi_sta_config))
+    {
+        ESP_LOGE(TAG_WIFI, "Failed to set WiFi mode to STA");
+        iRet = -1;
+    } 
+    else
+    {
+        ESP_LOGI(TAG_WIFI, "WiFi mode set to STA");
+
+        /* Start WiFi */
+        if(ERR_OK != esp_wifi_start())
+        {
+            ESP_LOGE(TAG_WIFI, "Failed to start WiFi mode to STA");
+            iRet = -1;
+        } 
+        else
+        {
+          
+            ESP_LOGI(TAG_WIFI, "WiFi connected to AP successfully");
+            /*
+            * Wait until either the connection is established (WIFI_CONNECTED_BIT) or
+            * connection failed for the maximum number of re-tries (WIFI_FAIL_BIT).
+            * The bits are set by event_handler() (see above)
+            */
+            EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
+                                                    WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
+                                                    pdFALSE,
+                                                    pdFALSE,
+                                                    portMAX_DELAY);
+
+            /* xEventGroupWaitBits() returns the bits before the call returned,
+            * hence we can test which event actually happened. */
+            if (bits & WIFI_CONNECTED_BIT)
+            {
+                ESP_LOGI(TAG_WIFI, "connected to ap SSID:%s password:%s", EXAMPLE_ESP_WIFI_STA_SSID, EXAMPLE_ESP_WIFI_STA_PASSWD);
+                softap_set_dns_addr(esp_netif_sta);
+
+                /* Set sta as the default interface */
+                esp_netif_set_default_netif(esp_netif_sta);
+
+            } 
+            else if (bits & WIFI_FAIL_BIT) 
+            {
+                ESP_LOGI(TAG_WIFI, "Failed to connect to SSID:%s, password:%s", EXAMPLE_ESP_WIFI_STA_SSID, EXAMPLE_ESP_WIFI_STA_PASSWD);
+                iRet = -1;
+            } 
+            else 
+            {
+                ESP_LOGE(TAG_WIFI, "UNEXPECTED EVENT");
+                iRet = -1;
+            }            
+        }
+        
+    }      
+    return iRet;
+}
+#if 0
 
 // Function to wait for Wi-Fi connection and obtain IP address
 void wifi_task(wifi_config_t *wifi_config)
@@ -135,6 +358,8 @@ void wifi_task(wifi_config_t *wifi_config)
     }
 }
 
+
+
 // Function to initialize Wi-Fi in Station mode (STA mode) and connect to an AP
 void wifi_sta_init(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t authmode)
 {
@@ -148,10 +373,11 @@ void wifi_sta_init(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t authmode)
     strcpy((char *)wifi_config.sta.ssid, (const char *)ssid);
     strcpy((char *)wifi_config.sta.password, (const char *)pwd);
 
-    xTaskCreate(wifi_task, "wifi_task", 6 * 1024, &wifi_config, 9, &wifi_TaskHandle);
+    //xTaskCreate(wifi_task, "wifi_task", 6 * 1024, &wifi_config, 9, &wifi_TaskHandle);
 
    // wifi_wait_connect();  // Wait for the connection to establish and get IP address
 }
+
 
 void wifi_scan()
 {
@@ -205,7 +431,10 @@ void wifi_scan()
         ESP_LOGI(TAG_WIFI, "Channel \t\t%d", wifi_scann_list[i].primary);  // Log channel number
     }
 }
+#endif
 
+
+/*
 void action_wifi_scann(lv_event_t *e) 
 {
     lv_event_code_t code   = lv_event_get_code(e);
@@ -223,8 +452,8 @@ void action_wifi_scann(lv_event_t *e)
         lvgl_port_unlock();
     }
 }
-
-
+*/
+#if 0
 void action_wifi_txt_psw(lv_event_t *e) 
 {      
     objects_t objs    = objects;
@@ -251,7 +480,7 @@ void action_wifi_txt_psw(lv_event_t *e)
         ESP_LOGI(TAG_WIFI, "Defocus On Wifi Psw Textbox ");
     }
 }
-
+#endif
 void action_txt_net_cb(lv_event_t *e) 
 {
     objects_t objs    = objects;
@@ -373,6 +602,7 @@ void action_txt_day(lv_event_t *e)
 #endif
 
 // Select SSID from Dropdown
+#if 0
 void action_ssid_select(lv_event_t *e) 
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -387,14 +617,8 @@ void action_ssid_select(lv_event_t *e)
         memcpy(stUSerConfig.strWifiSsid, wifi_scann_list[lv_dropdown_get_selected(obj)].ssid, sizeof(stUSerConfig.strWifiSsid));
     }    
 }
+#endif
 
-
-
-// Connect To WiFi
-void action_wifi_connect(lv_event_t *e) {
-    // TODO: Implement action wifi_connect here
-    ESP_LOGI(TAG_WIFI, "Connect Clicked ");
-}
 
 
 void action_btn_apply(lv_event_t *e) {
@@ -453,6 +677,7 @@ void action_set_clock(lv_event_t *e) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Calculate Day of Week from Date
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+#if 0
 static int dayofweek(int day,int month,int year)
 {
     int arr[] = {0,3,2,5,3,5,1,4,6,2,4};
@@ -460,7 +685,11 @@ static int dayofweek(int day,int month,int year)
         year--;
     return ((year+year/4-year/100+year/400+arr[month-1]+day)%7);
 }
-
+    #endif
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Action Callback When RealTme Settings Screen is loaded
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+#if 0
 void action_settings_screen_cb(lv_event_t *e) 
 {
     struct tm currentTime;
@@ -513,16 +742,16 @@ void action_settings_screen_cb(lv_event_t *e)
         dropdown = objs.drop_minute;
         lv_dropdown_set_selected(dropdown, stUSerConfig.stRtcClock.tm_min); // Minutes are 0-59
     
-    }    
-    // TODO: Implement action settings_screen_cb here
+    }        
 }
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Action Callback When RealTme Set Clock Button is clicked
 //////////////////////////////////////////////////////////////////////////////////////////////////////
+#if 0
 void action_btn_real_time_set_clock_cb(lv_event_t *e) 
 {
-    //sw_ManualRTC_NtpServer
     objects_t objs               = objects;
     lv_obj_t *SwManRTC_NtpServer = objs.sw_manual_rtc_ntp_server;
     lv_event_code_t code = lv_event_get_code(e);
@@ -549,9 +778,11 @@ void action_btn_real_time_set_clock_cb(lv_event_t *e)
         }
     }
 }
+#endif
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /// Action Callback When RealTme Switch Manual/NTP Server is clicked
 //////////////////////////////////////////////////////////////////////////////////////////////////
+#if 0
 void action_sw_manual_rtc_ntp_server(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -562,9 +793,11 @@ void action_sw_manual_rtc_ntp_server(lv_event_t *e)
         stUSerConfig.eRtcManualAuto = lv_obj_has_state(obj, LV_STATE_CHECKED) ? RTC_MANUAL : RTC_FROM_NTP_SERVER;
     }
 }
+    #endif
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Action Callback When RealTme Date/Time Dropdown is changed
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
+#if 0
 void action_drop_date_time(lv_event_t *e) 
 {
     char strBuffer[16];
@@ -611,4 +844,4 @@ void action_drop_date_time(lv_event_t *e)
         }        
     } 
 }
-
+#endif

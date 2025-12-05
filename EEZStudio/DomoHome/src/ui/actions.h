@@ -16,7 +16,6 @@ extern void action_goto_home(lv_event_t * e);
 extern void action_slider_temp1_change(lv_event_t * e);
 extern void action_goto_settings_screen(lv_event_t * e);
 extern void action_wifi_scann(lv_event_t * e);
-extern void action_wifi_connect(lv_event_t * e);
 extern void action_ssid_select(lv_event_t * e);
 extern void action_wifi_txt_psw(lv_event_t * e);
 extern void action_btn_apply(lv_event_t * e);
@@ -29,6 +28,7 @@ extern void action_txt_hostname_cb(lv_event_t * e);
 extern void action_btn_real_time_set_clock_cb(lv_event_t * e);
 extern void action_drop_date_time(lv_event_t * e);
 extern void action_settings_screen_cb(lv_event_t * e);
+extern void action_wifi_connect_cb(lv_event_t * e);
 
 
 #ifdef __cplusplus

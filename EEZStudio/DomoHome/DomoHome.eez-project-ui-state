@@ -231,7 +231,8 @@
                   },
                   "icon": "material:settings"
                 }
-              ]
+              ],
+              "active": true
             },
             {
               "type": "row",
@@ -251,8 +252,7 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -1006,7 +1006,9 @@
           "32": {},
           "33": {},
           "34": {},
-          "35": {}
+          "35": {
+            "$selected": true
+          }
         }
       },
       "transform": {

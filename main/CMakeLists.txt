@@ -14,6 +14,8 @@ file(GLOB_RECURSE srcs *.c
                    user/sd_card/*.c
                    user/SYSInfo/*.c
                    user/CalendarTime/*.c
+                   user/Config/*.c
+                   user/Utils/*.c
                    )
 set(include_dirs 
    . 
@@ -30,6 +32,8 @@ set(include_dirs
    user/sd_card
    user/SYSInfo
    user/CalendarTime
+   user/Config
+   user/Utils
    )
 idf_component_register( SRCS ${srcs}
                        INCLUDE_DIRS ${include_dirs}

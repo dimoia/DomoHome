@@ -184,14 +184,6 @@
       "name": "wifi_scann"
     },
     {
-      "objID": "3fe092ed-e0bf-4ed4-e6d0-70eed6f1d466",
-      "components": [],
-      "connectionLines": [],
-      "localVariables": [],
-      "userProperties": [],
-      "name": "wifi_connect"
-    },
-    {
       "objID": "54e77db7-3abb-43da-d898-d100e82f820e",
       "components": [],
       "connectionLines": [],
@@ -286,6 +278,14 @@
       "localVariables": [],
       "userProperties": [],
       "name": "settings_screen_cb"
+    },
+    {
+      "objID": "10f74d63-c240-4853-d5e8-d7b889fa6b67",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "userProperties": [],
+      "name": "wifiConnect_cb"
     }
   ],
   "userPages": [
@@ -2370,7 +2370,7 @@
                   "objID": "ddb7d52b-506e-4b4d-876e-a4586d0ee59a",
                   "eventName": "CLICKED",
                   "handlerType": "action",
-                  "action": "wifi_connect",
+                  "action": "wifiConnect_cb",
                   "userData": 0
                 }
               ],
