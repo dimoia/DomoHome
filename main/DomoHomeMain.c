@@ -225,7 +225,7 @@ void action_slider_temp1_change(lv_event_t *e) {
 void app_main()
 {
     ESP_LOGI(TAG, "DomoHome Main Application Starting...");
-#if 0
+
     // Initialize the Non-Volatile Storage (NVS) for settings and data persistence
     // This ensures that user data and settings are retained even after power loss.
     // Initialize the Non-Volatile Storage (NVS) for Wi-Fi settings
@@ -233,10 +233,11 @@ void app_main()
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {
         // If NVS has no free pages or a new version is found, erase and reinitialize NVS
+        ESP_LOGE(TAG, "NVS Flash Init Error, Erasing NVS...");
         ESP_ERROR_CHECK(nvs_flash_erase());
         err = nvs_flash_init();
     }
-#endif
+
     static esp_lcd_panel_handle_t panel_handle = NULL; // Handle for the LCD panel
     static esp_lcd_touch_handle_t tp_handle = NULL;    // Handle for the touch panel  
 
@@ -261,7 +262,7 @@ void app_main()
         ESP_LOGE(TAG, "BMP280 Init Failed");
     }
     Pcf8523_Init();
-    //iConfigInit();
+   // iConfigInit();
     //wifi_init();
    
 

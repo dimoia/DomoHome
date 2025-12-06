@@ -1,19 +1,22 @@
 #include "config.h"
+#include "pcf8523.h"
 
 const char *TAG_CONFIG = "config";    // Tag for Station mode (Wi-Fi client mode)
-
+static USER_CONFIG stUSerConfig;
+static wifi_ap_record_t wifi_scann_list[DEFAULT_SCAN_LIST_SIZE];  // Array to store the AP records
 
 int8_t iConfigInit(void)
 {    
     memset(&stUSerConfig, 0, sizeof(USER_CONFIG));
     return wifi_init();
 }
-
+/*
 void vGetDefaultConfig(USER_CONFIG *pUserConfig)
 {
     memcpy(pUserConfig, &stUSerConfig, sizeof(USER_CONFIG));
     return;
 }
+*/
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// @brief Action Callback When RealTme Settings Screen is loaded
@@ -197,32 +200,31 @@ void action_wifi_scann(lv_event_t *e)
     objects_t objs           = objects;  
     lv_obj_t *list_wifi_ssid = objs.drp_wifi_ssid;
     char wifiAppInfo[128]; // Array to hold SSID strings of found APs
-    wifi_ap_record_t wifi_scann_list[DEFAULT_SCAN_LIST_SIZE];  // Array to store the AP records
-
+    
     if(code == LV_EVENT_CLICKED) 
     {
-        LV_LOG_USER("Clicked");
-        iConfigInit();
-        lvgl_port_lock(-1);
+        ESP_LOGI(TAG_CONFIG, "WiFi Scan Clicked ");        
+     //   lvgl_port_lock(-1);
         lv_obj_add_state(btn_WifiScan, LV_STATE_DISABLED); // Disable the scan button during scanning 
         lv_dropdown_clear_options(list_wifi_ssid);  // Clear existing options in the dropdown       
-        lvgl_port_unlock();
+     //   lvgl_port_unlock();
 
         //wifi_scan();
-        int iNumberOfAP = iWifiScan(out_stWifiScannList, DEFAULT_SCAN_LIST_SIZE);
+        int iNumberOfAP = iWifiScan(wifi_scann_list, DEFAULT_SCAN_LIST_SIZE);
         for (int i = 0; i < iNumberOfAP; i++) 
         {
             memset(wifiAppInfo, 0, sizeof(wifiAppInfo));
-            sprintf(wifiAppInfo, "%s (RSSI: %d CH: %d)", wifi_scann_list[i].ssid,wifi_scann_list[i].rssi,wifi_scann_list[i].primary);            
+            sprintf(wifiAppInfo, "%s (RSSI: %d CH: %d)", wifi_scann_list[i].ssid,wifi_scann_list[i].rssi,wifi_scann_list[i].primary);    
+            
+            lv_dropdown_add_option(list_wifi_ssid, wifiAppInfo, i);
+            ESP_LOGI(TAG_CONFIG, "SSID \t\t%s", wifi_scann_list[i].ssid);  // Log SSID (network name)
+            ESP_LOGI(TAG_CONFIG, "RSSI \t\t%d", wifi_scann_list[i].rssi);  // Log RSSI (signal strength)        
+            ESP_LOGI(TAG_CONFIG, "Channel \t\t%d", wifi_scann_list[i].primary);  // Log channel number
         }
-
-        lvgl_port_lock(-1);
-        lv_dropdown_add_option(list_wifi_ssid, wifiAppInfo, i);
-        ESP_LOGI(TAG_CONFIG, "SSID \t\t%s", wifi_scann_list[i].ssid);  // Log SSID (network name)
-        ESP_LOGI(TAG_CONFIG, "RSSI \t\t%d", wifi_scann_list[i].rssi);  // Log RSSI (signal strength)        
-        ESP_LOGI(TAG_CONFIG, "Channel \t\t%d", wifi_scann_list[i].primary);  // Log channel number
+       // lvgl_port_lock(-1);              
         lv_obj_clear_state(btn_WifiScan, LV_STATE_DISABLED); // Re-enable the scan button after scanning is complete
-        lvgl_port_unlock();
+
+       // lvgl_port_unlock();
     }
 }
 
@@ -266,14 +268,14 @@ void action_wifi_txt_psw(lv_event_t *e)
         lv_obj_clear_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
         lv_keyboard_set_textarea((lv_obj_t *)kb, ta);
         lv_keyboard_set_mode((lv_obj_t *)kb, LV_KEYBOARD_MODE_TEXT_LOWER ); // Set keyboard to number mode for IP address input  
-        ESP_LOGI(TAG_WIFI, "Click On Wifi Psw Textbox ");
+        ESP_LOGI(TAG_CONFIG, "Click On Wifi Psw Textbox ");
     }  
     if(code == LV_EVENT_DEFOCUSED) 
     {
         lv_keyboard_set_textarea((lv_obj_t *)kb, NULL);
         lv_obj_add_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
         memcpy(stUSerConfig.strWifiPassword, lv_textarea_get_text(ta), sizeof(stUSerConfig.strWifiPassword));        
-        ESP_LOGI(TAG_WIFI, "Defocus On Wifi Psw Textbox ");
+        ESP_LOGI(TAG_CONFIG, "Defocus On Wifi Psw Textbox ");
     }
 }
 
@@ -285,10 +287,61 @@ void action_wifi_connect_cb(lv_event_t *e)
 {
     lv_event_code_t code     = lv_event_get_code(e);
     lv_obj_t *btn_WifiScan   = lv_event_get_target(e);   
+    objects_t objs           = objects;
+    
     //wifi_ap_record_t wifi_scann_list[DEFAULT_SCAN_LIST_SIZE];  // Array to store the AP records
 
     if(code == LV_EVENT_CLICKED) 
     {
+        //iWifiConnectInStationMode((uint8_t *)stUSerConfig.strWifiSsid, (uint8_t *)stUSerConfig.strWifiPassword, WIFI_AUTH_WPA2_PSK);
+        start_wifi();
+
+
+        vGetDefaultConfig(&stUSerConfig);
+        while (stUSerConfig.WiFi_is_connected == false)
+        {
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+            vGetDefaultConfig(&stUSerConfig);
+            if(stUSerConfig.WiFi_is_connected == true)
+            {
+                ESP_LOGI(TAG_CONFIG, "WiFi Connected Successfully inside loop");
+                break;
+            }
+            else
+            {
+                ESP_LOGI(TAG_CONFIG, "Waiting for WiFi Connection...");
+            }
+        }
+
+        
+       
+        lv_textarea_add_text(objs.txt_ipaddress, stUSerConfig.stNetworkConfig.strIpAddr);;
+        lv_textarea_add_text(objs.txt_netmask,   stUSerConfig.stNetworkConfig.strNetMAsk);;
+        lv_textarea_add_text(objs.txt_gateway,   stUSerConfig.stNetworkConfig.strGateway);;
+
+        #if 0
+        wifi_config_t wifi_configuration;
+        const char *your_ssid = "HUAWEI-B535-13F7";//stUSerConfig.strWifiSsid;
+        const char *your_pass = "Intrepido123.";//stUSerConfig.strWifiPassword;
+        strcpy((char*)wifi_configuration.sta.ssid,your_ssid); // copy chars from hardcoded configs to struct
+        strcpy((char*)wifi_configuration.sta.password,your_pass);
+        wifi_configuration.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;//setting authmode
+        esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_configuration);//setting up configs when event ESP_IF_WIFI_STA
+        esp_wifi_start();//start connection with configurations provided in funtion
+        esp_wifi_set_mode(WIFI_MODE_STA);//station mode selected
+        if(esp_wifi_connect() != ESP_OK)//connecting to wifi with provided ssid and pass
+        {
+            ESP_LOGE(TAG_CONFIG, "Failed to Connect to WiFi SSID: %s", stUSerConfig.strWifiSsid);
+        }
+        else
+        {
+            ESP_LOGI(TAG_CONFIG, "Successfully Connected to WiFi SSID: %s with password %s", stUSerConfig.strWifiSsid,stUSerConfig.strWifiPassword);
+            esp_wifi_disconnect(); //disconnecting after successful connection
+        }
+        #endif
+        //printf( "wifi_init_softap finished. SSID:%s  password:%s",your_ssid,your_pass);
+
+        #if 0
         ESP_LOGI(TAG_CONFIG, "Connect Clicked ");
         if(-1 == iWifiConnectInStationMode((uint8_t *)stUSerConfig.strWifiSsid, (uint8_t *)stUSerConfig.strWifiPassword, WIFI_AUTH_WPA2_PSK))
         {
@@ -297,6 +350,7 @@ void action_wifi_connect_cb(lv_event_t *e)
         else
         {
             ESP_LOGI(TAG_CONFIG, "Successfully Connected to WiFi SSID: %s", stUSerConfig.strWifiSsid);
-        }       
+        }    
+            #endif   
     }     
 }

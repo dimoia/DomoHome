@@ -12,7 +12,7 @@
 
 
 #define DEFAULT_SCAN_LIST_SIZE 15 // Max number of APs to store (0 to 20)
-#if 0
+
 typedef enum _RTC_MANUAL_AUTO
 {
     RTC_MANUAL = 0,
@@ -43,9 +43,10 @@ typedef struct _USER_CONFIG
     char strNtpServer[64];
     RTC_MANUAL_AUTO eRtcManualAuto;
     NETWORK_CONFIG stNetworkConfig;
+    bool WiFi_is_connected;
     
 } USER_CONFIG;
-#endif
+
 
 //extern wifi_ap_record_t    ap_info[];  // Declare an array to store the AP records
 //extern esp_netif_ip_info_t ip_info;    // Stores IP information
@@ -80,4 +81,6 @@ int iWifiScan(wifi_ap_record_t out_stWifiScannList[], uint8_t u8MaxApCount);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 int iWifiConnectInStationMode(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t authmode);
   
+ void start_wifi();
+ void vGetDefaultConfig(USER_CONFIG *pUserConfig);
 #endif

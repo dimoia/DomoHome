@@ -11,6 +11,8 @@
 #include "nvs.h"
 
 #define DEFAULT_SCAN_LIST_SIZE 15 // Max number of APs to store (0 to 20)
+#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+
 static wifi_ap_record_t wifi_scann_list[DEFAULT_SCAN_LIST_SIZE];  // Array to store the AP records
 static USER_CONFIG stUSerConfig;
 TaskHandle_t wifi_TaskHandle;
@@ -20,19 +22,41 @@ wifi_ap_record_t    ap_info[];  // Declare an array to store the AP records
 /* FreeRTOS event group to signal when we are connected/disconnected */
 static EventGroupHandle_t s_wifi_event_group;
 
-
+int retry_num = 0;
 static void wifi_event_handler(void *arg, esp_event_base_t event_base,
                                int32_t event_id, void *event_data)
 {
+    if(event_id == WIFI_EVENT_STA_START)
+    {
+        ESP_LOGI(TAG_WIFI,"WIFI CONNECTING....\n");
+    }
+    else if (event_id == WIFI_EVENT_STA_CONNECTED)
+    {
+        ESP_LOGI(TAG_WIFI,"WiFi CONNECTED\n");
+    }
+    else if (event_id == WIFI_EVENT_STA_DISCONNECTED)
+    {
+        ESP_LOGI(TAG_WIFI,"WiFi lost connection\n");
+        if(retry_num<5){
+            esp_wifi_connect();
+            retry_num++;
+            printf("Retrying to Connect...\n");}
+        }
+    else if (event_id == IP_EVENT_STA_GOT_IP)
+    {
+        ESP_LOGI(TAG_WIFI,"Wifi got IP...\n\n");
+    }
+
+    #if 0
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_AP_STACONNECTED) 
     {
         wifi_event_ap_staconnected_t *event = (wifi_event_ap_staconnected_t *) event_data;
-        ESP_LOGI(TAG_AP, "Station "MACSTR" joined, AID=%d", MAC2STR(event->mac), event->aid);
+        ESP_LOGI(TAG_WIFI, "Station "MACSTR" joined, AID=%d", MAC2STR(event->mac), event->aid);
     } 
     else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_AP_STADISCONNECTED) 
     {
         wifi_event_ap_stadisconnected_t *event = (wifi_event_ap_stadisconnected_t *) event_data;
-        ESP_LOGI(TAG_AP, "Station "MACSTR" left, AID=%d, reason:%d", MAC2STR(event->mac), event->aid, event->reason);
+        ESP_LOGI(TAG_WIFI, "Station "MACSTR" left, AID=%d, reason:%d", MAC2STR(event->mac), event->aid, event->reason);
     } 
     else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
     {
@@ -49,8 +73,9 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base,
     else if (event_base == IP_EVENT && event_id == IP_EVENT_ASSIGNED_IP_TO_CLIENT)
     {
         const ip_event_assigned_ip_to_client_t *e = (const ip_event_assigned_ip_to_client_t *)event_data;
-        ESP_LOGI(TAG_AP, "Assigned IP to client: " IPSTR ", MAC=" MACSTR ", hostname='%s'", IP2STR(&e->ip), MAC2STR(e->mac), e->hostname);
+        ESP_LOGI(TAG_WIFI, "Assigned IP to client: " IPSTR ", MAC=" MACSTR ", hostname='%s'", IP2STR(&e->ip), MAC2STR(e->mac), e->hostname);
     }
+        #endif
 }
 
 // Initialize Wi-Fi for STA (Station) and AP (Access Point) modes
@@ -137,7 +162,6 @@ int iWifiScan(wifi_ap_record_t out_stWifiScannList[], uint8_t u8MaxApCount)
     }
     else
     {                
-
         // Set the WiFi operating mode as station, soft-AP, station+soft-AP or NAN. The default mode is station mode.
         if(ESP_OK !=  esp_wifi_set_mode(WIFI_MODE_STA))
         {
@@ -200,30 +224,26 @@ int iWifiScan(wifi_ap_record_t out_stWifiScannList[], uint8_t u8MaxApCount)
 
 void softap_set_dns_addr(esp_netif_t *esp_netif_sta)
 {
+    #if 0
     esp_netif_dns_info_t dns;
     esp_netif_get_dns_info(esp_netif_sta,ESP_NETIF_DNS_MAIN,&dns);
     uint8_t dhcps_offer_option = DHCPS_OFFER_DNS;
+    #endif
 }
 
 int iWifiConnectInStationMode(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t authmode)
 {
     int iRet = 0;
-    wifi_config_t wifi_sta_config = {
-        .sta = {
-            .ssid               = ssid,
-            .password           = pwd,
-            .scan_method        = CONFIG_ESP_WIFI_AP_CHANNEL,
-            .failure_retry_cnt  = CONFIG_ESP_MAXIMUM_STA_RETRY,
-            /* Authmode threshold resets to WPA2 as default if password matches WPA2 standards (password len => 8).
-             * If you want to connect the device to deprecated WEP/WPA networks, Please set the threshold value
-             * to WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK and set the password with length and format matching to
-            * WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK standards.
-             */
-            .threshold.authmode = WIFI_AUTH_WPA_WPA2_PSK,
-            .sae_pwe_h2e        = WPA3_SAE_PWE_BOTH,
-        },
-    };
-    if(ERR_OK != esp_wifi_set_config(WIFI_IF_STA, &wifi_sta_config))
+    wifi_config_t wifi_sta_config;
+    
+    esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, wifi_event_handler, NULL);
+    esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, wifi_event_handler, NULL);
+
+    strcpy((char*)wifi_sta_config.sta.ssid,(char*)"Galaxy A5221DC"/*ssid,(char*)ssid*/); // copy chars from hardcoded configs to struct
+    strcpy((char*)wifi_sta_config.sta.password,(char*)"1234567890"/*(char*)pwd*/);
+    wifi_sta_config.sta.threshold.authmode = WIFI_AUTH_OPEN;// authmode;//setting authmode    
+    //wifi_sta_config.sta.owe_enabled = 1; // Enable OWE if needed
+    if(ESP_OK != esp_wifi_set_config(WIFI_IF_STA, &wifi_sta_config))
     {
         ESP_LOGE(TAG_WIFI, "Failed to set WiFi mode to STA");
         iRet = -1;
@@ -233,7 +253,7 @@ int iWifiConnectInStationMode(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t auth
         ESP_LOGI(TAG_WIFI, "WiFi mode set to STA");
 
         /* Start WiFi */
-        if(ERR_OK != esp_wifi_start())
+        if(ESP_OK != esp_wifi_start())
         {
             ESP_LOGE(TAG_WIFI, "Failed to start WiFi mode to STA");
             iRet = -1;
@@ -242,38 +262,17 @@ int iWifiConnectInStationMode(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t auth
         {
           
             ESP_LOGI(TAG_WIFI, "WiFi connected to AP successfully");
-            /*
-            * Wait until either the connection is established (WIFI_CONNECTED_BIT) or
-            * connection failed for the maximum number of re-tries (WIFI_FAIL_BIT).
-            * The bits are set by event_handler() (see above)
-            */
-            EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
-                                                    WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
-                                                    pdFALSE,
-                                                    pdFALSE,
-                                                    portMAX_DELAY);
-
-            /* xEventGroupWaitBits() returns the bits before the call returned,
-            * hence we can test which event actually happened. */
-            if (bits & WIFI_CONNECTED_BIT)
+            esp_wifi_set_mode(WIFI_MODE_STA);  
+            if(ESP_OK != esp_wifi_connect())
             {
-                ESP_LOGI(TAG_WIFI, "connected to ap SSID:%s password:%s", EXAMPLE_ESP_WIFI_STA_SSID, EXAMPLE_ESP_WIFI_STA_PASSWD);
-                softap_set_dns_addr(esp_netif_sta);
-
-                /* Set sta as the default interface */
-                esp_netif_set_default_netif(esp_netif_sta);
-
-            } 
-            else if (bits & WIFI_FAIL_BIT) 
-            {
-                ESP_LOGI(TAG_WIFI, "Failed to connect to SSID:%s, password:%s", EXAMPLE_ESP_WIFI_STA_SSID, EXAMPLE_ESP_WIFI_STA_PASSWD);
+                ESP_LOGE(TAG_WIFI, "Failed to connect to the AP");
                 iRet = -1;
             } 
-            else 
+            else
             {
-                ESP_LOGE(TAG_WIFI, "UNEXPECTED EVENT");
-                iRet = -1;
-            }            
+                ESP_LOGI(TAG_WIFI, "Connecting to AP SSID:%s, password:%s",
+                        wifi_sta_config.sta.ssid, wifi_sta_config.sta.password);
+            }
         }
         
     }      
@@ -845,3 +844,157 @@ void action_drop_date_time(lv_event_t *e)
     } 
 }
 #endif
+volatile bool WiFi_is_connected = false;
+volatile bool ignore_disconnect_event = false;
+volatile bool going_to_sleep = false;
+EventGroupHandle_t wifi_event_group;
+const int CONNECTED_BIT = BIT0;
+const int DISCONNECTED_BIT = BIT1;
+esp_netif_t *netif_sta = NULL;
+#define SECRET_USER_SETTINGS_SSID  "AccessPointEsterno_N"
+#define SECRET_USER_SETTINGS_PASSWORD "Intrepido123." 
+#define GENERAL_USER_SETTINGS_USE_AUTOMATIC_SLEEP_APPROACH 3 
+static void WiFi_start_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
+{
+    ESP_LOGI(TAG_WIFI, "Wi-Fi started");
+    ESP_LOGI(TAG_WIFI, "Connecting to %s", SECRET_USER_SETTINGS_SSID);
+    ESP_ERROR_CHECK(esp_wifi_connect());
+}
+
+static void WiFi_connected_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
+{
+    WiFi_is_connected = false;
+    ESP_LOGI(TAG_WIFI, "Wi-Fi connected");
+}
+
+static void WiFi_disconnect_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
+{
+    WiFi_is_connected = false;
+
+    if (going_to_sleep)
+        ESP_LOGI(TAG_WIFI, "Wi-Fi disconnected");
+    else
+    {
+        if (ignore_disconnect_event)
+            ESP_LOGI(TAG_WIFI, "Wi-Fi disconnected, but ignoring as system is going into deep sleep");
+        else
+        {
+            ESP_LOGI(TAG_WIFI, "Wi-Fi disconnected, reconnecting");
+            xEventGroupClearBits(wifi_event_group, CONNECTED_BIT);
+            ESP_ERROR_CHECK(esp_wifi_connect());
+        }
+    }
+}
+
+static void WiFi_beacon_timeout_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
+{
+    ESP_LOGE(TAG_WIFI, "Beacon timeout");
+}
+
+static void got_ip_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
+{
+
+    ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
+    ESP_LOGI(TAG_WIFI, "Got IP address: " IPSTR, IP2STR(&event->ip_info.ip));
+    ESP_LOGI(TAG_WIFI, "Got IP address: " IPSTR, IP2STR(&event->ip_info.netmask));
+    ESP_LOGI(TAG_WIFI, "Got IP address: " IPSTR, IP2STR(&event->ip_info.gw));
+
+    sprintf(stUSerConfig.stNetworkConfig.strIpAddr, IPSTR, IP2STR(&event->ip_info.ip));
+    sprintf(stUSerConfig.stNetworkConfig.strNetMAsk, IPSTR, IP2STR(&event->ip_info.netmask));
+    sprintf(stUSerConfig.stNetworkConfig.strGateway,  IPSTR, IP2STR(&event->ip_info.gw));
+#if 0
+    objects_t objs = objects;
+    lvgl_port_lock(-1);    
+    lv_textarea_add_text(objs.txt_ipaddress, stUSerConfig.stNetworkConfig.strIpAddr);;
+    lv_textarea_add_text(objs.txt_netmask,   stUSerConfig.stNetworkConfig.strNetMAsk);;
+    lv_textarea_add_text(objs.txt_gateway,   stUSerConfig.stNetworkConfig.strGateway);;
+    lvgl_port_unlock();
+#endif
+    xEventGroupClearBits(wifi_event_group, DISCONNECTED_BIT);
+    xEventGroupSetBits(wifi_event_group, CONNECTED_BIT);
+  
+    WiFi_is_connected = true;
+}
+
+#define WIFI_LISTEN_INTERVAL 100
+#define GENERAL_USER_SETTINGS_WIFI_COUNTRY_CODE "IT"
+void start_wifi()
+{
+    // This subroutine starts the Wi-Fi
+    // It will make a Wi-Fi 6 connection if possible
+    // However, once the Wi-Fi event handler has been connected and an IP address has been assigned
+    // the program will determine if a Wi-Fi 6 connection was actually made
+
+    ESP_ERROR_CHECK(esp_netif_init());
+    wifi_event_group = xEventGroupCreate();
+
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    netif_sta = esp_netif_create_default_wifi_sta();
+    assert(netif_sta);
+
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
+    // WiFi events
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, WIFI_EVENT_STA_START, &WiFi_start_handler, NULL, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &WiFi_disconnect_handler, NULL, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &WiFi_connected_handler, NULL, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, WIFI_EVENT_STA_BEACON_TIMEOUT, &WiFi_beacon_timeout_handler, NULL, NULL));
+
+    // IP event
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &got_ip_handler, NULL, NULL));
+
+    wifi_config_t wifi_config = {
+        .sta = {
+            .ssid = SECRET_USER_SETTINGS_SSID,
+            .password = SECRET_USER_SETTINGS_PASSWORD,
+            .listen_interval = WIFI_LISTEN_INTERVAL,
+            .pmf_cfg = {
+                .capable = true,
+                .required = false},
+        },
+    };
+ 
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+
+    esp_wifi_set_bandwidth(WIFI_IF_STA, WIFI_BW_HT20);
+
+    esp_wifi_set_protocol(WIFI_IF_STA, WIFI_PROTOCOL_11B | WIFI_PROTOCOL_11G | WIFI_PROTOCOL_11N | WIFI_PROTOCOL_11AX);
+
+    esp_wifi_set_country_code(GENERAL_USER_SETTINGS_WIFI_COUNTRY_CODE, true);
+
+    esp_wifi_set_ps(WIFI_PS_MAX_MODEM);
+    // esp_wifi_set_ps(WIFI_PS_MIN_MODEM);
+    // esp_wifi_set_ps(WIFI_PS_NONE);
+
+    // set_static_ip(netif_sta); // helpful if publishing to mqtt only; if publishing to pwsweather then comment this line // additional code for this is commented out above
+
+    ESP_ERROR_CHECK(esp_wifi_start());
+
+    uint16_t probe_timeout = 65535;
+    ESP_ERROR_CHECK(esp_wifi_set_inactive_time(WIFI_IF_STA, probe_timeout));
+
+#if CONFIG_ESP_WIFI_ENABLE_WIFI_RX_STATS
+#if CONFIG_ESP_WIFI_ENABLE_WIFI_RX_MU_STATS
+    esp_wifi_enable_rx_statistics(true, true);
+#else
+    esp_wifi_enable_rx_statistics(true, false);
+#endif
+#endif
+#if CONFIG_ESP_WIFI_ENABLE_WIFI_TX_STATS
+    esp_wifi_enable_tx_statistics(ESP_WIFI_ACI_VO, true);
+    esp_wifi_enable_tx_statistics(ESP_WIFI_ACI_BE, true);
+#endif
+
+    //register_system();
+    //register_wifi_itwt();
+    //register_wifi_stats();
+}
+
+
+void vGetDefaultConfig(USER_CONFIG *pUserConfig)
+{
+    memcpy(pUserConfig, &stUSerConfig, sizeof(USER_CONFIG));
+    return;
+}

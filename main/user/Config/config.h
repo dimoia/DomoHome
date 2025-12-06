@@ -11,7 +11,10 @@
 #include "freertos/event_groups.h"
 #include "esp_wifi.h"  // Include ESP32 Wi-Fi driver functions
 #include "esp_log.h"   // Include ESP32 logging functions
-
+#include "lvgl_port.h" 
+#include "lvgl.h"
+#include "ui.h"
+#if 0
 /// @brief Enumeration for RTC Manual or NTP Server Configuration
 typedef enum _RTC_MANUAL_AUTO
 {
@@ -48,7 +51,7 @@ typedef struct _USER_CONFIG
     NETWORK_CONFIG stNetworkConfig;
     
 } USER_CONFIG;
-
+#endif
 /// @brief External declarations
 extern wifi_ap_record_t    ap_info[];  // Declare an array to store the AP records
 extern esp_netif_ip_info_t ip_info;    // Stores IP information
@@ -65,7 +68,7 @@ int8_t iConfigInit(void);
 /// @param  pUserConfig Pointer to USER_CONFIG structure to be populated
 /// @return none
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-void vGetDefaultConfig(USER_CONFIG *pUserConfig);
+//void vGetDefaultConfig(USER_CONFIG *pUserConfig);
 
 // Initialize Wi-Fi in STA mode with SSID, password, and auth mode
 //void wifi_sta_init(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t authmode);
