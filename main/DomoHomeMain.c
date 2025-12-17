@@ -262,7 +262,7 @@ void app_main()
         ESP_LOGE(TAG, "BMP280 Init Failed");
     }
     Pcf8523_Init();
-   // iConfigInit();
+    iConfigInit();
     //wifi_init();
    
 

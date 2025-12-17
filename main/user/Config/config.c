@@ -204,12 +204,9 @@ void action_wifi_scann(lv_event_t *e)
     if(code == LV_EVENT_CLICKED) 
     {
         ESP_LOGI(TAG_CONFIG, "WiFi Scan Clicked ");        
-     //   lvgl_port_lock(-1);
         lv_obj_add_state(btn_WifiScan, LV_STATE_DISABLED); // Disable the scan button during scanning 
         lv_dropdown_clear_options(list_wifi_ssid);  // Clear existing options in the dropdown       
-     //   lvgl_port_unlock();
-
-        //wifi_scan();
+     
         int iNumberOfAP = iWifiScan(wifi_scann_list, DEFAULT_SCAN_LIST_SIZE);
         for (int i = 0; i < iNumberOfAP; i++) 
         {
@@ -221,10 +218,7 @@ void action_wifi_scann(lv_event_t *e)
             ESP_LOGI(TAG_CONFIG, "RSSI \t\t%d", wifi_scann_list[i].rssi);  // Log RSSI (signal strength)        
             ESP_LOGI(TAG_CONFIG, "Channel \t\t%d", wifi_scann_list[i].primary);  // Log channel number
         }
-       // lvgl_port_lock(-1);              
         lv_obj_clear_state(btn_WifiScan, LV_STATE_DISABLED); // Re-enable the scan button after scanning is complete
-
-       // lvgl_port_unlock();
     }
 }
 
@@ -293,32 +287,19 @@ void action_wifi_connect_cb(lv_event_t *e)
 
     if(code == LV_EVENT_CLICKED) 
     {
-        //iWifiConnectInStationMode((uint8_t *)stUSerConfig.strWifiSsid, (uint8_t *)stUSerConfig.strWifiPassword, WIFI_AUTH_WPA2_PSK);
-        start_wifi();
-
-
-        vGetDefaultConfig(&stUSerConfig);
-        while (stUSerConfig.WiFi_is_connected == false)
-        {
-            vTaskDelay(100 / portTICK_PERIOD_MS);
-            vGetDefaultConfig(&stUSerConfig);
-            if(stUSerConfig.WiFi_is_connected == true)
-            {
-                ESP_LOGI(TAG_CONFIG, "WiFi Connected Successfully inside loop");
-                break;
-            }
-            else
-            {
-                ESP_LOGI(TAG_CONFIG, "Waiting for WiFi Connection...");
-            }
+        if(iWifiConnectInStationMode((uint8_t *)stUSerConfig.strWifiSsid, (uint8_t *)stUSerConfig.strWifiPassword, WIFI_AUTH_WPA2_PSK) < 0) 
+        {      
+            ESP_LOGE(TAG_CONFIG, "iWifiConnectInStationMode Failed ");
+            static const char * btns[] ={"OK", ""};
+            lv_obj_t * mboxError = lv_msgbox_create(NULL, "Error", "WiFi Connection Error", btns, true);
+            lv_obj_center(mboxError);
         }
 
-        
-       
         lv_textarea_add_text(objs.txt_ipaddress, stUSerConfig.stNetworkConfig.strIpAddr);;
         lv_textarea_add_text(objs.txt_netmask,   stUSerConfig.stNetworkConfig.strNetMAsk);;
         lv_textarea_add_text(objs.txt_gateway,   stUSerConfig.stNetworkConfig.strGateway);;
 
+       // stop_wifi();
         #if 0
         wifi_config_t wifi_configuration;
         const char *your_ssid = "HUAWEI-B535-13F7";//stUSerConfig.strWifiSsid;

@@ -83,4 +83,5 @@ int iWifiConnectInStationMode(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t auth
   
  void start_wifi();
  void vGetDefaultConfig(USER_CONFIG *pUserConfig);
+ void stop_wifi();
 #endif
