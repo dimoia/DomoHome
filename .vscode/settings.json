@@ -40,7 +40,7 @@
         "freertos.h": "c"
     },
     "cmake.sourceDirectory": "D:/GITHUB_PROJECTS/DomoHome",
-    "idf.portWin": "COM35",
+    "idf.portWin": "COM12",
     "idf.flashBaudRate": "1150000",
     "idf.customExtraVars": {
         "OPENOCD_SCRIPTS": "F:\\esp\\v5.3-dev\\Espressif\\tools\\openocd-esp32\\v0.12.0-esp32-20230921/openocd-esp32/share/openocd/scripts",
@@ -51,7 +51,7 @@
     "idf.openOcdConfigs": [
         "board/esp32s3-builtin.cfg"
     ],
-    "idf.monitorPort": "COM35",
+    "idf.monitorPort": "COM12",
     "idf.flashType": "UART",
     "idf.currentSetup": "C:/Espressif/frameworks/esp-idf-v5.3.1/"
 }

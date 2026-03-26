@@ -51,6 +51,7 @@ typedef struct _USER_CONFIG
     NETWORK_CONFIG stNetworkConfig;
     
 } USER_CONFIG;
+
 #endif
 /// @brief External declarations
 extern wifi_ap_record_t    ap_info[];  // Declare an array to store the AP records
@@ -73,5 +74,22 @@ int8_t iConfigInit(void);
 // Initialize Wi-Fi in STA mode with SSID, password, and auth mode
 //void wifi_sta_init(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t authmode);
   
+
+typedef enum _DEVICE_STATUS_
+{
+    DEVICE_STATUS_OK,
+    DEVICE_STATUS_ERROR,
+} DEVICE_STATUS;
+
+typedef struct _DEVICE_CONFIG
+{
+    DEVICE_STATUS bBME280Status;    
+} DEVICE_CONFIG;
+
+void initDeviceConfig(DEVICE_CONFIG* out_ptrDeviceConfig);
+void setBME280Status(DEVICE_CONFIG* in_ptrDeviceConfig, DEVICE_STATUS in_bStatus);
+DEVICE_STATUS getBME280Status(const DEVICE_CONFIG* in_ptrDeviceConfig);
+
+
 
 #endif //_CONFIG_H_

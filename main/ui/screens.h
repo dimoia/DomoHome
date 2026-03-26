@@ -179,8 +179,8 @@ typedef struct _objects_t {
 extern objects_t objects;
 
 enum ScreensEnum {
-    SCREEN_ID_SETTINGS_SCREEN = 1,
-    SCREEN_ID_MAIN = 2,
+    SCREEN_ID_MAIN = 1,
+    SCREEN_ID_SETTINGS_SCREEN = 2,    
     SCREEN_ID_HEATING_SCREEN = 3,
     SCREEN_ID_TEST = 4,
 };

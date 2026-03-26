@@ -2,9 +2,9 @@
 #define _PCF8523_H_
 
 #include <time.h>
-//#include <stdbool.h>
+#include <stdbool.h>
 
-
+bool   Pcf8523_get_status();
 int8_t Pcf8523_Reset();
 int8_t Pcf8523_Init();
 int8_t Pcf8523_Run();

@@ -56,7 +56,7 @@ typedef struct _USER_CONFIG
 /// @param  none
 /// @return -1 on error, 0 on success 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-int8_t wifi_init(void);
+//int8_t wifi_init(void);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// @brief Scan for available Wi-Fi Access Points (APs) and populate a dropdown list
@@ -84,4 +84,19 @@ int iWifiConnectInStationMode(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t auth
  void start_wifi();
  void vGetDefaultConfig(USER_CONFIG *pUserConfig);
  void stop_wifi();
+
+
+extern wifi_ap_record_t ap_info[];  // Declare an array to store the AP records
+
+extern esp_netif_ip_info_t ip_info; // Stores IP information
+
+#define DEFAULT_SCAN_LIST_SIZE 15 // Max number of APs to store (0 to 20)
+
+void wifi_init(void);  // Function to initialize Wi-Fi
+void wifi_scan(void);  // Function to scan available Wi-Fi networks
+
+// Initialize Wi-Fi in STA mode with SSID, password, and auth mode
+int8_t wifi_sta_init(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t authmode);
+int8_t wifi_wait_connect();
+
 #endif

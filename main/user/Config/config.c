@@ -7,8 +7,9 @@ static wifi_ap_record_t wifi_scann_list[DEFAULT_SCAN_LIST_SIZE];  // Array to st
 
 int8_t iConfigInit(void)
 {    
-    memset(&stUSerConfig, 0, sizeof(USER_CONFIG));
-    return wifi_init();
+  //  memset(&stUSerConfig, 0, sizeof(USER_CONFIG));
+   // return wifi_init();
+   return 0;
 }
 /*
 void vGetDefaultConfig(USER_CONFIG *pUserConfig)
@@ -334,4 +335,31 @@ void action_wifi_connect_cb(lv_event_t *e)
         }    
             #endif   
     }     
+}
+
+
+
+
+void initDeviceConfig(DEVICE_CONFIG* out_ptrDeviceConfig)
+{
+    if(out_ptrDeviceConfig != NULL)
+    {
+        out_ptrDeviceConfig->bBME280Status = DEVICE_STATUS_ERROR; // Imposta lo stato iniziale del BME280 come errore
+    }
+}
+void setBME280Status(DEVICE_CONFIG* in_ptrDeviceConfig, DEVICE_STATUS in_bStatus)
+{
+    if(in_ptrDeviceConfig != NULL)
+    {
+        in_ptrDeviceConfig->bBME280Status = in_bStatus;
+    }
+}
+
+DEVICE_STATUS getBME280Status(const DEVICE_CONFIG* in_ptrDeviceConfig)
+{
+    if(in_ptrDeviceConfig != NULL)
+    {
+        return in_ptrDeviceConfig->bBME280Status;
+    }
+    return DEVICE_STATUS_ERROR;
 }

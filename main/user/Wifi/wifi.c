@@ -1000,7 +1000,7 @@ void stop_wifi()
 }
 
 // Initialize Wi-Fi for STA (Station) and AP (Access Point) modes
-int8_t wifi_init(void)
+int8_t iwifi_init(void)
 {    
     int8_t iRet = 0;
 
@@ -1077,4 +1077,113 @@ void vGetDefaultConfig(USER_CONFIG *pUserConfig)
 {
     memcpy(pUserConfig, &stUSerConfig, sizeof(USER_CONFIG));
     return;
+}
+
+
+
+const char *TAG_STA = "wifi_sta";    // Tag for Station mode (Wi-Fi client mode)
+esp_netif_ip_info_t ip_info; // Stores the IP information once connected to Wi-Fi
+
+// Function to wait for Wi-Fi connection and obtain IP address
+int8_t wifi_wait_connect()
+{
+    int8_t iRet = 0;
+    static int s_retry_num = 0;  // Counter to track the number of connection retries
+    wifi_config_t sta_config;
+
+    // Get the current Wi-Fi station configuration (SSID, password, etc.)
+    ESP_ERROR_CHECK(esp_wifi_get_config(WIFI_IF_STA, &sta_config));
+
+    while (1)
+    {
+        // Get the network interface handle for the default Wi-Fi STA interface
+        esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+        if (netif)
+        {
+            // Get the IP information associated with the Wi-Fi STA interface
+            esp_err_t ret = esp_netif_get_ip_info(netif, &ip_info);
+            if (ret == ESP_OK && ip_info.ip.addr != 0) {
+                // If successfully connected and an IP address is obtained
+                ESP_LOGI("WiFi", "Connected with IP: " IPSTR, IP2STR(&ip_info.ip));
+                ESP_LOGI(TAG_STA, "Connected to AP SSID:%s, password:%s", sta_config.sta.ssid, sta_config.sta.password);
+                
+                char ip[20];
+                // Clear the top section of the screen to display connection info
+                
+                s_retry_num = 0;  // Reset retry counter on successful connection
+                break;  // Exit the loop since the connection is successful
+            } else {
+                // Log the failure to connect or obtain an IP address
+                ESP_LOGI(TAG_STA, "Failed to connect to the AP");
+
+                // Retry connection if the retry counter is less than 5
+                if (s_retry_num < 5)
+                {
+                    s_retry_num++;
+                    ESP_LOGI(TAG_STA, "Retrying to connect to the AP");
+                }
+                else {
+                    // Reset retry counter after 5 attempts and log the failure
+                    s_retry_num = 0;
+
+                    ESP_LOGI(TAG_STA, "Failed to connect to SSID:%s, password:%s",
+                            sta_config.sta.ssid, sta_config.sta.password);
+                    
+                    // Clear the top section of the screen to display failure message
+                    iRet = -1;
+                    break;  // Exit the loop after failed retries
+                }
+
+                // Wait for 1 second before retrying
+                vTaskDelay(pdMS_TO_TICKS(1000));
+            }
+        }
+        else 
+        {
+            // Log an error if the network interface handle is not found
+            ESP_LOGE("WiFi", "Netif handle not found");
+        }
+
+        // Short delay (10ms) before checking the connection status again
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+    return iRet;
+}
+
+// Function to initialize Wi-Fi in Station mode (STA mode) and connect to an AP
+int8_t wifi_sta_init(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t authmode)
+{
+    int8_t iRet = 0;
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));  // Set Wi-Fi mode to Station (STA) initially
+    
+    wifi_config_t wifi_config = {              \
+        .sta = {                                \
+            .threshold.authmode = authmode,     \
+        },                                      \
+    };
+
+    // Copy SSID and password to the Wi-Fi configuration structure
+    strcpy((char *)wifi_config.sta.ssid, (const char *)ssid);
+    strcpy((char *)wifi_config.sta.password, (const char *)pwd);
+
+    // Set the Wi-Fi configuration for the station (STA) interface
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+    esp_netif_create_default_wifi_sta();  // Create the default network interface for Wi-Fi STA
+    esp_wifi_start(); // Start the Wi-Fi with the new configuration
+    ESP_ERROR_CHECK(esp_wifi_connect());  // Attempt to connect to the Wi-Fi AP
+    return wifi_wait_connect();  // Wait for the connection to establish and get IP address
+}
+
+// Initialize Wi-Fi for STA (Station) and AP (Access Point) modes
+void wifi_init(void)
+{
+    // Initialize the TCP/IP stack
+    ESP_ERROR_CHECK(esp_netif_init());
+    
+    // Create the default event loop
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    // Initialize the Wi-Fi driver with default configuration
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 }

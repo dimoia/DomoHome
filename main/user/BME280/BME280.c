@@ -20,6 +20,8 @@ static int32_t  bme280_Compensate_Temperature(bme280_t *config, int32_t adc_T);
 static uint32_t bme280_Compensate_Presure    (const bme280_t *config, int32_t adc_P);
 static uint32_t bme280_Compensate_Humidity   (const bme280_t *config, int32_t adc_H);
 
+static bool bme280_initialized = false;  // Flag to indicate if the BME280 sensor has been initialized
+static bool bme280_status      = false;  // Flag to indicate if the BME280 sensor has been initialized
 
 #include "vars.h"
 
@@ -180,86 +182,98 @@ int8_t bme280_init()
 {
     int8_t iRetVal = 0;
     uint8_t chip_id     = 0;
-   // uint8_t reg_address = BME280_ID_REG;
-
-    ESP_LOGI(TAG, "Init BME280 On I2C "); // Log the BMP280 initialization
-
-    if(I2C_Add_Slave_Addr(&bme280Obj.addr,BME280_I2C_ADDRESS) != ESP_OK) 
+    if(bme280_initialized == false) 
     {
-        ESP_LOGE(TAG, "Failed to add BME280 I2C slave address");
-        return -1; // Return error if adding slave address fails
-    }
+        ESP_LOGI(TAG, "Init BME280 On I2C "); // Log the BMP280 initialization
 
-    // Default configuration
-	bme280Obj.temperature_oversampling = OVERSAMPLING_x1;
-	bme280Obj.pressure_oversampling = OVERSAMPLING_x1;
-	bme280Obj.humidity_oversampling = OVERSAMPLING_x1;
-	bme280Obj.standby = SB_1000MS;
-	bme280Obj.filter = FILTER_OFF;
-	bme280Obj.mode = NORMAL;
-
-    // Read the chip ID from the BMP280
-    if(I2C_Read_Byte(bme280Obj.addr, BME280_ID_REG, &chip_id, 100) != ESP_OK) 
-    {
-        ESP_LOGE(TAG, "Failed to read BME280 chip ID");
-        return -1; // Return error if reading chip ID fails
-    }
-    else
-    {
-        ESP_LOGI(TAG, " Device ID %d ",chip_id);
-        if (chip_id != BME280_CHIP_ID)
+        if(I2C_Add_Slave_Addr(&bme280Obj.addr,BME280_I2C_ADDRESS) != ESP_OK) 
         {
-            ESP_LOGI(TAG, " Invalid Device ID");
-            iRetVal = -1;
+            ESP_LOGE(TAG, "Failed to add BME280 I2C slave address");
+            return -1; // Return error if adding slave address fails
+        }
+
+        // Default configuration
+        bme280Obj.temperature_oversampling = OVERSAMPLING_x1;
+        bme280Obj.pressure_oversampling    = OVERSAMPLING_x1;
+        bme280Obj.humidity_oversampling    = OVERSAMPLING_x1;
+        bme280Obj.standby                  = SB_1000MS;
+        bme280Obj.filter                   = FILTER_OFF;
+        bme280Obj.mode                     = NORMAL;
+
+        // Read the chip ID from the BMP280
+        if(I2C_Read_Byte(bme280Obj.addr, BME280_ID_REG, &chip_id, 100) != ESP_OK) 
+        {
+            ESP_LOGE(TAG, "Failed to read BME280 chip ID");
+            iRetVal = -1; // Return error if reading chip ID fails
         }
         else
         {
-            // reset the sens using soft-reset, this makes sure the IIR is off, etc.
-            I2C_Write_Byte(bme280Obj.addr, BME280_RESET_REG, BME280_RESET_VALUE, 100);           
-            vTaskDelay(300 / 10);
-
-            // if chip is still reading calibration, delay
-            uint8_t u8RepeatAgain = 0;
-            while ( bme280_isOn(&bme280Obj) && (u8RepeatAgain++ < 10) )
+            ESP_LOGI(TAG, " Device ID %d ",chip_id);
+            if (chip_id != BME280_CHIP_ID)
             {
-                vTaskDelay(100 / portTICK_PERIOD_MS);
-            }
-            if(u8RepeatAgain >= 10)
-            {
-                ESP_LOGE(TAG, "BME280 initialization timeout");
+                ESP_LOGI(TAG, " Invalid Device ID");
                 iRetVal = -1;
             }
             else
             {
-                ESP_LOGI(TAG,"BME280 initialization successful");
+                // reset the sens using soft-reset, this makes sure the IIR is off, etc.
+                I2C_Write_Byte(bme280Obj.addr, BME280_RESET_REG, BME280_RESET_VALUE, 100);           
+                vTaskDelay(300 / 10);
 
-               // get compensation values
-               bme280_Read_Calibration_Data(&bme280Obj);
+                // if chip is still reading calibration, delay
+                uint8_t u8RepeatAgain = 0;
+                while ( bme280_isOn(&bme280Obj) && (u8RepeatAgain++ < 10) )
+                {
+                    vTaskDelay(100 / portTICK_PERIOD_MS);
+                }
+                if(u8RepeatAgain >= 10)
+                {
+                    ESP_LOGE(TAG, "BME280 initialization timeout");
+                    iRetVal = -1;
+                }
+                else
+                {
+                    ESP_LOGI(TAG,"BME280 initialization successful");
+                    // get compensation values
+                    bme280_Read_Calibration_Data(&bme280Obj);
 
-               ESP_LOGI(TAG,"BME280 Dumping calibration...");
-               bme280_Write_Configuration(&bme280Obj);
-            }    
-            #if 0
-            // Start the temperature monitoring task
-            xTaskCreate(bmp280_task, "bmp280_task", 3 * 1024, NULL, 3, &bme280_TaskHandle);
-            if (bme280_TaskHandle == NULL) {
-                ESP_LOGE(TAG, "Failed to create bmp280_task");
-            }    
-            #endif
+                    ESP_LOGI(TAG,"BME280 Dumping calibration...");
+                    bme280_Write_Configuration(&bme280Obj);
+                }                   
+            }
         }
+        if(iRetVal >= 0)
+        {
+            bme280_initialized = true;  // Set the flag to indicate successful initialization            
+        }   
     }
-    
     return iRetVal;
+}
+
+bool bme280_get_status() 
+{
+    return bme280_status;
 }
 
 int8_t bme280_run()
 {
-    // Start the temperature monitoring task
-    xTaskCreate(bmp280_task, "bmp280_task", 3 * 1024, NULL, 3, &bme280_TaskHandle);
-    if (bme280_TaskHandle == NULL) {
-        ESP_LOGE(TAG, "Failed to create bmp280_task");
-    } 
-    return 0;   
+    int8_t iRetVal = 0;
+    if(bme280_initialized)
+    {
+        // Start the temperature monitoring task
+        xTaskCreate(bmp280_task, "bmp280_task", 3 * 1024, NULL, 3, &bme280_TaskHandle);
+        if (bme280_TaskHandle == NULL) 
+        {
+             ESP_LOGE(TAG, "Failed to create bmp280_task");
+             iRetVal = -1; // Return error if task creation fails            
+        }
+    }
+    else
+    {
+        ESP_LOGE(TAG, "BME280 is not initialized. Please initialize before running.");
+        iRetVal = -1; // Return error if BME280 is not initialized
+    }
+    return iRetVal;   
 }
 
 int8_t bme280_Pbit(uint8_t* deviceID)
@@ -268,21 +282,37 @@ int8_t bme280_Pbit(uint8_t* deviceID)
     int8_t iRetVal = 0;
     uint8_t u8ChipID = 0;
 
-    if (!ptrConfigObj || !deviceID)
-    {  
-        iRetVal = -1;
+    if(bme280_initialized == false)
+    {
+        ESP_LOGI(TAG, "BME280 is not initialized. Please initialize before reading device ID.");
+        iRetVal = -1; // Return error if BME280 is not initialized
+    }
+    else 
+    {
+        if (!ptrConfigObj || !deviceID)
+        {  
+            iRetVal = -1;
+        }
+        else
+        {
+            if(I2C_Read_Byte(ptrConfigObj->addr, BME280_ID_REG, &u8ChipID, 100) != ESP_OK) 
+            {
+                ESP_LOGI(TAG, "Failed to read BME280 chip ID");
+                iRetVal = -1; // Return error if reading chip ID fails
+            }      
+            else
+            {
+                *deviceID = u8ChipID;
+            }   
+        }
+    }
+    if(iRetVal == 0)
+    {
+        bme280_status = true; // Set status to true if device ID is read successfully
     }
     else
     {
-        if(I2C_Read_Byte(ptrConfigObj->addr, BME280_ID_REG, &u8ChipID, 100) != ESP_OK) 
-        {
-            ESP_LOGE(TAG, "Failed to read BME280 chip ID");
-            iRetVal = -1; // Return error if reading chip ID fails
-        }      
-        else
-        {
-            *deviceID = u8ChipID;
-        }   
+        bme280_status = false; // Set status to false if there was an error
     }
 
     return iRetVal;
@@ -294,25 +324,32 @@ int8_t bme280_Read_Pressure_Temperature_Humidity(bme280_t *ptrConfigObj, uint32_
     int32_t raw_pressure = 0;
     int32_t raw_temperature = 0;
     int32_t raw_humidity = 0;
-
-    if (!ptrConfigObj)
-    {  
-        iRetVal = -1;
-    }
-    else
+    
+    if(bme280_initialized == true)
     {
-        if(bme280_Burst_Read(ptrConfigObj, &raw_pressure, &raw_temperature, &raw_humidity) == 0)
-        {
-            *temperature = bme280_Compensate_Temperature(ptrConfigObj, raw_temperature);
-            *pressure    = bme280_Compensate_Presure    (ptrConfigObj, raw_pressure);
-            *humidity    = bme280_Compensate_Humidity   (ptrConfigObj, raw_humidity);
+        if (!ptrConfigObj)
+        {  
+            iRetVal = -1;
         }
         else
         {
-            iRetVal = -1;
-        }   
+            if(bme280_Burst_Read(ptrConfigObj, &raw_pressure, &raw_temperature, &raw_humidity) == 0)
+            {
+                *temperature = bme280_Compensate_Temperature(ptrConfigObj, raw_temperature);
+                *pressure    = bme280_Compensate_Presure    (ptrConfigObj, raw_pressure);
+                *humidity    = bme280_Compensate_Humidity   (ptrConfigObj, raw_humidity);
+            }
+            else
+            {
+                iRetVal = -1;
+            }   
+        }
     }
-
+    else
+    {
+        ESP_LOGI(TAG, "BME280 is not initialized. Please initialize before reading sensor data.");
+        iRetVal = -1; // Return error if BME280 is not initialized
+    }
     return iRetVal;
 }
 

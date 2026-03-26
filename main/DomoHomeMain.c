@@ -39,11 +39,12 @@
 #include "nvs_flash.h"
 #include "nvs.h"
 #include "config.h"
-
+#include "mqtt_client.h"
 static const char    *TAG = "DomoHomeMain"; // Tag used for ESP log output
 static QueueHandle_t gpio_evt_queue = NULL;
 static TaskHandle_t  boot_TaskHandle;
 static const uint32_t u32BootPressedForSeconds = 5 * 1000 * 1000; // Time in seconds to consider a long press
+
 
 static void IRAM_ATTR gpio_isr_handler(void* arg)
 {
@@ -75,7 +76,9 @@ static void boot_task(void* arg)
         .clk_src = GPTIMER_CLK_SRC_DEFAULT, // Select the default clock source
         .direction = GPTIMER_COUNT_UP,      // Counting direction is up
         .resolution_hz = 1 * 1000 * 1000,   // Resolution is 1 MHz, i.e., 1 tick equals 1 microsecond
+        .intr_priority = 1,                // Interrupt priority (0 is highest, but we set it to 1 for a relatively low priority)          
     };
+    
     // Create a timer instance
     ESP_ERROR_CHECK(gptimer_new_timer(&timer_config, &gptimer));
     // Enable the timer
@@ -90,11 +93,11 @@ static void boot_task(void* arg)
         {
             u64TimerCount = 0;
             ESP_ERROR_CHECK(gptimer_enable(gptimer));
-            ESP_LOGI(TAG, "GPIO[%"PRIu32"] intr, val: %d",io_num, gpio_get_level(io_num));
+            ESP_LOGI(TAG,"GPIO[%" PRIu32 "] intr, val: %d", io_num, gpio_get_level((gpio_num_t)io_num));
             gptimer_set_raw_count(gptimer,0);
             gptimer_start(gptimer);
            // u64elapsedTime = 0;
-            while(gpio_get_level(io_num) == 0)
+            while(gpio_get_level((gpio_num_t)io_num) == 0)
             {
                 gptimer_get_raw_count(gptimer, &u64TimerCount);
                 //u64elapsedTime = u64elapsedTime + u64TimerCount;
@@ -224,6 +227,9 @@ void action_slider_temp1_change(lv_event_t *e) {
 
 void app_main()
 {
+    static esp_lcd_panel_handle_t panel_handle = NULL; // Handle for the LCD panel
+    static esp_lcd_touch_handle_t tp_handle = NULL;    // Handle for the touch panel  
+
     ESP_LOGI(TAG, "DomoHome Main Application Starting...");
 
     // Initialize the Non-Volatile Storage (NVS) for settings and data persistence
@@ -236,34 +242,82 @@ void app_main()
         ESP_LOGE(TAG, "NVS Flash Init Error, Erasing NVS...");
         ESP_ERROR_CHECK(nvs_flash_erase());
         err = nvs_flash_init();
+        if(err != ESP_OK)
+        {
+            ESP_LOGE(TAG, "NVS Flash Re-Init Failed: %d", err);
+            return; // Exit if NVS initialization fails
+        }
     }
-
-    static esp_lcd_panel_handle_t panel_handle = NULL; // Handle for the LCD panel
-    static esp_lcd_touch_handle_t tp_handle = NULL;    // Handle for the touch panel  
 
     // Initialize the GT911 touch screen controller
     // This sets up the touch functionality of the screen.
     tp_handle = touch_gt911_init();
+    if (tp_handle == NULL) 
+    {
+        ESP_LOGE(TAG, "Failed to initialize GT911 touch controller");
+        return; // Exit if touch controller initialization fails
+    }
 
     // Initialize the Waveshare ESP32-S3 RGB LCD hardware
     // This prepares the LCD panel for display operations.
     panel_handle = waveshare_esp32_s3_rgb_lcd_init();
+    if (panel_handle == NULL) 
+    {
+        ESP_LOGE(TAG, "Failed to initialize RGB LCD panel");
+        return; // Exit if LCD panel initialization fails
+    }
 
-    // Turn on the LCD backlight
-    // This ensures the display is visible.
+    // Turn on the LCD backlight This ensures the display is visible.
     wavesahre_rgb_lcd_bl_on();
 
     // Initialize the LVGL library, linking it to the LCD and touch panel handles
     // LVGL is a lightweight graphics library used for rendering UI elements.
-    ESP_ERROR_CHECK(lvgl_port_init(panel_handle, tp_handle));    
 
-    if(bme280_init() < 0) 
+    if(lvgl_port_init(panel_handle, tp_handle) != ESP_OK) 
     {
-        ESP_LOGE(TAG, "BMP280 Init Failed");
+        ESP_LOGI(TAG, "Failed to initialize LVGL");
+        return; // Exit if LVGL initialization fails}   
     }
-    Pcf8523_Init();
-    iConfigInit();
-    //wifi_init();
+    if(bme280_init() >= 0) 
+    {
+        ESP_LOGI(TAG, "BMP280 Init Success");
+
+        uint8_t u8DevId;
+        int8_t u8Pbit = bme280_Pbit(&u8DevId);
+        if(u8Pbit == 0)
+        {
+            ESP_LOGI(TAG, "BME280 Device ID: 0x%02X", u8DevId);
+        }
+        else
+        {
+            ESP_LOGE(TAG, "Failed to read BME280 Device ID ");
+        }
+    }
+    
+    
+    if(Pcf8523_Init() >= 0)
+    {
+        ESP_LOGI(TAG, "PCF8523 initialized successfully");  
+        if(Pcf8523_PBit_Battery_Status() >= 0)
+        {
+            ESP_LOGI(TAG, "PCF8523 Status: OK");
+        }
+        else
+        {
+            ESP_LOGE(TAG, "PCF8523 Status: LOW");
+        }
+    }
+    else
+    {
+        ESP_LOGE(TAG, "Failed to initialize PCF8523");
+    }
+
+     // Initialize Wi-Fi settings (connect to the specified Wi-Fi network)
+    wifi_init(); 
+    
+   
+   // iConfigInit();
+  //  wifi_init();
    
 
     // Lock the LVGL port to ensure thread safety during API calls
@@ -273,8 +327,19 @@ void app_main()
 
         // Initialize the UI components with LVGL (e.g., demo screens, sliders)
         // This sets up the user interface elements using the LVGL library.
-        ui_init();
-      
+        //ui_init();
+        create_screens();
+        if( wifi_sta_init((uint8_t*)"dlinkAP", (uint8_t*)"DMINGL6Intrepido123.", WIFI_AUTH_WPA2_PSK) == ESP_OK)
+        {
+            loadScreen(SCREEN_ID_MAIN);
+        }
+        else
+        {
+            ESP_LOGE(TAG, "Failed to connect to Wi-Fi network");
+            // Handle Wi-Fi connection failure (e.g., show error message on screen)
+             loadScreen(SCREEN_ID_SETTINGS_SCREEN );
+        }
+
         // Release the mutex after LVGL operations are complete
         // This allows other tasks to access the LVGL port.
         lvgl_port_unlock();        
@@ -387,7 +452,7 @@ void app_main()
      .pin_bit_mask = (1ULL << GPIO_NUM_0),
      .mode         = GPIO_MODE_INPUT,
      .pull_up_en   = GPIO_PULLUP_ENABLE,
-     .intr_type    = GPIO_INTR_NEGEDGE  /* GPIO interrupt type : falling edge */
+     .intr_type    = GPIO_INTR_NEGEDGE,  /* GPIO interrupt type : falling edge */
     };
     gpio_config(&button_config);
     
@@ -401,7 +466,3 @@ void app_main()
     gpio_isr_handler_add(GPIO_NUM_0, gpio_isr_handler, (void*) GPIO_NUM_0);
     ESP_LOGI(TAG, "DomoHome Main Application Finished Initialization.");
 }
-/*
-            LV_IMG_DECLARE(img_wifi_on);    
-            lv_img_set_src(img_wifi, &img_wifi_on);
-            */

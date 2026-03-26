@@ -101,11 +101,12 @@ static i2c_master_dev_handle_t i2c_dev_obj;
 TaskHandle_t pcf8523_TaskHandle;
 static const char *TAG = "PCF8523";  // Tag used for ESP log output
 
-
 static uint8_t dec2bcd(uint8_t val);
 static int Pcf8523_Get_WeekDay(int iYear, int iMouth, int iDay);
 static char *Pcf8523_Get_MountName(int iMouth);
 
+static bool pcf8523_initialized = false;  // Flag to indicate if the PCF8523 sensor has been initialized
+static bool pcf8523_status      = false;  // Flag to indicate if the PCF8523 sensor has been initialized
 
 void pcf8523UpdateLvgObjectCb(lv_timer_t * timer) 
 {
@@ -236,113 +237,137 @@ void pcf8523_task(void *arg)
 }
 
 int8_t Pcf8523_Init()
-{
-  
+{  
     int8_t iRetVal = 0;
-   
-    ESP_LOGI(TAG, "Init PCF8523 On I2C "); // Log the PCF8523 initialization
-
-    DEV_I2C_Set_Slave_Addr(&i2c_dev_obj,I2C_PCF8523_ADDR); // Set the I2C slave address for PCF8523
-#if 0
-	// Start the time monitoring task
-    xTaskCreate(pcf8523_task, "pcf8523_task", 3 * 1024, NULL, 3, &pcf8523_TaskHandle);
-    if (pcf8523_TaskHandle == NULL) 
-	{
-		iRetVal = -1;
-        ESP_LOGE(TAG, "Failed to create pcf8523_task");
+    if(pcf8523_initialized == true)  
+    {
+        ESP_LOGI(TAG, "PCF8523 is already initialized.");
+        iRetVal = -1;
     }
-#endif		
+	else
+	{
+		ESP_LOGI(TAG, "Init PCF8523 On I2C "); // Log the PCF8523 initialization
+	    DEV_I2C_Set_Slave_Addr(&i2c_dev_obj,I2C_PCF8523_ADDR); // Set the I2C slave address for PCF8523
+	}	
+	if(iRetVal == 0)
+	{
+		pcf8523_initialized = true; // Set the initialized flag to true if initialization was successful
+	}
     return iRetVal;    
 }
 
 int8_t Pcf8523_Run()
 {
 	int8_t iRetVal = 0;
-
-	// Start the time monitoring task
-    xTaskCreate(pcf8523_task, "pcf8523_task", 3 * 1024, NULL, 3, &pcf8523_TaskHandle);
-    if (pcf8523_TaskHandle == NULL) 
+    if(pcf8523_initialized == false)  
 	{
+		ESP_LOGE(TAG, "PCF8523 is not initialized. Please initialize before running.");
 		iRetVal = -1;
-        ESP_LOGE(TAG, "Failed to create pcf8523_task");
-    }
+	}
+	else
+	{
+		// Start the time monitoring task
+		xTaskCreate(pcf8523_task, "pcf8523_task", 3 * 1024, NULL, 3, &pcf8523_TaskHandle);
+		if (pcf8523_TaskHandle == NULL) 
+		{
+			iRetVal = -1;
+			ESP_LOGE(TAG, "Failed to create pcf8523_task");
+		}
+	}
     return iRetVal;  
 }
 
 int8_t Pcf8523_Reset()
 {	
+	int8_t iRetVal = 0;
 	uint8_t u8Data = 0x00;
-
-	ESP_LOGI(TAG, "Reset PCF8523 ");
-	if(I2C_Write_Byte(i2c_dev_obj, PCF8523_CONTROL_1,u8Data, 100)!= ESP_OK) 
+    if(pcf8523_initialized == false)  
 	{
-		ESP_LOGE(TAG, "Failed to reset PCF8523");
-		return -1; // Return error if writing time fails
-	}		
-	return 0;
+		ESP_LOGE(TAG, "PCF8523 is not initialized. Please initialize before resetting.");
+		iRetVal = -1;
+	}
+    else
+	{
+		ESP_LOGI(TAG, "Reset PCF8523 ");
+		if(I2C_Write_Byte(i2c_dev_obj, PCF8523_CONTROL_1,u8Data, 100)!= ESP_OK) 
+		{
+			ESP_LOGE(TAG, "Failed to reset PCF8523");
+			iRetVal = -1; // Return error if writing time fails
+		}		
+	}
+	return iRetVal;
 }
 
 int8_t Pcf8523_Set_Time(struct tm *time)
 {
-    int8_t iRetVal = 0;
+	int8_t iRetVal = 0;
 	uint8_t u8Data[7];
-	if(time==NULL) {
-		iRetVal =  -1;
-	}
-	else 
+
+	if(pcf8523_initialized == false)
 	{
-		// Set the time time/date data */
-		u8Data[0] = dec2bcd(time->tm_sec);
-		u8Data[1] = dec2bcd(time->tm_min);
-		u8Data[2] = dec2bcd(time->tm_hour);
-		u8Data[3] = dec2bcd(time->tm_mday);
-		u8Data[4] = dec2bcd(time->tm_wday); // tm_wday is 0 to 6
-		u8Data[5] = dec2bcd(time->tm_mon);	// tm_mon is 0 to 11
-		u8Data[6] = dec2bcd(time->tm_year - 2000);
-		
-        if(I2C_Write_Bytes(i2c_dev_obj, PCF8523_SECONDS,u8Data, 7,100) != ESP_OK) 
+		ESP_LOGE(TAG, "PCF8523 is not initialized. Please initialize before setting time.");
+		iRetVal = -1;
+	}
+	else
+	{
+		if(time==NULL) 
 		{
-			ESP_LOGE(TAG, "Failed to set PCF8523 time");
-			iRetVal = -1; // Return error if writing time fails
-		}		
+			iRetVal =  -1;
+		}
+		else 
+		{
+			// Set the time time/date data */
+			u8Data[0] = dec2bcd(time->tm_sec);
+			u8Data[1] = dec2bcd(time->tm_min);
+			u8Data[2] = dec2bcd(time->tm_hour);
+			u8Data[3] = dec2bcd(time->tm_mday);
+			u8Data[4] = dec2bcd(time->tm_wday); // tm_wday is 0 to 6
+			u8Data[5] = dec2bcd(time->tm_mon);	// tm_mon is 0 to 11
+			u8Data[6] = dec2bcd(time->tm_year - 2000);
+			
+			if(I2C_Write_Bytes(i2c_dev_obj, PCF8523_SECONDS,u8Data, 7,100) != ESP_OK) 
+			{
+				ESP_LOGE(TAG, "Failed to set PCF8523 time");
+				iRetVal = -1; // Return error if writing time fails
+			}		
+		}
 	}
 	return iRetVal;	
 }
 
 int8_t Pcf8523_Get_Time(struct tm *out_stTime)
 {
-    uint8_t data[7];
 	int8_t iRetVal = 0;
-	if(out_stTime == NULL) 
+    uint8_t data[7];
+	
+	if(pcf8523_initialized == false) 
 	{
+		ESP_LOGE(TAG, "PCF8523 is not initialized. Please initialize before getting time.");
 		iRetVal = -1;
 	}
-    else 
+	else
 	{
-        if(I2C_Read_Bytes(i2c_dev_obj, PCF8523_SECONDS, &data[0], 7, 100)	!= ESP_OK) 
+		if(out_stTime == NULL) 
 		{
-			ESP_LOGE(TAG, "Failed to read PCF8523 time");
-			iRetVal = -1; // Return error if reading time fails
+			iRetVal = -1;
 		}
+		else 
+		{
+			if(I2C_Read_Bytes(i2c_dev_obj, PCF8523_SECONDS, &data[0], 7, 100)	!= ESP_OK) 
+			{
+				ESP_LOGE(TAG, "Failed to read PCF8523 time");
+				iRetVal = -1; // Return error if reading time fails
+			}
 
-		// Convert raw data into time	
-		out_stTime->tm_sec  = (10 * (int)((data[0] & 0x70) >> 4)) + ((int)(data[0] & 0x0F));
-		out_stTime->tm_min  = (10 * (int)((data[1] & 0x70) >> 4)) + ((int)(data[1] & 0x0F));
-		out_stTime->tm_hour = (10 * (int)((data[2] & 0x30) >> 4)) + ((int)(data[2] & 0x0F));
-		out_stTime->tm_mday = (10 * (int)((data[3] & 0x30) >> 4)) + ((int)(data[3] & 0x0F));
-		out_stTime->tm_wday = (int)(data[4] & 0x07);
-		out_stTime->tm_mon  = (10 * (int)((data[5] & 0x10) >> 4)) + ((int)(data[5] & 0x0F));
-		out_stTime->tm_year = (10 * (int)((data[6] & 0xF0) >> 4)) + ((int)(data[6] & 0x0F)) + 2000;	
-
-		//int iWeekDay = Pcf8523_Get_WeekDay(out_stTime->tm_year, out_stTime->tm_mon, out_stTime->tm_mday);
-/*
-		sprintf(out_StrDateTime, "%02d-%02d-%04d %02d:%02d:%02d",
-				out_stTime->tm_mday,
-				out_stTime->tm_mon,
-				out_stTime->tm_year,				
-				out_stTime->tm_hour,
-				out_stTime->tm_min,
-				out_stTime->tm_sec);*/
+			// Convert raw data into time	
+			out_stTime->tm_sec  = (10 * (int)((data[0] & 0x70) >> 4)) + ((int)(data[0] & 0x0F));
+			out_stTime->tm_min  = (10 * (int)((data[1] & 0x70) >> 4)) + ((int)(data[1] & 0x0F));
+			out_stTime->tm_hour = (10 * (int)((data[2] & 0x30) >> 4)) + ((int)(data[2] & 0x0F));
+			out_stTime->tm_mday = (10 * (int)((data[3] & 0x30) >> 4)) + ((int)(data[3] & 0x0F));
+			out_stTime->tm_wday = (int)(data[4] & 0x07);
+			out_stTime->tm_mon  = (10 * (int)((data[5] & 0x10) >> 4)) + ((int)(data[5] & 0x0F));
+			out_stTime->tm_year = (10 * (int)((data[6] & 0xF0) >> 4)) + ((int)(data[6] & 0x0F)) + 2000;	
+		}
 	}
 	return iRetVal;
 }
@@ -403,17 +428,38 @@ int8_t Pcf8523_PBit_Battery_Status()
 	int8_t iRetVal = 0;
 	uint8_t data[7];	
 
-	if(I2C_Read_Bytes(i2c_dev_obj, PCF8523_CONTROL_3, &data[0], 7, 100)	!= ESP_OK) 
+	if(pcf8523_initialized == false) 
 	{
-		ESP_LOGE(TAG, "Pcf8523_Status: Failed to read PCF8523 status");
-		iRetVal = -1; // Return error if reading time fails
+		ESP_LOGE(TAG, "PCF8523 is not initialized.");
+		iRetVal = -1;
 	}
 	else
-	{		
-		if((data[2] & PCF8523_CONTROL_3_BLF_BIT) == 0)
+	{
+		if(I2C_Read_Bytes(i2c_dev_obj, PCF8523_CONTROL_3, &data[0], 7, 100)	!= ESP_OK) 
 		{
-			iRetVal = 1;
+			ESP_LOGE(TAG, "Pcf8523_Status: Failed to read PCF8523 status");
+			iRetVal = -1; // Return error if reading time fails
+		}
+		else
+		{		
+			if((data[2] & PCF8523_CONTROL_3_BLF_BIT) == 0)
+			{
+				iRetVal = 0; // Battery is OK
+			}
 		}
 	}
+	if(iRetVal == 0)
+	{
+		pcf8523_status = true; // Set status to true if device ID is read successfully
+	}
+	else
+	{
+		pcf8523_status = false; // Set status to false if there was an error
+	}
 	return iRetVal;
+}
+
+bool  Pcf8523_get_status()
+{
+	return pcf8523_status;
 }

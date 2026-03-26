@@ -120,7 +120,7 @@ typedef struct bme280_s
     // fine_temperature carries fine tempereature as global value
     int32_t fine_temperature;
 } bme280_t;
-
+bool   bme280_get_status();
 int8_t bme280_init();
 int8_t bme280_run();
 int8_t bme280_Read_Pressure_Temperature_Humidity (bme280_t* config, uint32_t* pressure, uint32_t* humidity, int32_t* temperature);
