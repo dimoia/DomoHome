@@ -126,7 +126,6 @@
                   "type": "tabset",
                   "id": "#751090f9-898a-494d-8ac2-845ed731e798",
                   "weight": 1.262127088859336,
-                  "selected": 2,
                   "enableClose": false,
                   "children": [
                     {
@@ -153,7 +152,8 @@
                       "enableClose": false,
                       "icon": "material:code"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -193,29 +193,17 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 55.42654841719798,
-              "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
                 {
                   "type": "tab",
-                  "id": "#1a42077c-38fb-4ed3-b3af-003ff291e60d",
-                  "name": "test",
+                  "id": "#ac61f9d4-0c92-4eed-858b-e722283230d5",
+                  "name": "Main",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[DomoHome.eez-project]:/userPages/3",
-                    "permanent": true
-                  },
-                  "icon": "svg:page"
-                },
-                {
-                  "type": "tab",
-                  "id": "#d547cae4-4131-4f5a-8838-f51f1f55ff6a",
-                  "name": "settings_screen",
-                  "component": "editor",
-                  "config": {
-                    "objectPath": "[DomoHome.eez-project]:/userPages/0",
-                    "permanent": true
+                    "objectPath": "[DomoHome.eez-project]:/userPages/1",
+                    "permanent": false
                   },
                   "icon": "svg:page"
                 },
@@ -251,8 +239,7 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -1003,13 +990,7 @@
         "0": {
           "0": {},
           "1": {},
-          "26": {
-            "$selected": true
-          },
-          "32": {},
-          "33": {},
-          "34": {},
-          "35": {}
+          "5": {}
         }
       },
       "transform": {
@@ -1031,11 +1012,7 @@
         "0": {
           "0": {},
           "1": {},
-          "5": {},
-          "37": {},
-          "38": {},
-          "39": {},
-          "40": {}
+          "5": {}
         }
       },
       "transform": {

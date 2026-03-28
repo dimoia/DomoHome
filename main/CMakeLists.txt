@@ -14,6 +14,7 @@ file(GLOB_RECURSE srcs *.c
                    user/CalendarTime/*.c
                    user/Config/*.c
                    user/Utils/*.c
+                   user/MqttManager/*.c
                    )
 set(include_dirs 
    . 
@@ -30,6 +31,7 @@ set(include_dirs
    user/CalendarTime
    user/Config
    user/Utils
+   user/MqttManager
    )
 
 idf_component_register( SRCS ${srcs}  

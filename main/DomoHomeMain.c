@@ -39,6 +39,7 @@
 #include "nvs_flash.h"
 #include "nvs.h"
 #include "config.h"
+#include "mqtt_manager.h"
 #include "mqtt_client.h"
 static const char    *TAG = "DomoHomeMain"; // Tag used for ESP log output
 static QueueHandle_t gpio_evt_queue = NULL;
@@ -314,8 +315,8 @@ void app_main()
 
      // Initialize Wi-Fi settings (connect to the specified Wi-Fi network)
     wifi_init(); 
-    
-   
+        
+
    // iConfigInit();
   //  wifi_init();
    
@@ -329,15 +330,26 @@ void app_main()
         // This sets up the user interface elements using the LVGL library.
         //ui_init();
         create_screens();
-        if( wifi_sta_init((uint8_t*)"dlinkAP", (uint8_t*)"DMINGL6Intrepido123.", WIFI_AUTH_WPA2_PSK) == ESP_OK)
+        char config_val[100];
+        size_t config_val_len = sizeof(config_val);
+        if(read_config("config.txt","p", config_val, &config_val_len) == 0)
         {
+            ESP_LOGI(TAG, "Configuration loaded successfully");
             loadScreen(SCREEN_ID_MAIN);
         }
         else
         {
+            ESP_LOGE(TAG, "Failed to load configuration");
+            loadScreen(SCREEN_ID_SETTINGS_SCREEN );
+        }
+
+        if( wifi_sta_init((uint8_t*)"dlinkAP", (uint8_t*)"DMINGL6Intrepido123.", WIFI_AUTH_WPA2_PSK) == ESP_OK)
+        {
+            ESP_LOGE(TAG, "Success to connect to Wi-Fi network");
+        }
+        else
+        {
             ESP_LOGE(TAG, "Failed to connect to Wi-Fi network");
-            // Handle Wi-Fi connection failure (e.g., show error message on screen)
-             loadScreen(SCREEN_ID_SETTINGS_SCREEN );
         }
 
         // Release the mutex after LVGL operations are complete
@@ -402,6 +414,7 @@ void app_main()
    lv_calendar_set_showed_date(calendar, 2021, 02);
    */
         
+   mqtt_manager_init();
          
     
     // Delay to ensure all initializations are stable

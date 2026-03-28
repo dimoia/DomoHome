@@ -8,46 +8,15 @@ extern "C" {
 #endif
 
 typedef struct _objects_t {
-    lv_obj_t *settings_screen;
     lv_obj_t *main;
+    lv_obj_t *settings_screen;
     lv_obj_t *heating_screen;
     lv_obj_t *test;
-    lv_obj_t *btn_goto_home_from_heater_screen_1;
-    lv_obj_t *btn_goto_home_2;
-    lv_obj_t *lbl_home_2;
-    lv_obj_t *lbl_time_2;
-    lv_obj_t *lbl_str_date_2;
-    lv_obj_t *obj0;
-    lv_obj_t *txt_ntp_server;
-    lv_obj_t *sw_manual_automatic_time;
-    lv_obj_t *sw_manual_rtc_ntp_server;
-    lv_obj_t *drp_wifi_ssid;
-    lv_obj_t *txt_wifi_psw;
-    lv_obj_t *obj1;
-    lv_obj_t *txt_hostname;
-    lv_obj_t *txt_ipaddress;
-    lv_obj_t *txt_netmask;
-    lv_obj_t *txt_gateway;
-    lv_obj_t *txt_dns;
-    lv_obj_t *sw_static_ip_dynamic_ip;
-    lv_obj_t *btn_wifi_scann;
-    lv_obj_t *btn_set_clock;
-    lv_obj_t *btn_wifi_connect;
-    lv_obj_t *btn_connect;
-    lv_obj_t *kek_keyboard;
-    lv_obj_t *obj2;
-    lv_obj_t *btn_apply;
-    lv_obj_t *btn_cancell;
-    lv_obj_t *drop_day;
-    lv_obj_t *drop_month;
-    lv_obj_t *drop_year;
-    lv_obj_t *drop_hour;
-    lv_obj_t *drop_minute;
     lv_obj_t *btn_goto_home;
     lv_obj_t *lbl_home;
     lv_obj_t *lbl_time;
     lv_obj_t *btn_heating_screen;
-    lv_obj_t *obj3;
+    lv_obj_t *obj0;
     lv_obj_t *btn_settings_screen;
     lv_obj_t *lbl_home_3;
     lv_obj_t *lbl_str_date;
@@ -55,13 +24,13 @@ typedef struct _objects_t {
     lv_obj_t *meter_temp;
     lv_obj_t *lbl_temp_f;
     lv_obj_t *lbl_temp_value_farheneit;
-    lv_obj_t *obj4;
-    lv_obj_t *obj5;
+    lv_obj_t *obj1;
+    lv_obj_t *obj2;
     lv_obj_t *lbl_temp;
     lv_obj_t *lbl_temp_value;
     lv_obj_t *lbl_temperature;
     lv_obj_t *meter_humidity;
-    lv_obj_t *obj6;
+    lv_obj_t *obj3;
     lv_obj_t *lbl_humidity_percent;
     lv_obj_t *lbl_humi_value;
     lv_obj_t *lbl_humidity;
@@ -74,6 +43,37 @@ typedef struct _objects_t {
     lv_obj_t *lbl_press_hpa_2;
     lv_obj_t *lbl_pressure_2;
     lv_obj_t *lbl_press_value_2;
+    lv_obj_t *btn_goto_home_from_heater_screen_1;
+    lv_obj_t *btn_goto_home_2;
+    lv_obj_t *lbl_home_2;
+    lv_obj_t *lbl_time_2;
+    lv_obj_t *lbl_str_date_2;
+    lv_obj_t *obj4;
+    lv_obj_t *txt_ntp_server;
+    lv_obj_t *sw_manual_automatic_time;
+    lv_obj_t *sw_manual_rtc_ntp_server;
+    lv_obj_t *drp_wifi_ssid;
+    lv_obj_t *txt_wifi_psw;
+    lv_obj_t *obj5;
+    lv_obj_t *txt_hostname;
+    lv_obj_t *txt_ipaddress;
+    lv_obj_t *txt_netmask;
+    lv_obj_t *txt_gateway;
+    lv_obj_t *txt_dns;
+    lv_obj_t *sw_static_ip_dynamic_ip;
+    lv_obj_t *btn_wifi_scann;
+    lv_obj_t *btn_set_clock;
+    lv_obj_t *btn_wifi_connect;
+    lv_obj_t *btn_connect;
+    lv_obj_t *kek_keyboard;
+    lv_obj_t *obj6;
+    lv_obj_t *btn_apply;
+    lv_obj_t *btn_cancell;
+    lv_obj_t *drop_day;
+    lv_obj_t *drop_month;
+    lv_obj_t *drop_year;
+    lv_obj_t *drop_hour;
+    lv_obj_t *drop_minute;
     lv_obj_t *btn_goto_home_from_heater_screen;
     lv_obj_t *btn_goto_home_1;
     lv_obj_t *lbl_time_1;
@@ -180,16 +180,16 @@ extern objects_t objects;
 
 enum ScreensEnum {
     SCREEN_ID_MAIN = 1,
-    SCREEN_ID_SETTINGS_SCREEN = 2,    
+    SCREEN_ID_SETTINGS_SCREEN = 2,
     SCREEN_ID_HEATING_SCREEN = 3,
     SCREEN_ID_TEST = 4,
 };
 
-void create_screen_settings_screen();
-void tick_screen_settings_screen();
-
 void create_screen_main();
 void tick_screen_main();
+
+void create_screen_settings_screen();
+void tick_screen_settings_screen();
 
 void create_screen_heating_screen();
 void tick_screen_heating_screen();

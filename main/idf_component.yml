@@ -1,5 +1,4 @@
 dependencies:
-  espressif/mosquitto: "*"
   esp-idf-lib/aht: "*"
   idf:
     version: ">=5.1.0"

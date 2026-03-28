@@ -6,6 +6,7 @@
 #include "lvgl.h"
 #include "ui.h"
 #include "bme280.h"  // Include the CAN driver for communication
+#include "mqtt_manager.h"
 
 TaskHandle_t bme280_TaskHandle;
 static const char *TAG = "BME280";  // Tag used for ESP log output
@@ -174,7 +175,11 @@ void bmp280_task(void *arg)
 
         lvgl_port_unlock();
 
-         vTaskDelay(pdMS_TO_TICKS(500)); // Delay for 2 seconds
+        mqtt_manager_publish("HeatingTemp", strTempC, 0, false); // Publish sensor data to MQTT topic
+        mqtt_manager_publish("HeatingHum", strHumidity, 0, false); // Publish sensor data to MQTT topic
+        mqtt_manager_publish("HeatingPressure", strPressure, 0, false); // Publish sensor data to MQTT topic
+
+        vTaskDelay(pdMS_TO_TICKS(10000)); // Delay for 2 seconds
     }
 }
 

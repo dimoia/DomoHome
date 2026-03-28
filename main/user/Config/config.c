@@ -363,3 +363,92 @@ DEVICE_STATUS getBME280Status(const DEVICE_CONFIG* in_ptrDeviceConfig)
     }
     return DEVICE_STATUS_ERROR;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////// File System Configuration Section
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#include "nvs_flash.h"
+#include "esp_log.h"
+#include "nvs.h"
+
+static  nvs_handle_t my_handle;
+
+int8_t read_config(const char* in_ptrFilename,const char *in_ptrKey, char* out_ptrValue, size_t *out_ptrMaxLen)
+//int8_t read_config(const char* in_ptrFilename)
+ {
+    esp_err_t err;
+    int8_t iRet = 0;
+
+    // 1. Apri il namespace "storage" in modalità sola lettura
+    err = nvs_open(in_ptrFilename, NVS_READONLY, &my_handle);
+    if (err != ESP_OK) 
+    {
+        iRet = -1;
+        ESP_LOGE(TAG_CONFIG, "Error opening NVS handle: %s", esp_err_to_name(err));
+    }
+    else 
+    {
+
+        // 2. Leggi la stringa. Prima determiniamo la lunghezza necessaria
+        //size_t required_size;
+        //err = nvs_get_str(my_handle, in_ptrKey, NULL, &required_size);    
+        err = nvs_get_str(my_handle, in_ptrKey, NULL, out_ptrMaxLen);    
+        if (err == ESP_OK) 
+        {
+            // La chiave esiste, procediamo alla lettura effettiva
+           // char* config_val = malloc(required_size);
+           // nvs_get_str(my_handle, in_ptrKey, config_val, &required_size);
+            nvs_get_str(my_handle, in_ptrKey, out_ptrValue, &out_ptrMaxLen);
+            ESP_LOGE(TAG_CONFIG, "Configurazione trovata: %s", out_ptrValue);
+            // free(config_val);
+        } 
+        else 
+        if (err == ESP_ERR_NVS_NOT_FOUND) 
+        {
+            ESP_LOGE(TAG_CONFIG, "Configurazione non presente.");
+            iRet = -1;
+        }
+        else 
+        {
+            iRet = -1;
+            ESP_LOGE(TAG_CONFIG, "Error reading from NVS: %s", esp_err_to_name(err));
+        }
+    }
+    // 3. Chiudi sempre l'handle
+    nvs_close(my_handle);
+    return iRet;
+}
+
+#include "nvs_flash.h"
+#include "esp_log.h"
+
+esp_err_t save_wifi_credentials(const char* ssid, const char* pass) {
+    nvs_handle_t my_handle;
+    esp_err_t err;
+
+    // 1. Apri il namespace "config" in modalità scrittura
+    err = nvs_open("config", NVS_READWRITE, &my_handle);
+    if (err != ESP_OK) return err;
+
+    // 2. Scrivi l'SSID
+    err = nvs_set_str(my_handle, "wifi_ssid", ssid);
+    if (err != ESP_OK) {
+        nvs_close(my_handle);
+        return err;
+    }
+
+    // 3. Scrivi la Password
+    err = nvs_set_str(my_handle, "wifi_pass", pass);
+    if (err != ESP_OK) {
+        nvs_close(my_handle);
+        return err;
+    }
+
+    // 4. IMPORTANTE: Esegui il commit per salvare fisicamente i dati
+    err = nvs_commit(my_handle);
+    
+    // 5. Chiudi l'handle
+    nvs_close(my_handle);
+    return err;
+}

@@ -14,6 +14,7 @@
 #include "lvgl_port.h" 
 #include "lvgl.h"
 #include "ui.h"
+
 #if 0
 /// @brief Enumeration for RTC Manual or NTP Server Configuration
 typedef enum _RTC_MANUAL_AUTO
@@ -89,6 +90,8 @@ typedef struct _DEVICE_CONFIG
 void initDeviceConfig(DEVICE_CONFIG* out_ptrDeviceConfig);
 void setBME280Status(DEVICE_CONFIG* in_ptrDeviceConfig, DEVICE_STATUS in_bStatus);
 DEVICE_STATUS getBME280Status(const DEVICE_CONFIG* in_ptrDeviceConfig);
+
+int8_t read_config(const char* in_ptrFilename,const char *in_ptrKey, char* out_ptrValue, size_t *out_ptrMaxLen);
 
 
 

@@ -65,30 +65,6 @@ dependencies:
     - esp32s2
     - esp32s3
     version: 2.1.1
-  espressif/mosquitto:
-    component_hash: 399b14ef6eab43447e7c93ec181146ae7e0a75a5e95ff50bf418dfd98df03341
-    dependencies:
-    - name: espressif/sock_utils
-      registry_url: https://components.espressif.com
-      require: private
-      version: ^0.2
-    - name: idf
-      require: private
-      version: '>=5.1'
-    source:
-      registry_url: https://components.espressif.com/
-      type: service
-    version: 2.0.20~6
-  espressif/sock_utils:
-    component_hash: b2e5cafc60dfefd05720ababb9fca0dfe2830fb9d71f97e5336de36a84c591c9
-    dependencies:
-    - name: idf
-      require: private
-      version: '>=5.0'
-    source:
-      registry_url: https://components.espressif.com
-      type: service
-    version: 0.2.2
   idf:
     source:
       type: idf
@@ -101,9 +77,8 @@ dependencies:
     version: 8.4.0
 direct_dependencies:
 - esp-idf-lib/aht
-- espressif/mosquitto
 - idf
 - lvgl/lvgl
-manifest_hash: 60660de7fd2a7c89ce0aeca16dc486b10cebaad6d159d47b5ca2153db1538126
+manifest_hash: 651b6a09c52ac1aced0262aaf741432f6ff7adff242fea1945cffa96da0fc5f3
 target: esp32s3
 version: 2.0.0
