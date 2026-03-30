@@ -86,7 +86,7 @@ void bmp280_task(void *arg)
 
     lv_obj_t *Lbl_humidity       = objs.lbl_humidity;
     lv_obj_t *Lbl_humidity_value = objs.lbl_humi_value;
-
+#if 0
     lv_obj_t * chart_temp_humy =  objs.chart_temp_humy;
 
     lv_chart_series_t * ser_temp;
@@ -104,6 +104,7 @@ void bmp280_task(void *arg)
 
     lv_chart_set_axis_tick(chart_temp_humy, LV_CHART_AXIS_PRIMARY_Y, 10, 5, 5, 2, true, 40);
     lv_chart_set_range(chart_temp_humy, LV_CHART_AXIS_PRIMARY_Y, -10, 50);
+    #endif
     //  lv_obj_set_style_local_line_width(chart_temp_humy, LV_CHART_PART_SERIES, LV_STATE_DEFAULT, 1);
     while (1)
     {
@@ -168,10 +169,10 @@ void bmp280_task(void *arg)
 
        // set_var_temp_indicator(fTemperature);
 
-        lv_chart_set_next_value(chart_temp_humy, ser_temp, fTemperature);
-        lv_chart_set_next_value(chart_temp_humy, ser_humi, fHumidity);
+       // lv_chart_set_next_value(chart_temp_humy, ser_temp, fTemperature);
+       // lv_chart_set_next_value(chart_temp_humy, ser_humi, fHumidity);
        
-        lv_chart_refresh(chart_temp_humy); /*Required after direct set*/
+       // lv_chart_refresh(chart_temp_humy); /*Required after direct set*/
 
         lvgl_port_unlock();
 

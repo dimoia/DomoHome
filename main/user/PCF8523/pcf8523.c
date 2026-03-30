@@ -130,12 +130,13 @@ void pcf8523_task(void *arg)
     objects_t objs = objects;
 	lv_obj_t *lbl_strDate = objs.lbl_str_date;
 	lv_obj_t *lbl_strDate_1 = objs.lbl_str_date_1;
-	lv_obj_t *lbl_strDate_2 = objs.lbl_str_date_2;
+	//lv_obj_t *lbl_strDate_2 = objs.lbl_str_date_2;
     
 	lv_obj_t *LblTime   = objs.lbl_time;
 	lv_obj_t *LblTime_1 = objs.lbl_time_1;
-	lv_obj_t *LblTime_2 = objs.lbl_time_2;   
+	//lv_obj_t *LblTime_2 = objs.lbl_time_2;   
 	
+	#if 0
     lv_obj_t *LblPaneltemp  = objs.temp_humi_panel;	
 	lv_obj_set_scrollbar_mode(LblPaneltemp, LV_SCROLLBAR_MODE_OFF);
 
@@ -144,7 +145,6 @@ void pcf8523_task(void *arg)
 	//lv_meter_indicator_t * indic_hour = lv_meter_add_needle_img(meter, scale_min, &img_hand, 5, 5);
 	//lv_meter_set_indicator_value(meter, meter, 7);
 
-	#if 0
 	meter = lv_meter_create(lv_scr_act());
     lv_obj_set_size(meter, 220, 220);
    // lv_obj_set_pos(meter, 226, 300);
@@ -203,13 +203,13 @@ void pcf8523_task(void *arg)
 					currentTime.tm_mday,strWeekDay[iWeekDay]);
 			lv_label_set_text(lbl_strDate  , user_data);
 			lv_label_set_text(lbl_strDate_1, user_data);
-			lv_label_set_text(lbl_strDate_2, user_data);
+			//lv_label_set_text(lbl_strDate_2, user_data);
 
 			memset(user_data,0,sizeof(user_data));
 			sprintf((char*)user_data, "%02d:%02d:%02d",currentTime.tm_hour,currentTime.tm_min,currentTime.tm_sec);
 			lv_label_set_text(LblTime, user_data);
 			lv_label_set_text(LblTime_1, user_data);
-			lv_label_set_text(LblTime_2, user_data);
+			//lv_label_set_text(LblTime_2, user_data);
 						/*
 			memset(user_data,0,sizeof(user_data));
 			sprintf((char*)user_data, "%02d:%02d:%02d",currentTime.tm_hour,currentTime.tm_min,currentTime.tm_sec);

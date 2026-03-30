@@ -685,6 +685,10 @@ void action_btn_cancell(lv_event_t *e) {
     // TODO: Implement action btn_cancell here
 }
 
+void action_btn_restart(lv_event_t *e) {
+    // TODO: Implement action btn_cancell here
+    esp_restart();
+}
 
 
 void action_sw_static_dynamic_ip(lv_event_t *e) 

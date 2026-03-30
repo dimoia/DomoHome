@@ -365,6 +365,19 @@ DEVICE_STATUS getBME280Status(const DEVICE_CONFIG* in_ptrDeviceConfig)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////// Configuration Status Section
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+static CONFIG_STATUS enActualState = NOT_CONFIG;
+CONFIG_STATUS getConfigStatus(void)
+{
+    return enActualState;
+}
+void setConfigStatus(CONFIG_STATUS in_eConfigStatus)
+{
+    enActualState = in_eConfigStatus;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////// File System Configuration Section
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -391,7 +404,7 @@ static int8_t get_value_size_by_key(const char* in_ptrFilename, const char* in_p
         if (nvs_open(in_ptrFilename, NVS_READONLY, &my_handle) != ESP_OK)
         {
             iRet = -1;
-            ESP_LOGE(TAG_CONFIG, "Error opening NVS handle");
+            ESP_LOGE(TAG_CONFIG, "Error opening %s ", in_ptrFilename);
         }
         else 
         {
@@ -402,7 +415,7 @@ static int8_t get_value_size_by_key(const char* in_ptrFilename, const char* in_p
             } 
             else 
             {
-                ESP_LOGE(TAG_CONFIG, "Configurazione non present");
+                ESP_LOGE(TAG_CONFIG, "Key %s not present in %s", in_ptrKey, in_ptrFilename);
                 iRet = -1;
             }  
             nvs_close(my_handle); // 3. Chiudi sempre l'handle         
@@ -420,18 +433,18 @@ static int8_t get_value_by_key(const char* in_ptrFilename, const char* in_ptrKey
     if (nvs_open(in_ptrFilename, NVS_READONLY, &my_handle) != ESP_OK)
     {
         iRet = -1;
-        ESP_LOGE(TAG_CONFIG, "Error opening NVS handle");
+        ESP_LOGE(TAG_CONFIG, "Error opening %s ", in_ptrFilename);
     }
     else 
     {
-        if( nvs_get_str(my_handle, in_ptrKey, out_ptrValue, in_ptrValueSize) != ESP_OK)
+        if( nvs_get_str(my_handle, in_ptrKey, out_ptrValue, in_ptrValueSize) == ESP_OK)
         {
-            ESP_LOGE(TAG_CONFIG, "Configurazione trovata: %s", out_ptrValue);
+            ESP_LOGE(TAG_CONFIG, "Key %s present with value: %s", in_ptrKey, out_ptrValue);
             nvs_close(my_handle);
         }
         else 
         {
-            ESP_LOGE(TAG_CONFIG, "Configurazione non presente.");
+            ESP_LOGE(TAG_CONFIG, "Key %s not present in %s", in_ptrKey, in_ptrFilename);
             iRet = -1;
         }
     }    
@@ -445,7 +458,7 @@ static int8_t check_for_config_file(const char* in_ptrFilename)
     if(nvs_open(in_ptrFilename, NVS_READONLY, &my_handle) != ESP_OK)
     {
         iRet = -1;
-        ESP_LOGE(TAG_CONFIG, "Error opening NVS handle");
+        ESP_LOGE(TAG_CONFIG, "Error opening %s ", in_ptrFilename);
     }
     else
     {

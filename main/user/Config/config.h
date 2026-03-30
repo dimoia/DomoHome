@@ -54,6 +54,15 @@ typedef struct _USER_CONFIG
 } USER_CONFIG;
 
 #endif
+typedef enum _CONFIG_STATUS_
+{
+    CONFIG,
+    NOT_CONFIG,
+} CONFIG_STATUS;
+
+CONFIG_STATUS getConfigStatus(void);
+void setConfigStatus(CONFIG_STATUS in_eConfigStatus);
+
 /// @brief External declarations
 extern wifi_ap_record_t    ap_info[];  // Declare an array to store the AP records
 extern esp_netif_ip_info_t ip_info;    // Stores IP information
