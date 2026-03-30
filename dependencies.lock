@@ -70,15 +70,16 @@ dependencies:
       type: idf
     version: 5.3.1
   lvgl/lvgl:
+    component_hash: d7c1ac037ae6e85d94897f807d6e7ba0946a83e720074fc95a4f6241da9f9f53
     dependencies: []
     source:
-      path: D:\GITHUB_PROJECTS\DomoHome\components\lvgl_port\lvgl__lvgl
-      type: local
+      registry_url: https://components.espressif.com/
+      type: service
     version: 8.4.0
 direct_dependencies:
 - esp-idf-lib/aht
 - idf
 - lvgl/lvgl
-manifest_hash: 651b6a09c52ac1aced0262aaf741432f6ff7adff242fea1945cffa96da0fc5f3
+manifest_hash: 91648a0ee80c337607db47defaa06132c5d3c52967b25f2893a683a3e37b5ded
 target: esp32s3
 version: 2.0.0

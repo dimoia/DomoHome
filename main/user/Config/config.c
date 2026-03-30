@@ -372,8 +372,107 @@ DEVICE_STATUS getBME280Status(const DEVICE_CONFIG* in_ptrDeviceConfig)
 #include "esp_log.h"
 #include "nvs.h"
 
+
+CONFIG_KEY_VALUE_PAIR createConfigKeyValuePair[MAX_KEY_VALUE_PAIRS];
 static  nvs_handle_t my_handle;
 
+int8_t get_value_size_by_key(const char* in_ptrFilename, const char* in_ptrKey, size_t* out_ptrValueSize)
+{
+    int8_t iRet = 0;
+    
+    if ((out_ptrValueSize == NULL) || (in_ptrFilename == NULL) || (in_ptrKey == NULL))
+    {
+        ESP_LOGE(TAG_CONFIG, "One or more input pointers are NULL");
+        iRet = -1;
+    }
+    else
+    {
+        // 1. Apri il namespace "storage" in modalità sola lettura
+        if (nvs_open(in_ptrFilename, NVS_READONLY, &my_handle) != ESP_OK)
+        {
+            iRet = -1;
+            ESP_LOGE(TAG_CONFIG, "Error opening NVS handle");
+        }
+        else 
+        {
+            size_t required_size;
+            if (nvs_get_str(my_handle, in_ptrKey, NULL, &required_size) == ESP_OK)
+            {
+                *out_ptrValueSize = required_size;
+            } 
+            else 
+            {
+                ESP_LOGE(TAG_CONFIG, "Configurazione non present");
+                iRet = -1;
+            }  
+            nvs_close(my_handle); // 3. Chiudi sempre l'handle         
+        }        
+    }    
+    return iRet;
+}
+
+int8_t get_value_by_key(const char* in_ptrFilename, const char* in_ptrKey,char* out_ptrValue, size_t in_ptrValueSize)
+{
+    esp_err_t err;
+    int8_t iRet = 0;
+
+    // 1. Apri il namespace "storage" in modalità sola lettura
+    if (nvs_open(in_ptrFilename, NVS_READONLY, &my_handle) != ESP_OK)
+    {
+        iRet = -1;
+        ESP_LOGE(TAG_CONFIG, "Error opening NVS handle");
+    }
+    else 
+    {
+        if( nvs_get_str(my_handle, in_ptrKey, out_ptrValue, in_ptrValueSize) != ESP_OK)
+        {
+            ESP_LOGE(TAG_CONFIG, "Configurazione trovata: %s", out_ptrValue);
+            nvs_close(my_handle);
+        }
+        else 
+        {
+            ESP_LOGE(TAG_CONFIG, "Configurazione non presente.");
+            iRet = -1;
+        }
+    }    
+    return iRet;
+}
+
+int8_t check_for_config_file(const char* in_ptrFilename)
+{
+    int8_t iRet = 0;
+    // Try to open config file
+    if(nvs_open(in_ptrFilename, NVS_READONLY, &my_handle) != ESP_OK)
+    {
+        iRet = -1;
+        ESP_LOGE(TAG_CONFIG, "Error opening NVS handle");
+    }
+    else
+    {
+        ESP_LOGI(TAG_CONFIG, "Configuration file '%s' exists.", in_ptrFilename);
+        nvs_close(my_handle); // Close the handle after checking
+    }
+    return iRet;
+}
+
+int8_t delete_file(const char* filename)
+{
+    int8_t iRet = 0;
+    // Try to close config file
+    if(nvs_open(filename, NVS_READONLY, &my_handle) == ESP_OK)
+    {
+        nvs_erase_all(my_handle); // Erase all key-value pairs in the namespace
+        nvs_commit(my_handle);    // Commit the changes to ensure they are saved
+        nvs_close(my_handle);     // Close the handle after erasing
+        ESP_LOGI(TAG_CONFIG, "File '%s' deleted successfully.", filename);
+    }
+    else
+    {
+        iRet = -1;
+        ESP_LOGE(TAG_CONFIG, "Error opening NVS handle for deletion");
+    }
+    return iRet;
+}
 int8_t read_config(const char* in_ptrFilename,const char *in_ptrKey, char* out_ptrValue, size_t *out_ptrMaxLen)
 //int8_t read_config(const char* in_ptrFilename)
  {
@@ -389,19 +488,11 @@ int8_t read_config(const char* in_ptrFilename,const char *in_ptrKey, char* out_p
     }
     else 
     {
-
-        // 2. Leggi la stringa. Prima determiniamo la lunghezza necessaria
-        //size_t required_size;
-        //err = nvs_get_str(my_handle, in_ptrKey, NULL, &required_size);    
-        err = nvs_get_str(my_handle, in_ptrKey, NULL, out_ptrMaxLen);    
-        if (err == ESP_OK) 
+        size_t required_size;
+        if(nvs_get_str(my_handle, in_ptrKey, NULL, &required_size) == ESP_OK)
         {
-            // La chiave esiste, procediamo alla lettura effettiva
-           // char* config_val = malloc(required_size);
-           // nvs_get_str(my_handle, in_ptrKey, config_val, &required_size);
-            nvs_get_str(my_handle, in_ptrKey, out_ptrValue, &out_ptrMaxLen);
+            nvs_get_str(my_handle, in_ptrKey, out_ptrValue, out_ptrMaxLen);
             ESP_LOGE(TAG_CONFIG, "Configurazione trovata: %s", out_ptrValue);
-            // free(config_val);
         } 
         else 
         if (err == ESP_ERR_NVS_NOT_FOUND) 
@@ -412,7 +503,7 @@ int8_t read_config(const char* in_ptrFilename,const char *in_ptrKey, char* out_p
         else 
         {
             iRet = -1;
-            ESP_LOGE(TAG_CONFIG, "Error reading from NVS: %s", esp_err_to_name(err));
+            ESP_LOGE(TAG_CONFIG, "Error reading from NVS");
         }
     }
     // 3. Chiudi sempre l'handle
@@ -420,9 +511,7 @@ int8_t read_config(const char* in_ptrFilename,const char *in_ptrKey, char* out_p
     return iRet;
 }
 
-#include "nvs_flash.h"
-#include "esp_log.h"
-
+#if 0
 esp_err_t save_wifi_credentials(const char* ssid, const char* pass) {
     nvs_handle_t my_handle;
     esp_err_t err;
@@ -451,4 +540,292 @@ esp_err_t save_wifi_credentials(const char* ssid, const char* pass) {
     // 5. Chiudi l'handle
     nvs_close(my_handle);
     return err;
+}
+#endif
+
+static size_t iKeyValueLength = 0;
+int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
+{
+    int iRet = 0;
+    if(check_for_config_file(in_ptrFilename) == 0)
+    {
+        createConfigKeyValuePair[0].key = "wifi_ssid";
+        if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[0].key, &iKeyValueLength) == 0)
+        {
+            createConfigKeyValuePair[0].value = malloc(iKeyValueLength);        
+            if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[0].key, createConfigKeyValuePair[0].value, iKeyValueLength) != 0)
+            {
+                free(createConfigKeyValuePair[0].value);
+                ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[0].key);
+                iRet = -1;
+            }
+        }
+        else
+        {
+            ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[0].key);
+            iRet = -1;
+        }
+        if(iRet == 0)
+        {
+            createConfigKeyValuePair[1].key = "wifi_pass";
+            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[1].key   , &iKeyValueLength) == 0)
+            {
+                createConfigKeyValuePair[1].value = malloc(iKeyValueLength);    
+                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[1].key, createConfigKeyValuePair[1].value, iKeyValueLength) != 0)
+                {
+                    free(createConfigKeyValuePair[1].value);
+                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[1].key);
+                    iRet = -1;
+                }   
+            }
+            else
+            {
+                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[1].key);
+                iRet = -1;
+            }
+        }
+        if(iRet == 0)
+        {
+            createConfigKeyValuePair[2].key = "ipaddress";
+            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[2].key   , &iKeyValueLength) == 0)
+            {
+                createConfigKeyValuePair[2].value = malloc(iKeyValueLength);    
+                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[2].key, createConfigKeyValuePair[2].value, iKeyValueLength) != 0)
+                {
+                    free(createConfigKeyValuePair[2].value);
+                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[2].key);
+                    iRet = -1;
+                }
+            }
+            else
+            {
+                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[2].key);
+                iRet = -1;
+            }            
+        }
+        if(iRet == 0)
+        {              
+            createConfigKeyValuePair[3].key = "gateway";
+            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[3].key   , &iKeyValueLength)== 0)
+            {
+                createConfigKeyValuePair[3].value = malloc(iKeyValueLength);    
+                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[3].key, createConfigKeyValuePair[3].value, iKeyValueLength) != 0)
+                {
+                    free(createConfigKeyValuePair[3].value);
+                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[3].key);
+                    iRet = -1;
+                }   
+            }
+            else
+            {
+                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[3].key);
+                iRet = -1;
+            }
+        }
+        else
+        {
+            ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[3].key);
+            iRet = -1;
+        }
+        if(iRet == 0)
+        {
+            createConfigKeyValuePair[4].key = "netmask";
+            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[4].key   , &iKeyValueLength)==0)
+            {
+                createConfigKeyValuePair[4].value = malloc(iKeyValueLength);    
+                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[4].key, createConfigKeyValuePair[4].value, iKeyValueLength) != 0)
+                {
+                    free(createConfigKeyValuePair[4].value);
+                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[4].key);
+                    iRet = -1;
+                }   
+            }
+            else
+            {
+                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[4].key);
+                iRet = -1;
+            }
+        }
+
+        if(iRet == 0)
+        {
+            createConfigKeyValuePair[5].key = "hostname";
+            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[5].key   , &iKeyValueLength) == 0)
+            {
+                createConfigKeyValuePair[5].value = malloc(iKeyValueLength);    
+                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[5].key, createConfigKeyValuePair[5].value, iKeyValueLength) != 0)
+                {
+                    free(createConfigKeyValuePair[5].value);
+                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[5].key);
+                    iRet = -1;
+                }   
+            }
+            else
+            {
+                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[5].key);
+                iRet = -1;
+            }
+        }
+        else
+        {
+            ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[5].key);
+            iRet = -1;
+        }
+
+        if(iRet == 0)
+        {
+            createConfigKeyValuePair[6].key = "static_dinamicIP";
+            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[6].key   , &iKeyValueLength) == 0)
+            {
+                createConfigKeyValuePair[6].value = malloc(iKeyValueLength);    
+                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[6].key, createConfigKeyValuePair[6].value, iKeyValueLength) != 0)
+                {
+                    free(createConfigKeyValuePair[5].value);
+                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[5].key);
+                    iRet = -1;
+                }   
+            }
+            else
+            {
+                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[5].key);
+                iRet = -1;
+            }
+        }
+        else
+        {
+            ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[5].key);
+            iRet = -1;
+        }
+  
+        if(iRet == 0)
+        {
+            createConfigKeyValuePair[7].key = "ntpServer";
+            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[7].key   , &iKeyValueLength) == 0)
+            {
+                createConfigKeyValuePair[7].value = malloc(iKeyValueLength);    
+                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[7].key, createConfigKeyValuePair[7].value, iKeyValueLength) != 0)
+                {
+                    free(createConfigKeyValuePair[7].value);
+                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[7].key);
+                    iRet = -1;
+                }   
+            }
+            else    
+            {
+                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[7].key);
+                iRet = -1;
+            }
+        }
+
+        if(iRet == 0)
+        {   
+            createConfigKeyValuePair[8].key = "timezone";
+            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[8].key   , &iKeyValueLength) == 0)
+             {
+                createConfigKeyValuePair[8].value = malloc(iKeyValueLength);    
+                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[8].key, createConfigKeyValuePair[8].value, iKeyValueLength) != 0)
+                {
+                    free(createConfigKeyValuePair[8].value);
+                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[8].key);
+                    iRet = -1;
+                }   
+            }
+            else
+            {
+                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[8].key);
+                iRet = -1;
+            }
+        }
+        
+        if(iRet == 0)
+        {        
+            createConfigKeyValuePair[9].key = "mqttBrokerIP";
+            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[9].key   , &iKeyValueLength) == 0)
+            {
+                createConfigKeyValuePair[9].value = malloc(iKeyValueLength);    
+                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[9].key, createConfigKeyValuePair[9].value, iKeyValueLength) != 0)
+                {
+                    free(createConfigKeyValuePair[9].value);
+                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[9].key);
+                    iRet = -1;
+                }   
+            }
+            else
+            {
+                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[9].key);
+                iRet = -1;
+            }
+        }
+        else
+        {
+            ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[9].key);
+            iRet = -1;
+        }
+        
+        if(iRet == 0)
+        {              
+            createConfigKeyValuePair[10].key = "mqttUserId";
+            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[10].key   , &iKeyValueLength) == 0)
+            {   
+                createConfigKeyValuePair[10].value = malloc(iKeyValueLength);    
+                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[10].key, createConfigKeyValuePair[10].value, iKeyValueLength) != 0)
+                {
+                    free(createConfigKeyValuePair[10].value);
+                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[10].key);
+                    iRet = -1;
+                }   
+            }
+            else
+            {
+                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[10].key);
+                iRet = -1;
+            }
+        }
+
+        if(iRet == 0)
+        {   
+            createConfigKeyValuePair[11].key = "mqttPsw";
+            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[11].key   , &iKeyValueLength) == 0)
+            {   
+                createConfigKeyValuePair[11].value = malloc(iKeyValueLength);    
+                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[11].key, createConfigKeyValuePair[11].value, iKeyValueLength) != 0)
+                {
+                    free(createConfigKeyValuePair[11].value);
+                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[11].key);
+                    iRet = -1;
+                }   
+            }
+            else
+            {
+                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[11].key);
+                iRet = -1;
+            }
+        }  
+        if(iRet == 0)
+        {        
+            createConfigKeyValuePair[12].key = "mqttClientId";
+            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[12].key   , &iKeyValueLength) == 0)
+            {
+                createConfigKeyValuePair[12].value = malloc(iKeyValueLength);    
+                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[12].key, createConfigKeyValuePair[12].value, iKeyValueLength) != 0)
+                {
+                    free(createConfigKeyValuePair[12].value);
+                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[12].key);
+                    iRet = -1;
+                }
+            }
+            else
+            {
+                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[12].key);
+                iRet = -1;
+            }
+        }
+
+        ESP_LOGI(TAG_CONFIG, "Config file '%s' downloaded successfully.", in_ptrFilename);
+    }
+    else
+    {
+        iRet = -1;
+    }
+    return iRet;
 }

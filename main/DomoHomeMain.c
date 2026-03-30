@@ -330,27 +330,25 @@ void app_main()
         // This sets up the user interface elements using the LVGL library.
         //ui_init();
         create_screens();
-        char config_val[100];
-        size_t config_val_len = sizeof(config_val);
-        if(read_config("config.txt","p", config_val, &config_val_len) == 0)
+
+        if(iDownloadConfigFileFromNVS("config.txt") == -1)
         {
-            ESP_LOGI(TAG, "Configuration loaded successfully");
-            loadScreen(SCREEN_ID_MAIN);
-        }
-        else
-        {
-            ESP_LOGE(TAG, "Failed to load configuration");
+            ESP_LOGI(TAG, "Configuration file not found");
             loadScreen(SCREEN_ID_SETTINGS_SCREEN );
         }
-
-        if( wifi_sta_init((uint8_t*)"dlinkAP", (uint8_t*)"DMINGL6Intrepido123.", WIFI_AUTH_WPA2_PSK) == ESP_OK)
-        {
-            ESP_LOGE(TAG, "Success to connect to Wi-Fi network");
-        }
         else
         {
-            ESP_LOGE(TAG, "Failed to connect to Wi-Fi network");
+            loadScreen(SCREEN_ID_MAIN);
+            if( wifi_sta_init((uint8_t*)"dlinkAP", (uint8_t*)"DMINGL6Intrepido123.", WIFI_AUTH_WPA2_PSK) == ESP_OK)
+            {
+                ESP_LOGE(TAG, "Success to connect to Wi-Fi network");
+            }
+            else
+            {
+                ESP_LOGE(TAG, "Failed to connect to Wi-Fi network");
+            }
         }
+        
 
         // Release the mutex after LVGL operations are complete
         // This allows other tasks to access the LVGL port.

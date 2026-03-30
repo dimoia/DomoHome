@@ -7,6 +7,17 @@
 extern "C" {
 #endif
 
+// Screens
+
+enum ScreensEnum {
+    _SCREEN_ID_FIRST = 1,
+    SCREEN_ID_MAIN = 1,
+    SCREEN_ID_SETTINGS_SCREEN = 2,
+    SCREEN_ID_HEATING_SCREEN = 3,
+    SCREEN_ID_TEST = 4,
+    _SCREEN_ID_LAST = 4
+};
+
 typedef struct _objects_t {
     lv_obj_t *main;
     lv_obj_t *settings_screen;
@@ -74,6 +85,10 @@ typedef struct _objects_t {
     lv_obj_t *drop_year;
     lv_obj_t *drop_hour;
     lv_obj_t *drop_minute;
+    lv_obj_t *txt_broker_ip;
+    lv_obj_t *txt_mqttuserid;
+    lv_obj_t *txt_mqttpassword;
+    lv_obj_t *txt_mqttclient_id;
     lv_obj_t *btn_goto_home_from_heater_screen;
     lv_obj_t *btn_goto_home_1;
     lv_obj_t *lbl_time_1;
@@ -178,12 +193,53 @@ typedef struct _objects_t {
 
 extern objects_t objects;
 
-enum ScreensEnum {
-    SCREEN_ID_MAIN = 1,
-    SCREEN_ID_SETTINGS_SCREEN = 2,
-    SCREEN_ID_HEATING_SCREEN = 3,
-    SCREEN_ID_TEST = 4,
-};
+typedef struct {
+    lv_meter_scale_t *scale;
+    lv_meter_indicator_t *indicator;
+    lv_meter_indicator_t *indicator1;
+    lv_meter_indicator_t *indicator2;
+    lv_meter_indicator_t *indicator3;
+    lv_meter_indicator_t *indicator4;
+    lv_meter_indicator_t *indicator5;
+    lv_meter_indicator_t *indicator6;
+    lv_meter_indicator_t *indicator7;
+    lv_meter_indicator_t *indicator8;
+    lv_meter_indicator_t *indicator9;
+    lv_meter_scale_t *scale1;
+    lv_meter_indicator_t *indicator10;
+    lv_meter_indicator_t *indicator11;
+    lv_meter_indicator_t *indicator12;
+    lv_meter_indicator_t *indicator13;
+    lv_meter_scale_t *scale2;
+    lv_meter_indicator_t *indicator14;
+    lv_meter_scale_t *scale3;
+    lv_meter_indicator_t *indicator15;
+} screen_main_state_t;
+
+typedef struct {
+    lv_meter_scale_t *scale;
+    lv_meter_indicator_t *indicator;
+    lv_meter_indicator_t *indicator1;
+    lv_meter_indicator_t *indicator2;
+    lv_meter_indicator_t *indicator3;
+    lv_meter_indicator_t *indicator4;
+    lv_meter_indicator_t *indicator5;
+    lv_meter_indicator_t *indicator6;
+    lv_meter_indicator_t *indicator7;
+    lv_meter_indicator_t *indicator8;
+    lv_meter_indicator_t *indicator9;
+    lv_meter_scale_t *scale1;
+    lv_meter_indicator_t *indicator10;
+    lv_meter_indicator_t *indicator11;
+    lv_meter_indicator_t *indicator12;
+    lv_meter_indicator_t *indicator13;
+    lv_meter_scale_t *scale2;
+    lv_meter_indicator_t *indicator14;
+    lv_meter_indicator_t *indicator15;
+} screen_test_state_t;
+
+extern screen_main_state_t screen_main_state;
+extern screen_test_state_t screen_test_state;
 
 void create_screen_main();
 void tick_screen_main();
@@ -201,7 +257,6 @@ void tick_screen_by_id(enum ScreensEnum screenId);
 void tick_screen(int screen_index);
 
 void create_screens();
-
 
 #ifdef __cplusplus
 }

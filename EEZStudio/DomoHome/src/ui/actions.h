@@ -30,7 +30,6 @@ extern void action_drop_date_time(lv_event_t * e);
 extern void action_settings_screen_cb(lv_event_t * e);
 extern void action_wifi_connect_cb(lv_event_t * e);
 
-
 #ifdef __cplusplus
 }
 #endif
