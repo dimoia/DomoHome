@@ -372,11 +372,11 @@ DEVICE_STATUS getBME280Status(const DEVICE_CONFIG* in_ptrDeviceConfig)
 #include "esp_log.h"
 #include "nvs.h"
 
-
 CONFIG_KEY_VALUE_PAIR createConfigKeyValuePair[MAX_KEY_VALUE_PAIRS];
-static  nvs_handle_t my_handle;
+static nvs_handle_t my_handle;
+static size_t iKeyValueLength = 0;
 
-int8_t get_value_size_by_key(const char* in_ptrFilename, const char* in_ptrKey, size_t* out_ptrValueSize)
+static int8_t get_value_size_by_key(const char* in_ptrFilename, const char* in_ptrKey, size_t* out_ptrValueSize)
 {
     int8_t iRet = 0;
     
@@ -411,7 +411,7 @@ int8_t get_value_size_by_key(const char* in_ptrFilename, const char* in_ptrKey, 
     return iRet;
 }
 
-int8_t get_value_by_key(const char* in_ptrFilename, const char* in_ptrKey,char* out_ptrValue, size_t in_ptrValueSize)
+static int8_t get_value_by_key(const char* in_ptrFilename, const char* in_ptrKey,char* out_ptrValue, size_t in_ptrValueSize)
 {
     esp_err_t err;
     int8_t iRet = 0;
@@ -438,7 +438,7 @@ int8_t get_value_by_key(const char* in_ptrFilename, const char* in_ptrKey,char* 
     return iRet;
 }
 
-int8_t check_for_config_file(const char* in_ptrFilename)
+static int8_t check_for_config_file(const char* in_ptrFilename)
 {
     int8_t iRet = 0;
     // Try to open config file
@@ -455,7 +455,7 @@ int8_t check_for_config_file(const char* in_ptrFilename)
     return iRet;
 }
 
-int8_t delete_file(const char* filename)
+static int8_t delete_file(const char* filename)
 {
     int8_t iRet = 0;
     // Try to close config file
@@ -473,10 +473,9 @@ int8_t delete_file(const char* filename)
     }
     return iRet;
 }
-int8_t read_config(const char* in_ptrFilename,const char *in_ptrKey, char* out_ptrValue, size_t *out_ptrMaxLen)
-//int8_t read_config(const char* in_ptrFilename)
- {
-    esp_err_t err;
+#if 0
+static int8_t read_config(const char* in_ptrFilename,const char *in_ptrKey, char* out_ptrValue, size_t *out_ptrMaxLen)
+
     int8_t iRet = 0;
 
     // 1. Apri il namespace "storage" in modalità sola lettura
@@ -493,13 +492,7 @@ int8_t read_config(const char* in_ptrFilename,const char *in_ptrKey, char* out_p
         {
             nvs_get_str(my_handle, in_ptrKey, out_ptrValue, out_ptrMaxLen);
             ESP_LOGE(TAG_CONFIG, "Configurazione trovata: %s", out_ptrValue);
-        } 
-        else 
-        if (err == ESP_ERR_NVS_NOT_FOUND) 
-        {
-            ESP_LOGE(TAG_CONFIG, "Configurazione non presente.");
-            iRet = -1;
-        }
+        }        
         else 
         {
             iRet = -1;
@@ -511,7 +504,7 @@ int8_t read_config(const char* in_ptrFilename,const char *in_ptrKey, char* out_p
     return iRet;
 }
 
-#if 0
+
 esp_err_t save_wifi_credentials(const char* ssid, const char* pass) {
     nvs_handle_t my_handle;
     esp_err_t err;
@@ -543,13 +536,14 @@ esp_err_t save_wifi_credentials(const char* ssid, const char* pass) {
 }
 #endif
 
-static size_t iKeyValueLength = 0;
+
+
 int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
 {
     int iRet = 0;
     if(check_for_config_file(in_ptrFilename) == 0)
     {
-        createConfigKeyValuePair[0].key = "wifi_ssid";
+        //createConfigKeyValuePair[0].key = "wifi_ssid";
         if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[0].key, &iKeyValueLength) == 0)
         {
             createConfigKeyValuePair[0].value = malloc(iKeyValueLength);        
@@ -567,7 +561,7 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
         }
         if(iRet == 0)
         {
-            createConfigKeyValuePair[1].key = "wifi_pass";
+            //createConfigKeyValuePair[1].key = "wifi_pass";
             if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[1].key   , &iKeyValueLength) == 0)
             {
                 createConfigKeyValuePair[1].value = malloc(iKeyValueLength);    
@@ -586,7 +580,7 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
         }
         if(iRet == 0)
         {
-            createConfigKeyValuePair[2].key = "ipaddress";
+           // createConfigKeyValuePair[2].key = "ipaddress";
             if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[2].key   , &iKeyValueLength) == 0)
             {
                 createConfigKeyValuePair[2].value = malloc(iKeyValueLength);    
@@ -605,7 +599,7 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
         }
         if(iRet == 0)
         {              
-            createConfigKeyValuePair[3].key = "gateway";
+            //createConfigKeyValuePair[3].key = "gateway";
             if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[3].key   , &iKeyValueLength)== 0)
             {
                 createConfigKeyValuePair[3].value = malloc(iKeyValueLength);    
@@ -629,7 +623,7 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
         }
         if(iRet == 0)
         {
-            createConfigKeyValuePair[4].key = "netmask";
+            //createConfigKeyValuePair[4].key = "netmask";
             if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[4].key   , &iKeyValueLength)==0)
             {
                 createConfigKeyValuePair[4].value = malloc(iKeyValueLength);    
@@ -649,7 +643,7 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
 
         if(iRet == 0)
         {
-            createConfigKeyValuePair[5].key = "hostname";
+            //createConfigKeyValuePair[5].key = "hostname";
             if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[5].key   , &iKeyValueLength) == 0)
             {
                 createConfigKeyValuePair[5].value = malloc(iKeyValueLength);    
@@ -674,7 +668,7 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
 
         if(iRet == 0)
         {
-            createConfigKeyValuePair[6].key = "static_dinamicIP";
+            //createConfigKeyValuePair[6].key = "static_dinamicIP";
             if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[6].key   , &iKeyValueLength) == 0)
             {
                 createConfigKeyValuePair[6].value = malloc(iKeyValueLength);    
@@ -699,7 +693,7 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
   
         if(iRet == 0)
         {
-            createConfigKeyValuePair[7].key = "ntpServer";
+            //createConfigKeyValuePair[7].key = "ntpServer";
             if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[7].key   , &iKeyValueLength) == 0)
             {
                 createConfigKeyValuePair[7].value = malloc(iKeyValueLength);    
@@ -719,7 +713,7 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
 
         if(iRet == 0)
         {   
-            createConfigKeyValuePair[8].key = "timezone";
+            //createConfigKeyValuePair[8].key = "timezone";
             if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[8].key   , &iKeyValueLength) == 0)
              {
                 createConfigKeyValuePair[8].value = malloc(iKeyValueLength);    
@@ -739,7 +733,7 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
         
         if(iRet == 0)
         {        
-            createConfigKeyValuePair[9].key = "mqttBrokerIP";
+            //createConfigKeyValuePair[9].key = "mqttBrokerIP";
             if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[9].key   , &iKeyValueLength) == 0)
             {
                 createConfigKeyValuePair[9].value = malloc(iKeyValueLength);    
@@ -764,7 +758,7 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
         
         if(iRet == 0)
         {              
-            createConfigKeyValuePair[10].key = "mqttUserId";
+            //createConfigKeyValuePair[10].key = "mqttUserId";
             if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[10].key   , &iKeyValueLength) == 0)
             {   
                 createConfigKeyValuePair[10].value = malloc(iKeyValueLength);    
@@ -784,7 +778,7 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
 
         if(iRet == 0)
         {   
-            createConfigKeyValuePair[11].key = "mqttPsw";
+            //createConfigKeyValuePair[11].key = "mqttPsw";
             if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[11].key   , &iKeyValueLength) == 0)
             {   
                 createConfigKeyValuePair[11].value = malloc(iKeyValueLength);    
@@ -803,7 +797,7 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
         }  
         if(iRet == 0)
         {        
-            createConfigKeyValuePair[12].key = "mqttClientId";
+            //createConfigKeyValuePair[12].key = "mqttClientId";
             if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[12].key   , &iKeyValueLength) == 0)
             {
                 createConfigKeyValuePair[12].value = malloc(iKeyValueLength);    

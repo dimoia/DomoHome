@@ -105,15 +105,15 @@ typedef struct _CONFIG_KEY_VALUE_PAIR_
 int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename);
 int8_t iUploadConfigFileToNVS(const char* in_ptrFilename, const char* in_ptrKey[], const char* in_ptrValue[], size_t in_iNumKeyValuePairs);
 
+/*
 int8_t check_for_config_file(const char* in_ptrFilename);
 int8_t get_value_size_by_key(const char* in_ptrFilename, const char* in_ptrKey, size_t* out_ptrValueSize);
 int8_t get_value_by_key(const char* in_ptrFilename, const char* in_ptrKey,char* out_ptrValue, size_t in_ptrValueSize);
 int8_t delete_file(const char* filename);
 int8_t save_wifi_credentials(const char* ssid, const char* pass);
 int8_t save_ntp_server(const char* ntp_server);
-
 int8_t read_config(const char* in_ptrFilename,const char *in_ptrKey, char* out_ptrValue, size_t *out_ptrMaxLen);
-
+*/
 
 
 #endif //_CONFIG_H_
