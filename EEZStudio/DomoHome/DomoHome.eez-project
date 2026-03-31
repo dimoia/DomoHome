@@ -7,7 +7,7 @@
       "objID": "fd434352-2277-c4a8-e87e-e96cfcbf2305",
       "projectVersion": "v3",
       "projectType": "lvgl",
-      "lvglVersion": "8.3",
+      "lvglVersion": "8.4.0",
       "extensions": [],
       "imports": [],
       "flowSupport": false,
@@ -19,7 +19,8 @@
       "author": "Angelo Di Moia",
       "resourceFiles": [],
       "hiddenWidgetLines": "dimmed",
-      "dimmedLinesOpacity": "20"
+      "dimmedLinesOpacity": "20",
+      "embedFonts": true
     },
     "build": {
       "objID": "72794a43-a0fc-13c2-7eb5-67dd952141a4",
@@ -98,6 +99,7 @@
       "fileSystemPath": "",
       "lvglInclude": "lvgl.h",
       "screensLifetimeSupport": false,
+      "useDockerDesktop": true,
       "generateSourceCodeForEezFramework": false,
       "compressFlowDefinition": false,
       "executionQueueSize": 1000,
@@ -116,6 +118,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "DataChange"
     },
@@ -124,6 +127,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "UpdateDataTime"
     },
@@ -132,6 +136,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "HourChange"
     },
@@ -140,6 +145,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "MinuteChange"
     },
@@ -148,6 +154,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "goto_heating_screen"
     },
@@ -156,6 +163,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "goto_home"
     },
@@ -164,6 +172,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "SliderTemp1Change"
     },
@@ -172,6 +181,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "goto_settings_screen"
     },
@@ -180,6 +190,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "wifi_scann"
     },
@@ -188,6 +199,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "ssid_select"
     },
@@ -196,6 +208,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "wifi_txt_psw"
     },
@@ -204,6 +217,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "btn_apply"
     },
@@ -212,6 +226,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "btn_cancell"
     },
@@ -220,6 +235,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "sw_manualRTC_NtpServer"
     },
@@ -228,6 +244,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "sw_static_dynamic_ip"
     },
@@ -236,6 +253,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "txtNet_cb"
     },
@@ -244,6 +262,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "txt_ntpServer_cb"
     },
@@ -252,6 +271,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "txt_Hostname_cb"
     },
@@ -260,6 +280,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "btn_RealTimeSetClock_cb"
     },
@@ -268,6 +289,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "drop_date_time"
     },
@@ -276,6 +298,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "settings_screen_cb"
     },
@@ -284,6 +307,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "wifiConnect_cb"
     },
@@ -292,6 +316,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "btn_restart"
     }
@@ -1062,7 +1087,8 @@
                   "pivotY": 0,
                   "zoom": 256,
                   "angle": 0,
-                  "innerAlign": "CENTER"
+                  "innerAlign": "CENTER",
+                  "sizeMode": "VIRTUAL"
                 },
                 {
                   "objID": "ac52a80e-941f-44cf-bd13-c47b8c5d6f6b",
@@ -1107,7 +1133,8 @@
                   "pivotY": 0,
                   "zoom": 256,
                   "angle": 0,
-                  "innerAlign": "CENTER"
+                  "innerAlign": "CENTER",
+                  "sizeMode": "VIRTUAL"
                 },
                 {
                   "objID": "578716c5-d2a9-4be5-dd91-ff7b12aec9c3",
@@ -1152,7 +1179,8 @@
                   "pivotY": 0,
                   "zoom": 256,
                   "angle": 0,
-                  "innerAlign": "CENTER"
+                  "innerAlign": "CENTER",
+                  "sizeMode": "VIRTUAL"
                 },
                 {
                   "objID": "cbb8b8e9-f0c3-4461-dc3f-9b4b3455d434",
@@ -1753,7 +1781,8 @@
                   "pivotY": 0,
                   "zoom": 256,
                   "angle": 0,
-                  "innerAlign": "CENTER"
+                  "innerAlign": "CENTER",
+                  "sizeMode": "VIRTUAL"
                 },
                 {
                   "objID": "592577eb-fe8e-4785-9f45-608ce47cf323",
@@ -1845,7 +1874,8 @@
                   "pivotY": 0,
                   "zoom": 256,
                   "angle": 0,
-                  "innerAlign": "CENTER"
+                  "innerAlign": "CENTER",
+                  "sizeMode": "VIRTUAL"
                 },
                 {
                   "objID": "10b5b4e6-9e01-4d91-a6fa-53ad36216deb",
@@ -1890,7 +1920,8 @@
                   "pivotY": 0,
                   "zoom": 256,
                   "angle": 0,
-                  "innerAlign": "CENTER"
+                  "innerAlign": "CENTER",
+                  "sizeMode": "VIRTUAL"
                 },
                 {
                   "objID": "9f3f91ec-54be-4a5c-b5a1-1d361d65a895",
@@ -2219,7 +2250,8 @@
                   "pivotY": 0,
                   "zoom": 200,
                   "angle": 0,
-                  "innerAlign": "CENTER"
+                  "innerAlign": "CENTER",
+                  "sizeMode": "VIRTUAL"
                 },
                 {
                   "objID": "91e82701-c883-4705-85c1-ad3614ad9b45",
@@ -2475,7 +2507,8 @@
               "pivotY": 0,
               "zoom": 256,
               "angle": 0,
-              "innerAlign": "CENTER"
+              "innerAlign": "CENTER",
+              "sizeMode": "VIRTUAL"
             },
             {
               "objID": "ec76f8b4-7a64-46bb-a215-d3d2a65db043",
@@ -2521,7 +2554,8 @@
               "pivotY": 0,
               "zoom": 256,
               "angle": 0,
-              "innerAlign": "CENTER"
+              "innerAlign": "CENTER",
+              "sizeMode": "VIRTUAL"
             },
             {
               "objID": "5b67e923-1c79-4766-8183-1da6129ee11f",
@@ -2566,7 +2600,8 @@
               "pivotY": 0,
               "zoom": 256,
               "angle": 0,
-              "innerAlign": "CENTER"
+              "innerAlign": "CENTER",
+              "sizeMode": "VIRTUAL"
             },
             {
               "objID": "087f0033-8a82-43dd-f226-6635b4b95d11",
@@ -2611,7 +2646,8 @@
               "pivotY": 0,
               "zoom": 200,
               "angle": 0,
-              "innerAlign": "CENTER"
+              "innerAlign": "CENTER",
+              "sizeMode": "VIRTUAL"
             },
             {
               "objID": "d5091814-36c6-40ad-b5a7-52d6a2adb332",
@@ -2656,7 +2692,8 @@
               "pivotY": 0,
               "zoom": 256,
               "angle": 1,
-              "innerAlign": "CENTER"
+              "innerAlign": "CENTER",
+              "sizeMode": "VIRTUAL"
             }
           ],
           "widgetFlags": "CLICKABLE|PRESS_LOCK|CLICK_FOCUSABLE|GESTURE_BUBBLE|SNAPPABLE|SCROLLABLE|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER",
@@ -2681,6 +2718,7 @@
       ],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "Main",
       "description": "Main Screen",
@@ -2749,7 +2787,7 @@
                   "userData": 0
                 }
               ],
-              "identifier": "btn_goto_home_from_heater_screen_1",
+              "identifier": "btn_goto_home_from_config_screen",
               "leftUnit": "px",
               "topUnit": "px",
               "widthUnit": "px",
@@ -6034,6 +6072,7 @@
       ],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "settings_screen",
       "left": 0,
@@ -10081,6 +10120,7 @@
       ],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "heating_screen",
       "left": 0,
@@ -10382,7 +10422,8 @@
                   "pivotY": 0,
                   "zoom": 250,
                   "angle": 0,
-                  "innerAlign": "CENTER"
+                  "innerAlign": "CENTER",
+                  "sizeMode": "VIRTUAL"
                 },
                 {
                   "objID": "9fdc04ee-0ffc-402d-a063-6104e4e97341",
@@ -10835,7 +10876,8 @@
               "pivotY": 0,
               "zoom": 256,
               "angle": 0,
-              "innerAlign": "CENTER"
+              "innerAlign": "CENTER",
+              "sizeMode": "VIRTUAL"
             },
             {
               "objID": "f74e3716-71b1-4c19-db56-7c585a41aa03",
@@ -11184,7 +11226,8 @@
               "pivotY": 0,
               "zoom": 256,
               "angle": 0,
-              "innerAlign": "CENTER"
+              "innerAlign": "CENTER",
+              "sizeMode": "VIRTUAL"
             },
             {
               "objID": "ab35ebc4-4052-4d51-a27c-b138f3bbc6e5",
@@ -11231,7 +11274,8 @@
               "pivotY": 0,
               "zoom": 256,
               "angle": 0,
-              "innerAlign": "CENTER"
+              "innerAlign": "CENTER",
+              "sizeMode": "VIRTUAL"
             },
             {
               "objID": "c036def3-1116-4b27-aedf-09e978332eb1",
@@ -11747,7 +11791,8 @@
               "pivotY": 0,
               "zoom": 256,
               "angle": 0,
-              "innerAlign": "CENTER"
+              "innerAlign": "CENTER",
+              "sizeMode": "VIRTUAL"
             },
             {
               "objID": "10f93d3d-4338-49cb-8ae9-e61a30028f54",
@@ -11956,6 +12001,7 @@
       ],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "test",
       "left": 0,

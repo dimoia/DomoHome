@@ -55,20 +55,7 @@ static void IRAM_ATTR gpio_isr_handler(void* arg)
     xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
 }
 
-static void event_cb(lv_event_t * e)
-{
-    lv_obj_t * obj = lv_event_get_current_target(e);
-    LV_LOG_USER("Button %s clicked", lv_msgbox_get_active_btn_text(obj));
-}
 
-void lv_example_msgbox_1(void)
-{
-    static const char * btns[] = { "Reset", "Cancel" ""};
-
-    lv_obj_t * mbox1 = lv_msgbox_create(NULL, "DomoHome", "DomoHome Reset To Factory", btns, true);
-    lv_obj_add_event_cb(mbox1, event_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_obj_center(mbox1);
-}
 
 
 static void boot_task(void* arg)
@@ -114,7 +101,7 @@ static void boot_task(void* arg)
             {
                 ESP_LOGI(TAG, "Long Press Detected: Performing Factory Reset");
                 // Perform factory reset actions here
-                lv_example_msgbox_1();
+                lv_msgbox_factory_reset();
             }
             else 
             {
@@ -174,38 +161,7 @@ static void boot_task(void* arg)
     }
 }
 
-void action_goto_heating_screen(lv_event_t *e) {
-    // TODO: Implement action goto_heating_screen here
-    lv_event_code_t code = lv_event_get_code(e);
-   // lv_obj_t * obj = lv_event_get_current_target(e);
 
-    if(code == LV_EVENT_CLICKED) {
-        LV_LOG_USER("Clicked");
-         loadScreen(SCREEN_ID_HEATING_SCREEN);
-        //lv_scr_load(obj);       
-    }
-}
-
-void action_goto_home(lv_event_t *e) 
-{
-    lv_event_code_t code = lv_event_get_code(e);
-      if(code == LV_EVENT_CLICKED) {
-        LV_LOG_USER("Clicked");
-         loadScreen(SCREEN_ID_MAIN );
-        
-       
-    }
-}
-
-void action_goto_settings_screen(lv_event_t *e) {
-    // TODO: Implement action goto_settings_screen here
-    lv_event_code_t code = lv_event_get_code(e);
-      if(code == LV_EVENT_CLICKED) {
-        LV_LOG_USER("Clicked");
-         loadScreen(SCREEN_ID_SETTINGS_SCREEN );
-               
-    }
-}
 
 
 void action_slider_temp1_change(lv_event_t *e) {
@@ -396,30 +352,38 @@ void app_main()
         
         if (getConfigStatus() == CONFIG)
         {
-
+            heating_screen();
+            /*
             lvgl_port_lock(-1);
             objects_t objs_goto_heating_screen = objects;
             lv_obj_t *btn_goto_heating_screen  = objs_goto_heating_screen.btn_heating_screen;
             lv_obj_add_event_cb(btn_goto_heating_screen, action_goto_heating_screen, LV_EVENT_CLICKED, NULL);  
+            */
             
+            goto_home_screen();
+            /*
             objects_t objs_btn_goto_home = objects;
-            lv_obj_t *btn_goto_home      =  objs_btn_goto_home.btn_goto_home_from_heater_screen;         
-            lv_obj_t *btn_goto_home_1    =  objs_btn_goto_home.btn_goto_home_from_heater_screen_1;
-            lv_obj_add_event_cb(btn_goto_home_1, action_goto_home, LV_EVENT_CLICKED, NULL);  
-            lv_obj_add_event_cb(btn_goto_home,   action_goto_home, LV_EVENT_CLICKED, NULL); 
-
+            lv_obj_t *btn_goto_home_from_heater_screen = objs_btn_goto_home.btn_goto_home_from_heater_screen;         
+            lv_obj_t *btn_goto_home_from_config_screen = objs_btn_goto_home.btn_goto_home_from_config_screen;
+            lv_obj_add_event_cb(btn_goto_home_from_heater_screen, action_goto_home, LV_EVENT_CLICKED, NULL);  
+            lv_obj_add_event_cb(btn_goto_home_from_config_screen, action_goto_home, LV_EVENT_CLICKED, NULL); 
+*/
+                /*
             objects_t objs_goto_settings_screen = objects;
             lv_obj_t *btn_goto_settings_screen  = objs_goto_heating_screen.btn_settings_screen;
             lv_obj_add_event_cb(btn_goto_settings_screen, action_goto_settings_screen, LV_EVENT_CLICKED, NULL);
-
+*/
+#ifdef ADM
+??????????????????????????????
+            lvgl_port_lock(-1);
             /* Slider Temperature 1*/
             objects_t objs_slider_temperature_1 = objects;
             lv_obj_t *slider_temp_1  = objs_slider_temperature_1.slider_temp_1;
             lv_obj_add_event_cb(slider_temp_1, action_slider_temp1_change, LV_EVENT_VALUE_CHANGED, NULL);       
 
-            initialize_data_and_time();
-
             lvgl_port_unlock();
+#endif            
+            initialize_data_and_time();
             /*  
                 lv_obj_t  * calendar = lv_calendar_create(lv_scr_act());
             lv_obj_set_size(calendar, 185, 185);

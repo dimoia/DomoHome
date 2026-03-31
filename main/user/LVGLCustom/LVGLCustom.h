@@ -4,5 +4,8 @@
 #include <stdint.h>
 
 void MsgConfigBox(void);
+void lv_msgbox_factory_reset(void);
+void heating_screen(void);
+void goto_home_screen(void);
 
 #endif // _LVGL_CUSTOM_

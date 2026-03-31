@@ -1,6 +1,11 @@
 #include "LVGLCustom.h"
-#include "screens.h"
+#include "config.h"
+#include "lvgl_port.h"
+#include "ui.h"
 
+///////////////////////////////////////////////////////////////////////
+// Message Box At Sturtup When Configuration File Is Not Found
+///////////////////////////////////////////////////////////////////////
 static void event_handler_config(lv_event_t * e) 
 {
     lv_obj_t * mbox = lv_event_get_current_target(e);
@@ -56,8 +61,82 @@ void MsgConfigBox(void)
     lv_obj_set_style_pad_column(btnm, 40, 0); 
 
     //lv_obj_set_style_align(btnm, LV_ALIGN_CENTER, 0);
-    lv_obj_set_style_text_color(btnm, lv_palette_main(LV_PALETTE_ORANGE), LV_PART_ITEMS);
-    
+    lv_obj_set_style_text_color(btnm, lv_palette_main(LV_PALETTE_ORANGE), LV_PART_ITEMS);    
+}
+///////////////////////////////////////////////////////////////////////
+/////////  Message Box Factory Reset
+///////////////////////////////////////////////////////////////////////
+
+static void event_factory_reset_cb(lv_event_t * e)
+{
+    lv_obj_t * obj = lv_event_get_current_target(e);
+    LV_LOG_USER("Button %s clicked", lv_msgbox_get_active_btn_text(obj));
+}
+
+void lv_msgbox_factory_reset(void)
+{
+    static const char * btns[] = { "Reset", "Cancel" ""};
+
+    lv_obj_t * mbox1 = lv_msgbox_create(NULL, "DomoHome", "DomoHome Reset To Factory", btns, true);
+    lv_obj_add_event_cb(mbox1, event_factory_reset_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_center(mbox1);
+}
+
+///////////////////////////////////////////////////////////////////////
+/////////  Set For Heating Screen
+///////////////////////////////////////////////////////////////////////
+
+void action_goto_heating_screen(lv_event_t *e) 
+{
+    // TODO: Implement action goto_heating_screen here
+    lv_event_code_t code = lv_event_get_code(e);
+   // lv_obj_t * obj = lv_event_get_current_target(e);
+
+    if(code == LV_EVENT_CLICKED) {
+        LV_LOG_USER("Clicked");
+        loadScreen(SCREEN_ID_HEATING_SCREEN);
+        //lv_scr_load(obj);       
+    }
+}
+
+void action_goto_settings_screen(lv_event_t *e) {
+    // TODO: Implement action goto_settings_screen here
+    lv_event_code_t code = lv_event_get_code(e);
+      if(code == LV_EVENT_CLICKED) {
+        LV_LOG_USER("Clicked");
+         loadScreen(SCREEN_ID_SETTINGS_SCREEN );               
+    }
+}
+void heating_screen(void)
+{
+    lvgl_port_lock(-1);
+    objects_t objs_goto_heating_screen = objects;
+    lv_obj_t *btn_goto_heating_screen  = objs_goto_heating_screen.btn_heating_screen;
+    lv_obj_add_event_cb(btn_goto_heating_screen, action_goto_heating_screen, LV_EVENT_CLICKED, NULL); 
+        
+    //objects_t objs_goto_settings_screen = objects;
+    lv_obj_t *btn_goto_settings_screen  = objs_goto_heating_screen.btn_settings_screen;
+    lv_obj_add_event_cb(btn_goto_settings_screen, action_goto_settings_screen, LV_EVENT_CLICKED, NULL);
+    lvgl_port_unlock();
 }
 
 
+static void action_goto_home(lv_event_t *e) 
+{
+    lv_event_code_t code = lv_event_get_code(e);
+      if(code == LV_EVENT_CLICKED) {
+        LV_LOG_USER("Clicked");
+         loadScreen(SCREEN_ID_MAIN );               
+    }
+}
+
+ void goto_home_screen(void)
+ {
+    lvgl_port_lock(-1);
+    objects_t objs_btn_goto_home = objects;
+    lv_obj_t *btn_goto_home_from_heater_screen = objs_btn_goto_home.btn_goto_home_from_heater_screen;         
+    lv_obj_t *btn_goto_home_from_config_screen = objs_btn_goto_home.btn_goto_home_from_config_screen;
+    lv_obj_add_event_cb(btn_goto_home_from_heater_screen, action_goto_home, LV_EVENT_CLICKED, NULL);  
+    lv_obj_add_event_cb(btn_goto_home_from_config_screen, action_goto_home, LV_EVENT_CLICKED, NULL); 
+    lvgl_port_unlock();
+ }
