@@ -3,4 +3,6 @@
 
 #include <stdint.h>
 
+void MsgConfigBox(void);
+
 #endif // _LVGL_CUSTOM_
