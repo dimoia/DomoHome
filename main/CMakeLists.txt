@@ -15,6 +15,7 @@ file(GLOB_RECURSE srcs *.c
                    user/Config/*.c
                    user/Utils/*.c
                    user/MqttManager/*.c
+                   user/LVGLCustom/*.c
                    )
 set(include_dirs 
    . 
@@ -32,6 +33,7 @@ set(include_dirs
    user/Config
    user/Utils
    user/MqttManager
+   user/LVGLCustom
    )
 
 idf_component_register( SRCS ${srcs}  
