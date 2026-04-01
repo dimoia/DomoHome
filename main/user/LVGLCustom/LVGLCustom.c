@@ -121,12 +121,16 @@ void heating_screen(void)
 }
 
 
-static void action_goto_home(lv_event_t *e) 
+void action_goto_home(lv_event_t *e) 
 {
     lv_event_code_t code = lv_event_get_code(e);
-      if(code == LV_EVENT_CLICKED) {
+    if(code == LV_EVENT_CLICKED) 
+    {        
         LV_LOG_USER("Clicked");
-         loadScreen(SCREEN_ID_MAIN );               
+        if(getConfigStatus() == CONFIG) 
+        {
+            loadScreen(SCREEN_ID_MAIN );
+        }               
     }
 }
 

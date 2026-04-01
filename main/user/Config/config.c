@@ -4,20 +4,59 @@
 const char *TAG_CONFIG = "config";    // Tag for Station mode (Wi-Fi client mode)
 static USER_CONFIG stUSerConfig;
 static wifi_ap_record_t wifi_scann_list[DEFAULT_SCAN_LIST_SIZE];  // Array to store the AP records
+static CONFIG_STATUS enActualState = NOT_CONFIG;
 
-int8_t iConfigInit(void)
+void iConfigInit(void)
 {    
-  //  memset(&stUSerConfig, 0, sizeof(USER_CONFIG));
-   // return wifi_init();
-   return 0;
+   memset(&stUSerConfig, 0, sizeof(USER_CONFIG));
+   return;
 }
-/*
-void vGetDefaultConfig(USER_CONFIG *pUserConfig)
+
+void vGetConfig(USER_CONFIG *pUserConfig)
 {
-    memcpy(pUserConfig, &stUSerConfig, sizeof(USER_CONFIG));
+    if(pUserConfig != NULL)
+    {
+        memcpy(pUserConfig, &stUSerConfig, sizeof(USER_CONFIG));
+    }
     return;
 }
-*/
+
+void initDeviceConfig(DEVICE_CONFIG* out_ptrDeviceConfig)
+{
+    if(out_ptrDeviceConfig != NULL)
+    {
+        out_ptrDeviceConfig->bBME280Status = DEVICE_STATUS_ERROR; // Imposta lo stato iniziale del BME280 come errore
+    }
+}
+void setBME280Status(DEVICE_CONFIG* in_ptrDeviceConfig, DEVICE_STATUS in_bStatus)
+{
+    if(in_ptrDeviceConfig != NULL)
+    {
+        in_ptrDeviceConfig->bBME280Status = in_bStatus;
+    }
+}
+
+DEVICE_STATUS getBME280Status(const DEVICE_CONFIG* in_ptrDeviceConfig)
+{
+    if(in_ptrDeviceConfig != NULL)
+    {
+        return in_ptrDeviceConfig->bBME280Status;
+    }
+    return DEVICE_STATUS_ERROR;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////// Configuration Status Section
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+CONFIG_STATUS getConfigStatus(void)
+{
+    return enActualState;
+}
+void setConfigStatus(CONFIG_STATUS in_eConfigStatus)
+{
+    enActualState = in_eConfigStatus;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// @brief Action Callback When RealTme Settings Screen is loaded
@@ -217,16 +256,45 @@ void action_wifi_scann(lv_event_t *e)
             lv_dropdown_add_option(list_wifi_ssid, wifiAppInfo, i);
             ESP_LOGI(TAG_CONFIG, "SSID \t\t%s", wifi_scann_list[i].ssid);  // Log SSID (network name)
             ESP_LOGI(TAG_CONFIG, "RSSI \t\t%d", wifi_scann_list[i].rssi);  // Log RSSI (signal strength)        
-            ESP_LOGI(TAG_CONFIG, "Channel \t\t%d", wifi_scann_list[i].primary);  // Log channel number
+            ESP_LOGI(TAG_CONFIG, "Channel \t\t%d", wifi_scann_list[i].primary);  // Log channel number            
         }
         lv_obj_clear_state(btn_WifiScan, LV_STATE_DISABLED); // Re-enable the scan button after scanning is complete
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// @brief  Select SSID from Dropdown
-/// @param  e Pointer to LVGL event structure
-/// @return none
+/// Action Callback When Hostname Textbox is edited
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+void action_txt_hostname_cb(lv_event_t *e) 
+{
+    objects_t objs    = objects;
+    lv_keyboard_t *kb = (lv_keyboard_t *)objs.kek_keyboard;
+   
+    lv_obj_set_size((lv_obj_t *)kb, lv_pct(100), lv_pct(40)); // Set size
+    lv_obj_align_to((lv_obj_t *)kb, lv_scr_act(), LV_ALIGN_BOTTOM_MID, 0, 0); // Align to bottom
+
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *ta         = lv_event_get_target(e);
+ 
+    if(code == LV_EVENT_FOCUSED) 
+    {
+        lv_obj_clear_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
+        lv_keyboard_set_textarea((lv_obj_t *)kb, ta);
+        lv_obj_move_foreground(kb); 
+        lv_keyboard_set_mode((lv_obj_t *)kb, LV_KEYBOARD_MODE_TEXT_LOWER ); // Set keyboard to number mode for IP address input          
+        ESP_LOGI(TAG_CONFIG, "Click On Hostname Textbox ");
+    }  
+    if(code == LV_EVENT_DEFOCUSED) 
+    {
+        lv_keyboard_set_textarea((lv_obj_t *)kb, NULL);
+        lv_obj_add_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
+        memcpy(stUSerConfig.strHostname, lv_textarea_get_text(ta), sizeof(stUSerConfig.strHostname));
+        ESP_LOGI(TAG_CONFIG, "Defocus On Hostname Textbox  ");
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Select SSID from Dropdown
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void action_ssid_select(lv_event_t *e) 
 {
@@ -234,18 +302,12 @@ void action_ssid_select(lv_event_t *e)
     lv_obj_t * obj       = lv_event_get_target(e);    
     if(code == LV_EVENT_VALUE_CHANGED) 
     {
-       // char buf[64];
-        //lv_dropdown_get_selected_str(obj, buf, sizeof(buf));
-        
-       // LV_LOG_USER("Option: %s", buf);
         ESP_LOGI(TAG_CONFIG, "%s ", wifi_scann_list[lv_dropdown_get_selected(obj)].ssid);  // Log RSSI (signal strength)
         memcpy(stUSerConfig.strWifiSsid, wifi_scann_list[lv_dropdown_get_selected(obj)].ssid, sizeof(stUSerConfig.strWifiSsid));
     }    
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// @brief  Action Callback When WiFi Password Textbox is edited
-/// @param  e Pointer to LVGL event structure
-/// @return none
+///  Action Callback When WiFi Password Textbox is edited
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 void action_wifi_txt_psw(lv_event_t *e) 
 {      
@@ -262,6 +324,7 @@ void action_wifi_txt_psw(lv_event_t *e)
     {
         lv_obj_clear_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
         lv_keyboard_set_textarea((lv_obj_t *)kb, ta);
+        lv_obj_move_foreground(kb); 
         lv_keyboard_set_mode((lv_obj_t *)kb, LV_KEYBOARD_MODE_TEXT_LOWER ); // Set keyboard to number mode for IP address input  
         ESP_LOGI(TAG_CONFIG, "Click On Wifi Psw Textbox ");
     }  
@@ -340,42 +403,6 @@ void action_wifi_connect_cb(lv_event_t *e)
 
 
 
-void initDeviceConfig(DEVICE_CONFIG* out_ptrDeviceConfig)
-{
-    if(out_ptrDeviceConfig != NULL)
-    {
-        out_ptrDeviceConfig->bBME280Status = DEVICE_STATUS_ERROR; // Imposta lo stato iniziale del BME280 come errore
-    }
-}
-void setBME280Status(DEVICE_CONFIG* in_ptrDeviceConfig, DEVICE_STATUS in_bStatus)
-{
-    if(in_ptrDeviceConfig != NULL)
-    {
-        in_ptrDeviceConfig->bBME280Status = in_bStatus;
-    }
-}
-
-DEVICE_STATUS getBME280Status(const DEVICE_CONFIG* in_ptrDeviceConfig)
-{
-    if(in_ptrDeviceConfig != NULL)
-    {
-        return in_ptrDeviceConfig->bBME280Status;
-    }
-    return DEVICE_STATUS_ERROR;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////// Configuration Status Section
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-static CONFIG_STATUS enActualState = NOT_CONFIG;
-CONFIG_STATUS getConfigStatus(void)
-{
-    return enActualState;
-}
-void setConfigStatus(CONFIG_STATUS in_eConfigStatus)
-{
-    enActualState = in_eConfigStatus;
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////// File System Configuration Section
@@ -835,4 +862,9 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
         iRet = -1;
     }
     return iRet;
+}
+
+void action_save_to_flash(lv_event_t *e) 
+{
+
 }

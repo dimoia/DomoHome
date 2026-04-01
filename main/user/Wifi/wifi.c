@@ -10,6 +10,7 @@
 #include "nvs_flash.h"
 #include "nvs.h"
 
+
 /* Used As Default */
 #define SECRET_USER_SETTINGS_SSID     ""
 #define SECRET_USER_SETTINGS_PASSWORD "" 
@@ -713,16 +714,6 @@ void action_txt_ntp_server_cb(lv_event_t *e)
     }   
 }
 
-void action_txt_hostname_cb(lv_event_t *e) 
-{
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t        *obj = lv_event_get_target(e);
-    if(code == LV_EVENT_FOCUSED) 
-    {
-        ESP_LOGI(TAG_WIFI, "Click On Hostname Textbox ");
-        memcpy(stUSerConfig.strHostname, lv_textarea_get_text(obj), sizeof(stUSerConfig.strHostname));
-    }
-}
 #if 0
 // Save Configuration
 void action_set_clock(lv_event_t *e) {

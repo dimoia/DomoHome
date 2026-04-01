@@ -15,22 +15,37 @@
 #include "lvgl.h"
 #include "ui.h"
 
-#if 0
-/// @brief Enumeration for RTC Manual or NTP Server Configuration
+
+#define DEFAULT_SCAN_LIST_SIZE 15 // Max number of APs to store (0 to 20)
+
 typedef enum _RTC_MANUAL_AUTO
 {
     RTC_MANUAL = 0,
     RTC_FROM_NTP_SERVER
 } RTC_MANUAL_AUTO;
 
-/// @brief Enumeration for Dynamic or Static IP Configuration
 typedef enum _DYNAMIC_IP_STATIC_IP
 {
     STATIC_IP = 0,
     DYNAMIC_IP
 } DYNAMIC_IP_STATIC_IP;
 
-/// @brief Structure to hold Network Configuration
+typedef struct _WEATHER_
+{
+    char strWeatherServer[64];
+    char strWeatherApiKey[32];
+} WEATHER;
+
+typedef struct _MQTT_CONFIG_
+{
+    bool bMqttEnable;
+    char strMqttBrokerIpAddr[16];
+    uint16_t u16MqttBrokerPort;
+    char strMqttClientID[6];
+    char strMqttUserID[16];
+    char strMqttPassword[16];
+} MQTT_CONFIG;
+
 typedef struct _NETWORK_CONFIG
 {
     char strIpAddr[16];
@@ -40,20 +55,32 @@ typedef struct _NETWORK_CONFIG
     RTC_MANUAL_AUTO eStaticDynamic;    
 } NETWORK_CONFIG;
 
-/// @brief Structure to hold User Configuration
-typedef struct _USER_CONFIG
+typedef struct _USER_CONFIG_
 {
-    char strHostname[32];
+    // HostName of the device
+    char strHostname[16];
+
+    // WiFi Configuration
     char strWifiSsid[32];
-    char strWifiPassword[64];
-    struct tm stRtcClock;
-    char strNtpServer[64];
-    RTC_MANUAL_AUTO eRtcManualAuto;
+    char strWifiPassword[32];
+
+    // NETWORK Configuration
     NETWORK_CONFIG stNetworkConfig;
+
+    // Clock Configuration
+    struct tm stRtcClock;
+
+    // RTC Manual or NTP Server Configuration
+    RTC_MANUAL_AUTO eRtcManualAuto;    
+    char strNtpServer[32];
+    
+    WEATHER stWeatherConfig;    
+    
+    MQTT_CONFIG stMqttConfig;
+    //bool WiFi_is_connected;
     
 } USER_CONFIG;
 
-#endif
 typedef enum _CONFIG_STATUS_
 {
     CONFIG,
@@ -68,18 +95,15 @@ extern wifi_ap_record_t    ap_info[];  // Declare an array to store the AP recor
 extern esp_netif_ip_info_t ip_info;    // Stores IP information
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// @brief  Initialize User Configuration  
-/// @param  none
-/// @return -1 on error, 0 on success 
+/// Initialize User Configuration  
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-int8_t iConfigInit(void); 
+void iConfigInit(void);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// @brief  Get Default User Configuration
-/// @param  pUserConfig Pointer to USER_CONFIG structure to be populated
-/// @return none
+/// Get Default User Configuration
+/// pUserConfig Pointer to a USER_CONFIG structure where the default configuration will be stored
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-//void vGetDefaultConfig(USER_CONFIG *pUserConfig);
+void vGetConfig(USER_CONFIG *pUserConfig);
 
 // Initialize Wi-Fi in STA mode with SSID, password, and auth mode
 //void wifi_sta_init(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t authmode);

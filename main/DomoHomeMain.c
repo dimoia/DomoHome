@@ -196,6 +196,7 @@ void app_main()
     ESP_LOGI(TAG, "DomoHome Main Application Starting...");
 
     setConfigStatus(NOT_CONFIG);
+    iConfigInit();
 
     // Initialize the GT911 touch screen controller
     // This sets up the touch functionality of the screen.
@@ -226,6 +227,7 @@ void app_main()
         ESP_LOGI(TAG, "Failed to initialize LVGL");
         return; // Exit if LVGL initialization fails}   
     }
+
     if(bme280_init() >= 0) 
     {
         ESP_LOGI(TAG, "BMP280 Init Success");
@@ -241,8 +243,7 @@ void app_main()
             ESP_LOGE(TAG, "Failed to read BME280 Device ID ");
         }
     }
-    
-    
+        
     if(Pcf8523_Init() >= 0)
     {
         ESP_LOGI(TAG, "PCF8523 initialized successfully");  
@@ -314,6 +315,7 @@ void app_main()
     }
     else
     {
+       
         // Lock the LVGL port to ensure thread safety during API calls
         // This prevents concurrent access issues when using LVGL functions.
         if (lvgl_port_lock(-1))
@@ -332,6 +334,28 @@ void app_main()
             }
             else
             {
+                USER_CONFIG objUserConfig;
+                vGetConfig(&objUserConfig);
+                ESP_LOGI(TAG, "Hostname: %s", objUserConfig.strHostname);
+                ESP_LOGI(TAG, "SSID    : %s, Password: %s", objUserConfig.strWifiSsid, objUserConfig.strWifiPassword);
+
+                ESP_LOGI(TAG, "IP Address: %s", objUserConfig.stNetworkConfig.strIpAddr);
+                ESP_LOGI(TAG, "NetMask   : %s", objUserConfig.stNetworkConfig.strNetMAsk);
+                ESP_LOGI(TAG, "Gateway   : %s", objUserConfig.stNetworkConfig.strGateway);
+                ESP_LOGI(TAG, "DNS       : %s", objUserConfig.stNetworkConfig.strDns);
+                //ESP_LOGI(TAG, "DHCP Enable: %d", objUserConfig.stNetworkConfig.dhcp_enable);
+                ESP_LOGI(TAG, "Static/Dynamic IP: %s", objUserConfig.stNetworkConfig.eStaticDynamic == 0 ? "Static IP" : "Dynamic IP");
+                ESP_LOGI(TAG, "NTP Server: %s", objUserConfig.strNtpServer);
+                
+                ESP_LOGI(TAG, "Weather Server: %s", objUserConfig.stWeatherConfig.strWeatherServer);
+                ESP_LOGI(TAG, "Weather API Key: %s", objUserConfig.stWeatherConfig.strWeatherApiKey);
+
+                ESP_LOGI(TAG, "MQTT Enable         : %s", objUserConfig.stMqttConfig.bMqttEnable == true ? "MQTT ON" : "MQTT OFF");       
+                ESP_LOGI(TAG, "MQTT BrokerServer IP: %s, Port: %d", objUserConfig.stMqttConfig.strMqttBrokerIpAddr, objUserConfig.stMqttConfig.u16MqttBrokerPort);                
+                ESP_LOGI(TAG, "MQTT Client ID      : %s", objUserConfig.stMqttConfig.strMqttClientID);        
+                ESP_LOGI(TAG, "MQTT User ID        : %s", objUserConfig.stMqttConfig.strMqttUserID);
+                ESP_LOGI(TAG, "MQTT Password       : %s", objUserConfig.stMqttConfig.strMqttPassword);
+
                 setConfigStatus(CONFIG);
                 loadScreen(SCREEN_ID_MAIN);
                 if( wifi_sta_init((uint8_t*)"dlinkAP", (uint8_t*)"DMINGL6Intrepido123.", WIFI_AUTH_WPA2_PSK) == ESP_OK)
