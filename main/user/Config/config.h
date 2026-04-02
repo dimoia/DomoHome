@@ -15,7 +15,6 @@
 #include "lvgl.h"
 #include "ui.h"
 
-
 #define DEFAULT_SCAN_LIST_SIZE 15 // Max number of APs to store (0 to 20)
 
 typedef enum _RTC_MANUAL_AUTO
@@ -41,9 +40,11 @@ typedef struct _MQTT_CONFIG_
     bool bMqttEnable;
     char strMqttBrokerIpAddr[16];
     uint16_t u16MqttBrokerPort;
-    char strMqttClientID[6];
-    char strMqttUserID[16];
-    char strMqttPassword[16];
+    char strMqttClientID[7];
+    char strMqttUserID[32];
+    char strMqttPassword[32];
+    char strMqttTopic[32];
+    char strMqttSubscribe[32];
 } MQTT_CONFIG;
 
 typedef struct _NETWORK_CONFIG
@@ -52,7 +53,7 @@ typedef struct _NETWORK_CONFIG
     char strNetMAsk[16];
     char strGateway[16];
     char strDns[16];
-    RTC_MANUAL_AUTO eStaticDynamic;    
+    DYNAMIC_IP_STATIC_IP eStaticDynamic;    
 } NETWORK_CONFIG;
 
 typedef struct _USER_CONFIG_
@@ -127,14 +128,37 @@ DEVICE_STATUS getBME280Status(const DEVICE_CONFIG* in_ptrDeviceConfig);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////// File System Interface Section
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
-#define MAX_KEY_VALUE_PAIRS 13
+#define MAX_KEY_VALUE_PAIRS 22
+/*
 typedef struct _CONFIG_KEY_VALUE_PAIR_
 {
     char* key;
     char* value;
-} CONFIG_KEY_VALUE_PAIR;
+} CONFIG_KEY_VALUE_PAIR; 
 
-
+char *strKeyArray[] = 
+{
+    "Hostname"
+    "WifiSsid",
+    "WifiPass",
+    "Ipaddress",
+    "Gateway",
+    "Netmask",
+    "StaticDinamicIP",
+    "RtcManualAuto",
+    "NtpServer",
+    "WeatherServer",
+    "WeatherApiKey",
+    "MqttStatus",
+    "MqttServer",
+    "MqttPort",
+    "MqttUsername",
+    "MqttPassword",
+    "MqttClientId",
+    "MqttTopic",
+    "MqttSubscribe"
+};
+*/
 int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename);
 int8_t iUploadConfigFileToNVS(const char* in_ptrFilename, const char* in_ptrKey[], const char* in_ptrValue[], size_t in_iNumKeyValuePairs);
 

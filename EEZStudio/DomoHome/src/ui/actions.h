@@ -31,7 +31,7 @@ extern void action_settings_screen_cb(lv_event_t * e);
 extern void action_wifi_connect_cb(lv_event_t * e);
 extern void action_btn_restart(lv_event_t * e);
 extern void action_save_to_flash(lv_event_t * e);
-
+extern void action_btn_erase_nvs(lv_event_t * e);
 
 #ifdef __cplusplus
 }

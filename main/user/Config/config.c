@@ -1,10 +1,34 @@
 #include "config.h"
 #include "pcf8523.h"
+#include "LVGLCustom.h"
 
 const char *TAG_CONFIG = "config";    // Tag for Station mode (Wi-Fi client mode)
 static USER_CONFIG stUSerConfig;
 static wifi_ap_record_t wifi_scann_list[DEFAULT_SCAN_LIST_SIZE];  // Array to store the AP records
 static CONFIG_STATUS enActualState = NOT_CONFIG;
+
+static const char *strKeyArray[] = 
+{
+    "Hostname"
+    "WifiSsid",
+    "WifiPass",
+    "Ipaddress",
+    "Gateway",
+    "Netmask",
+    "StaticDinamicIP",
+    "RtcManualAuto",
+    "NtpServer",
+    "WeatherServer",
+    "WeatherApiKey",
+    "MqttStatus",
+    "MqttServer",
+    "MqttPort",
+    "MqttUsername",
+    "MqttPassword",
+    "MqttClientId",
+    "MqttTopic",
+    "MqttSubscribe"
+};
 
 void iConfigInit(void)
 {    
@@ -338,13 +362,14 @@ void action_wifi_txt_psw(lv_event_t *e)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// @brief  Action Callback When WiFi Connect Button is Clicked
-/// @param  e Pointer to LVGL event structure
+/// Action Callback When WiFi Connect Button is Clicked
+/// e Pointer to LVGL event structure
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
+#if 0
 void action_wifi_connect_cb(lv_event_t *e) 
 {
     lv_event_code_t code     = lv_event_get_code(e);
-    lv_obj_t *btn_WifiScan   = lv_event_get_target(e);   
+    lv_obj_t *btn_WifiScan   = lv_event_get_target(e);
     objects_t objs           = objects;
     
     //wifi_ap_record_t wifi_scann_list[DEFAULT_SCAN_LIST_SIZE];  // Array to store the AP records
@@ -399,10 +424,7 @@ void action_wifi_connect_cb(lv_event_t *e)
             #endif   
     }     
 }
-
-
-
-
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////// File System Configuration Section
@@ -412,7 +434,7 @@ void action_wifi_connect_cb(lv_event_t *e)
 #include "esp_log.h"
 #include "nvs.h"
 
-CONFIG_KEY_VALUE_PAIR createConfigKeyValuePair[MAX_KEY_VALUE_PAIRS];
+//CONFIG_KEY_VALUE_PAIR createConfigKeyValuePair[MAX_KEY_VALUE_PAIRS];
 static nvs_handle_t my_handle;
 static size_t iKeyValueLength = 0;
 
@@ -577,13 +599,13 @@ esp_err_t save_wifi_credentials(const char* ssid, const char* pass) {
 #endif
 
 
-
+#if 0
 int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
 {
     int iRet = 0;
     if(check_for_config_file(in_ptrFilename) == 0)
     {
-        //createConfigKeyValuePair[0].key = "wifi_ssid";
+        
         if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[0].key, &iKeyValueLength) == 0)
         {
             createConfigKeyValuePair[0].value = malloc(iKeyValueLength);        
@@ -593,12 +615,41 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
                 ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[0].key);
                 iRet = -1;
             }
+            else
+            {
+                stUSerConfig.strWifiSsid[0] = '\0'; // Ensure the string is null-terminated
+                strncpy(stUSerConfig.strWifiSsid, createConfigKeyValuePair[0].value, sizeof(stUSerConfig.strWifiSsid) - 1); // Copy value to user config
+                ESP_LOGI(TAG_CONFIG, "Key: %s Value: %s", createConfigKeyValuePair[0].key, createConfigKeyValuePair[0].value);
+            }
         }
         else
         {
             ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[0].key);
             iRet = -1;
         }
+
+        if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[0].key, &iKeyValueLength) == 0)
+        {
+            createConfigKeyValuePair[0].value = malloc(iKeyValueLength);        
+            if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[0].key, createConfigKeyValuePair[0].value, iKeyValueLength) != 0)
+            {
+                free(createConfigKeyValuePair[0].value);
+                ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[0].key);
+                iRet = -1;
+            }
+            else
+            {
+                stUSerConfig.strWifiSsid[0] = '\0'; // Ensure the string is null-terminated
+                strncpy(stUSerConfig.strWifiSsid, createConfigKeyValuePair[0].value, sizeof(stUSerConfig.strWifiSsid) - 1); // Copy value to user config
+                ESP_LOGI(TAG_CONFIG, "Key: %s Value: %s", createConfigKeyValuePair[0].key, createConfigKeyValuePair[0].value);
+            }
+        }
+        else
+        {
+            ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[0].key);
+            iRet = -1;
+        }
+
         if(iRet == 0)
         {
             //createConfigKeyValuePair[1].key = "wifi_pass";
@@ -863,8 +914,148 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
     }
     return iRet;
 }
+#else
+int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
+{
+    int8_t iRet = 0;
+    int8_t i = 0;
+    char ptrTmpKeyValueBuffer[64]; // Temporary buffer to hold key values, adjust size as needed
 
+    if(in_ptrFilename != NULL)
+    {
+        ESP_LOGI(TAG_CONFIG, "Attempting to download config file '%s' from NVS.", in_ptrFilename);
+
+        while( (i < (sizeof(strKeyArray) / sizeof(strKeyArray[0]))) && (iRet == 0) )        
+        {
+            ESP_LOGI(TAG_CONFIG, "Processing key: %s", strKeyArray[i]);
+            if(get_value_size_by_key(in_ptrFilename, strKeyArray[i], &iKeyValueLength) == 0)
+            {
+                //ptrTmpKeyValueBuffer = malloc(iKeyValueLength);        
+                if(get_value_by_key(in_ptrFilename, strKeyArray[i], ptrTmpKeyValueBuffer, iKeyValueLength) != 0)
+                {                    
+                    ESP_LOGE(TAG_CONFIG, "Error retrieving value for key: %s", strKeyArray[i]);
+                    iRet = -1;
+                }
+                else
+                {
+                    stUSerConfig.strWifiSsid[0] = '\0'; // Ensure the string is null-terminated
+                    strncpy(stUSerConfig.strWifiSsid, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.strWifiSsid) - 1); // Copy value to user config
+                    ESP_LOGI(TAG_CONFIG, "Key: %s Value: %s", strKeyArray[i], ptrTmpKeyValueBuffer);
+                }
+            }
+            else
+            {
+                ESP_LOGE(TAG_CONFIG, "Error retrieving size for key: %s", strKeyArray[i]);
+                iRet = -1;
+            }
+            //free(ptrTmpKeyValueBuffer);
+            i++;            
+        }
+        if(iRet == 0)
+        {
+            ESP_LOGI(TAG_CONFIG, "Config file '%s' downloaded successfully.", in_ptrFilename);
+        }              
+    }
+    else
+    {
+        ESP_LOGE(TAG_CONFIG, "Input filename pointer is NULL.");
+        iRet = -1;
+    }
+    return iRet;
+}
+#endif
 void action_save_to_flash(lv_event_t *e) 
 {
+    nvs_handle_t writeHandle;
+    USER_CONFIG objUserConfig;
 
+    nvs_flash_erase_partition("nvs"); // remove NVS partition to ensure clean state before writing new config data
+    nvs_flash_init();
+
+    // Try to open config file
+    if(nvs_open("config.txt", NVS_READWRITE, &writeHandle) != ESP_OK)
+    {
+        ESP_LOGE(TAG_CONFIG, "Error opening config.txt ");
+        MsgConfigBox();
+    }
+    else
+    {
+        ESP_LOGI(TAG_CONFIG, "Configuration file config.txt.");
+        vGetConfig(&objUserConfig);
+
+        nvs_set_str(writeHandle, "Hostname", objUserConfig.strHostname);
+        nvs_set_str(writeHandle, "WifiSsid", objUserConfig.strWifiSsid);
+        nvs_set_str(writeHandle, "WifiPass", objUserConfig.strWifiPassword);
+
+        nvs_set_str(writeHandle, "Ipaddress", objUserConfig.stNetworkConfig.strIpAddr);
+        nvs_set_str(writeHandle, "Gateway", objUserConfig.stNetworkConfig.strGateway);
+        nvs_set_str(writeHandle, "Netmask", objUserConfig.stNetworkConfig.strNetMAsk);
+
+        // Static IP represented as 0, Dynamic IP represented as 1
+        if(objUserConfig.stNetworkConfig.eStaticDynamic == STATIC_IP)
+        {
+            nvs_set_u32(writeHandle, "StaticDinamicIP", 0); 
+        }
+        else
+        {
+            nvs_set_u32(writeHandle, "StaticDinamicIP", 1);
+        }
+        // Clock Settings
+        if(objUserConfig.eRtcManualAuto == RTC_FROM_NTP_SERVER)
+        {
+            // NTP Auto Clock Settings
+            nvs_set_u32(writeHandle, "RtcManualAuto", 1);
+            nvs_set_str(writeHandle, "NtpServer", objUserConfig.strNtpServer);
+/*
+            nvs_set_u32(writeHandle, "Day"   , 1);
+            nvs_set_u32(writeHandle, "Month" , 1);
+            nvs_set_u32(writeHandle, "Year"  , 2025);
+            nvs_set_u32(writeHandle, "Hour"  , 1);
+            nvs_set_u32(writeHandle, "Minute", 0);
+*/             
+        }
+        else 
+        {
+            nvs_set_u32(writeHandle, "RtcManualAuto", 0); 
+            /*
+            nvs_set_u32(writeHandle, "Day"   , objUserConfig.stRtcClock.tm_wday);
+            nvs_set_u32(writeHandle, "Month" , objUserConfig.stRtcClock.tm_mon);
+            nvs_set_u32(writeHandle, "Year"  , objUserConfig.stRtcClock.tm_year);
+            nvs_set_u32(writeHandle, "Hour"  , objUserConfig.stRtcClock.tm_hour);
+            nvs_set_u32(writeHandle, "Minute", objUserConfig.stRtcClock.tm_min);
+            nvs_set_u32(writeHandle, "Second", 0);        
+            */
+        }
+        // Weather Server Settings
+        nvs_set_str(writeHandle, "WeatherServer", objUserConfig.stWeatherConfig.strWeatherServer);
+        nvs_set_str(writeHandle, "WeatherApiKey", objUserConfig.stWeatherConfig.strWeatherApiKey);
+     
+        // Mqtt Home Assistant Settings
+        nvs_set_str(writeHandle, "MqttServer"   , objUserConfig.stMqttConfig.strMqttBrokerIpAddr);
+        nvs_set_u32(writeHandle, "MqttPort"     , objUserConfig.stMqttConfig.u16MqttBrokerPort);
+        nvs_set_str(writeHandle, "MqttUsername" , objUserConfig.stMqttConfig.strMqttUserID);
+        nvs_set_str(writeHandle, "MqttPassword" , objUserConfig.stMqttConfig.strMqttPassword);
+        nvs_set_str(writeHandle, "MqttClientId" , objUserConfig.stMqttConfig.strMqttUserID);
+        nvs_set_str(writeHandle, "MqttTopic"    , objUserConfig.stMqttConfig.strMqttTopic);
+        nvs_set_str(writeHandle, "MqttSubscribe", objUserConfig.stMqttConfig.strMqttSubscribe);
+
+        if(objUserConfig.stMqttConfig.bMqttEnable)
+        {
+            // Mqtt Protocol Enabled
+            nvs_set_u32(writeHandle, "MqttStatus", 1); 
+        }
+        else
+        {
+            nvs_set_u32(writeHandle, "MqttStatus", 0); 
+        } 
+        nvs_commit(writeHandle); // Commit the changes to ensure they are saved
+        nvs_close(writeHandle);  // Close the handle after writing              
+    }
+}
+
+
+void action_btn_erase_nvs(lv_event_t *e) 
+{
+    nvs_flash_erase_partition("nvs"); // remove NVS partition to ensure clean state before writing new config data
+    nvs_flash_init();
 }
