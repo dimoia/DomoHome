@@ -15,6 +15,7 @@
 #include "lvgl.h"
 #include "ui.h"
 
+#define CONFIG_FILE_NAME "config.txt"
 #define DEFAULT_SCAN_LIST_SIZE 15 // Max number of APs to store (0 to 20)
 
 typedef enum _RTC_MANUAL_AUTO

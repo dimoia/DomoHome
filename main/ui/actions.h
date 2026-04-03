@@ -18,8 +18,6 @@ extern void action_goto_settings_screen(lv_event_t * e);
 extern void action_wifi_scann(lv_event_t * e);
 extern void action_ssid_select(lv_event_t * e);
 extern void action_wifi_txt_psw(lv_event_t * e);
-extern void action_btn_apply(lv_event_t * e);
-extern void action_btn_cancell(lv_event_t * e);
 extern void action_sw_manual_rtc_ntp_server(lv_event_t * e);
 extern void action_sw_static_dynamic_ip(lv_event_t * e);
 extern void action_txt_net_cb(lv_event_t * e);
@@ -31,7 +29,8 @@ extern void action_settings_screen_cb(lv_event_t * e);
 extern void action_wifi_connect_cb(lv_event_t * e);
 extern void action_btn_restart(lv_event_t * e);
 extern void action_save_to_flash(lv_event_t * e);
-extern void action_btn_erase_nvs(lv_event_t * e);
+extern void action_btn_erase_flash(lv_event_t * e);
+
 
 #ifdef __cplusplus
 }

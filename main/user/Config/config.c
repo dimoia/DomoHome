@@ -2,14 +2,38 @@
 #include "pcf8523.h"
 #include "LVGLCustom.h"
 
+// Function to disable a textarea and handle associated keyboard (if needed)
+static void disable_textarea_with_kb(lv_obj_t *ta, lv_keyboard_t *kb) {
+    lv_obj_add_state(ta, LV_STATE_DISABLED  );
+    // Additional logic (e.g., hiding keyboard) can be added here if required
+}   
+
+static void disable_and_hide_kb(lv_obj_t * ta, lv_obj_t * kb) 
+{
+    // 1. Disabilita la textbox (diventa grigia e non cliccabile)
+    lv_obj_add_state(ta, LV_STATE_DISABLED);
+
+    // 2. Rimuovi il focus (il bordo blu/arancione di selezione)
+    lv_obj_clear_state(ta, LV_STATE_FOCUSED);
+
+    // 3. Controlla se la tastiera è collegata a QUESTA specifica textbox
+    if(lv_keyboard_get_textarea(kb) == ta) {
+        lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN); // Nascondi la tastiera
+        lv_keyboard_set_textarea(kb, NULL);      // Scollegala per sicurezza
+    }
+}
+
 const char *TAG_CONFIG = "config";    // Tag for Station mode (Wi-Fi client mode)
 static USER_CONFIG stUSerConfig;
 static wifi_ap_record_t wifi_scann_list[DEFAULT_SCAN_LIST_SIZE];  // Array to store the AP records
 static CONFIG_STATUS enActualState = NOT_CONFIG;
+static lv_keyboard_t *kb;
+
+#define KEY_ARRAY_SIZE 19
 
 static const char *strKeyArray[] = 
 {
-    "Hostname"
+    "Hostname",
     "WifiSsid",
     "WifiPass",
     "Ipaddress",
@@ -87,6 +111,7 @@ void setConfigStatus(CONFIG_STATUS in_eConfigStatus)
 /// @param e   Pointer to LVGL event structure
 /// @return none
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define LV_TEXTAREA_DEF_BULLET  "\xE2\x80\xA2"
 void action_settings_screen_cb(lv_event_t *e) 
 {
     struct tm currentTime;
@@ -96,7 +121,164 @@ void action_settings_screen_cb(lv_event_t *e)
 
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t        *obj = lv_event_get_target(e);
+    
+    ESP_LOGI(TAG_CONFIG, "###############################################################");
+    ESP_LOGI(TAG_CONFIG, "Hostname       : %s", stUSerConfig.strHostname);
+    ESP_LOGI(TAG_CONFIG, "WifiSsid       : %s", stUSerConfig.strWifiSsid);
+    ESP_LOGI(TAG_CONFIG, "WifiPass       : %s", stUSerConfig.strWifiPassword);
 
+    ESP_LOGI(TAG_CONFIG, "Ipaddress      : %s", stUSerConfig.stNetworkConfig.strIpAddr);                
+    ESP_LOGI(TAG_CONFIG, "Gateway        : %s", stUSerConfig.stNetworkConfig.strGateway);
+    ESP_LOGI(TAG_CONFIG, "NetMask        : %s", stUSerConfig.stNetworkConfig.strNetMAsk);
+    if(stUSerConfig.stNetworkConfig.eStaticDynamic == STATIC_IP)
+    {
+    ESP_LOGI(TAG_CONFIG, "StaticDinamicIP: Static IP");
+    }
+    else
+    {
+        ESP_LOGI(TAG_CONFIG, "StaticDinamicIP: Dynamic IP");
+    }
+    if(stUSerConfig.eRtcManualAuto == RTC_MANUAL)
+    {
+        ESP_LOGI(TAG_CONFIG, "RtcManualAuto  : Manual");
+    }
+    else
+    {
+        ESP_LOGI(TAG_CONFIG, "RtcManualAuto  : Auto");                    
+    }
+    ESP_LOGI(TAG_CONFIG, "NtpServer      : %s", stUSerConfig.strNtpServer);
+    ESP_LOGI(TAG_CONFIG, "WeatherServer  : %s", stUSerConfig.stWeatherConfig.strWeatherServer);
+    ESP_LOGI(TAG_CONFIG, "WeatherApiKey  : %s", stUSerConfig.stWeatherConfig.strWeatherApiKey);                    
+    ESP_LOGI(TAG_CONFIG, "MqttStatus     : %s", stUSerConfig.stMqttConfig.bMqttEnable == true ? "Enabled" : "Disabled");       
+    ESP_LOGI(TAG_CONFIG, "MqttServer     : %s", stUSerConfig.stMqttConfig.strMqttBrokerIpAddr);                
+    ESP_LOGI(TAG_CONFIG, "MqttPort       : %d", stUSerConfig.stMqttConfig.u16MqttBrokerPort);                
+    ESP_LOGI(TAG_CONFIG, "MqttUsername   : %s", stUSerConfig.stMqttConfig.strMqttUserID);
+    ESP_LOGI(TAG_CONFIG, "MqttPassword   : %s", stUSerConfig.stMqttConfig.strMqttPassword);
+    ESP_LOGI(TAG_CONFIG, "MqttClientId   : %s", stUSerConfig.stMqttConfig.strMqttClientID);                                        
+    ESP_LOGI(TAG_CONFIG, "MqttTopic      : %s", stUSerConfig.stMqttConfig.strMqttTopic);        
+    ESP_LOGI(TAG_CONFIG, "MqttSubscribe  : %s", stUSerConfig.stMqttConfig.strMqttSubscribe);
+    ESP_LOGI(TAG_CONFIG, "###############################################################");
+
+    // Get Hostname
+    if (strlen(stUSerConfig.strHostname) > 0)
+    {
+        lv_obj_t *ta = objs.txt_hostname;
+        lv_textarea_set_text(ta, stUSerConfig.strHostname);
+    }
+    // Get Wi-Fi SSID
+    if (strlen(stUSerConfig.strWifiSsid) > 0)
+    {
+        lv_obj_t *ta = objs.drp_wifi_ssid;
+        lv_dropdown_clear_options(ta);
+        lv_dropdown_add_option(ta, stUSerConfig.strWifiSsid, 0); // 0 è l'indice (posizione)
+        ESP_LOGI(TAG_CONFIG, "WifiSsid: %s", stUSerConfig.strWifiSsid);
+    }
+    // Get Wi-Fi Password
+    if (strlen(stUSerConfig.strWifiPassword) > 0)
+    {
+        lv_obj_t *ta = objs.txt_ipaddress;       
+        //lv_textarea_set_password_mode(ta, true);
+        lv_textarea_set_text(ta, stUSerConfig.strWifiPassword);
+        ESP_LOGI(TAG_CONFIG, "WifiPassword: %s", stUSerConfig.strWifiPassword);
+    }
+    // Get IP Address
+    if (strlen(stUSerConfig.stNetworkConfig.strIpAddr) > 0)
+    {
+        lv_obj_t *ta = objs.txt_ipaddress;
+        lv_textarea_set_text(ta, stUSerConfig.stNetworkConfig.strIpAddr);
+    }
+    // Get Gateway
+    if (strlen(stUSerConfig.stNetworkConfig.strGateway) > 0)
+    {
+        lv_obj_t *ta = objs.txt_gateway;
+        lv_textarea_set_text(ta, stUSerConfig.stNetworkConfig.strGateway);
+    }
+    // Get Netmask
+    if (strlen(stUSerConfig.stNetworkConfig.strNetMAsk) > 0)
+    {
+        lv_obj_t *ta = objs.txt_netmask;
+        lv_textarea_set_text(ta, stUSerConfig.stNetworkConfig.strNetMAsk);
+    }
+    // Get Static/Dynamic IP
+    lv_obj_t *sw = objs.sw_static_ip_dynamic_ip;
+    if(stUSerConfig.stNetworkConfig.eStaticDynamic == STATIC_IP)
+    {
+        lv_obj_add_state(sw, LV_STATE_CHECKED);
+        lv_obj_clear_state(objs.txt_ipaddress, LV_STATE_DISABLED);
+        lv_obj_clear_state(objs.txt_gateway, LV_STATE_DISABLED);
+        lv_obj_clear_state(objs.txt_netmask, LV_STATE_DISABLED);
+    }
+    else
+    {
+        lv_obj_clear_state(sw, LV_STATE_CHECKED);
+        // If Dynamic IP is selected, hide the IP address, gateway, and netmask fields
+       ESP_LOGI(TAG_CONFIG, "IP DINAMICO");
+       static lv_style_t style_grigio;
+        lv_style_init(&style_grigio);
+
+        // Colore del testo grigio
+        lv_style_set_text_color(&style_grigio, lv_palette_main(LV_PALETTE_GREY));
+        // Sfondo grigio molto chiaro
+        lv_style_set_bg_color(&style_grigio, lv_palette_lighten(LV_PALETTE_GREY, 3));
+        // Opzionale: rendi l'intero widget un po' trasparente
+        lv_style_set_opa(&style_grigio, LV_OPA_60);
+
+        // APPLICA LO STILE SOLO PER LO STATO DISABLED
+        lv_obj_add_style(objs.txt_ipaddress, &style_grigio, LV_STATE_DISABLED);
+        lv_obj_add_style(objs.txt_gateway, &style_grigio, LV_STATE_DISABLED);
+        lv_obj_add_style(objs.txt_netmask, &style_grigio, LV_STATE_DISABLED);
+
+        
+       /* lv_keyboard_t **/kb = (lv_keyboard_t *)objs.kek_keyboard;
+
+        disable_and_hide_kb(objs.txt_ipaddress, kb);
+        disable_and_hide_kb(objs.txt_gateway, kb);
+        disable_and_hide_kb(objs.txt_netmask, kb);
+        /*
+        disable_textarea_with_kb(objs.txt_ipaddress, kb);
+        disable_textarea_with_kb(objs.txt_netmask, kb);
+        disable_textarea_with_kb(objs.txt_gateway, kb);*/
+    }
+    // Get RTC Manual/NTP Server
+    sw = objs.sw_manual_rtc_ntp_server;
+    if(stUSerConfig.eRtcManualAuto == RTC_MANUAL)
+    {
+        lv_obj_add_state(sw, LV_STATE_CHECKED);
+    }
+    else
+    {
+        lv_obj_clear_state(sw, LV_STATE_CHECKED);
+        // If NTP Server is selected, hide the date/time dropdowns and set RTC from NTP server
+        lv_obj_add_flag(objs.drop_day, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(objs.drop_month, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(objs.drop_year, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(objs.drop_hour, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(objs.drop_minute, LV_OBJ_FLAG_HIDDEN);
+        // Disable the "Set Clock" button since we will get time from NTP server
+        lv_obj_add_flag(objs.btn_set_clock, LV_OBJ_FLAG_HIDDEN);        
+    }
+    // Get NTP Server
+    if (strlen(stUSerConfig.strNtpServer) > 0)
+    {
+        lv_obj_t *ta = objs.txt_ntp_server;
+        lv_textarea_set_text(ta, stUSerConfig.strNtpServer);
+    }
+    // Get Weather Server
+    if (strlen(stUSerConfig.stWeatherConfig.strWeatherServer) > 0)
+    {
+        lv_obj_t *ta = objs.txt_weather_server;
+        lv_textarea_set_text(ta, stUSerConfig.stWeatherConfig.strWeatherServer);
+    }
+    // Get Weather API Key
+    if (strlen(stUSerConfig.stWeatherConfig.strWeatherApiKey) > 0)
+    {
+        lv_obj_t *ta = objs.btn_energy_power;
+        lv_textarea_set_text(ta, stUSerConfig.stWeatherConfig.strWeatherApiKey);
+    }
+       
+    
+
+    // Get current time from RTC and populate the dropdowns
     if(Pcf8523_Get_Time(&currentTime) < 0) 
     {
         ESP_LOGE(TAG_CONFIG, "Failed to get time from PCF8563");
@@ -292,7 +474,7 @@ void action_wifi_scann(lv_event_t *e)
 void action_txt_hostname_cb(lv_event_t *e) 
 {
     objects_t objs    = objects;
-    lv_keyboard_t *kb = (lv_keyboard_t *)objs.kek_keyboard;
+    /*lv_keyboard_t **/kb = (lv_keyboard_t *)objs.kek_keyboard;
    
     lv_obj_set_size((lv_obj_t *)kb, lv_pct(100), lv_pct(40)); // Set size
     lv_obj_align_to((lv_obj_t *)kb, lv_scr_act(), LV_ALIGN_BOTTOM_MID, 0, 0); // Align to bottom
@@ -336,7 +518,7 @@ void action_ssid_select(lv_event_t *e)
 void action_wifi_txt_psw(lv_event_t *e) 
 {      
     objects_t objs    = objects;
-    lv_keyboard_t *kb = (lv_keyboard_t *)objs.kek_keyboard;
+    /*lv_keyboard_t **/kb = (lv_keyboard_t *)objs.kek_keyboard;
    
     lv_obj_set_size((lv_obj_t *)kb, lv_pct(100), lv_pct(40)); // Set size
     lv_obj_align_to((lv_obj_t *)kb, lv_scr_act(), LV_ALIGN_BOTTOM_MID, 0, 0); // Align to bottom
@@ -358,6 +540,78 @@ void action_wifi_txt_psw(lv_event_t *e)
         lv_obj_add_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
         memcpy(stUSerConfig.strWifiPassword, lv_textarea_get_text(ta), sizeof(stUSerConfig.strWifiPassword));        
         ESP_LOGI(TAG_CONFIG, "Defocus On Wifi Psw Textbox ");
+    }
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Action Callback When Network Config Textbox is edited (IP Address, Netmask, Gateway, Dns)
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+static const char * kb_map[] = {"1", "2", "3", "\n",
+                                "4", "5", "6", "\n",
+                                "7", "8", "9", "\n",
+                                ".", "0", LV_SYMBOL_BACKSPACE, ""};
+static const lv_btnmatrix_ctrl_t kb_ctrl[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+
+void action_txt_net_cb(lv_event_t *e) 
+{
+    objects_t objs    = objects;
+    /*lv_keyboard_t **/kb = (lv_keyboard_t *)objs.kek_keyboard;
+    uint8_t userData  = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+    lv_obj_set_size((lv_obj_t *)kb, lv_pct(100), lv_pct(40)); // Set size
+    lv_obj_align_to((lv_obj_t *)kb, lv_scr_act(), LV_ALIGN_BOTTOM_MID, 0, 0); // Align to bottom
+/*
+    lv_obj_set_size((lv_obj_t *)kb, lv_pct(100), lv_pct(40)); // Set size
+    lv_obj_align_to((lv_obj_t *)kb, lv_scr_act(), LV_ALIGN_TOP_MID, 0, 0); // Align to bottom
+*/
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *ta         = lv_event_get_target(e);
+ 
+    if(code == LV_EVENT_FOCUSED) 
+    {
+        lv_obj_clear_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
+        lv_keyboard_set_textarea((lv_obj_t *)kb, ta);
+        lv_keyboard_set_map(kb, LV_KEYBOARD_MODE_USER_1, kb_map, kb_ctrl);
+        lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_USER_1);
+
+        //lv_keyboard_set_mode((lv_obj_t *)kb, LV_KEYBOARD_MODE_NUMBER ); // Set keyboard to number mode for IP address input              
+    }  
+    if(code == LV_EVENT_DEFOCUSED) 
+    {
+        lv_keyboard_set_textarea((lv_obj_t *)kb, NULL);
+        lv_obj_add_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
+        switch(userData)
+        {
+            case 1:
+                // Ip Address
+                memcpy(stUSerConfig.stNetworkConfig.strIpAddr, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.strIpAddr));
+                ESP_LOGI(TAG_CONFIG, "Click On IP Addr Textbox ");
+                break;
+            case 2:
+                memcpy(stUSerConfig.stNetworkConfig.strNetMAsk, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.strNetMAsk));
+                ESP_LOGI(TAG_CONFIG, "Click On NetMask Textbox ");
+                break;
+            case 3:
+                memcpy(stUSerConfig.stNetworkConfig.strGateway, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.strGateway));
+                ESP_LOGI(TAG_CONFIG, "Click On Gateway Textbox ");
+                break;
+            default:            
+                break;
+        }       
+        ESP_LOGI(TAG_CONFIG, "Defocus On Network Config Textbox ");
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Action Callback When Static/Dynamic IP Switch is toggled
+/// e Pointer to LVGL event structure
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+void action_sw_static_dynamic_ip(lv_event_t *e) 
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t        *obj = lv_event_get_target(e);
+    if(code == LV_EVENT_VALUE_CHANGED) 
+    {
+        ESP_LOGI(TAG_CONFIG, "State: %s\n", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
+        stUSerConfig.stNetworkConfig.eStaticDynamic = lv_obj_has_state(obj, LV_STATE_CHECKED) ? STATIC_IP : DYNAMIC_IP;
     }
 }
 
@@ -473,7 +727,7 @@ static int8_t get_value_size_by_key(const char* in_ptrFilename, const char* in_p
     return iRet;
 }
 
-static int8_t get_value_by_key(const char* in_ptrFilename, const char* in_ptrKey,char* out_ptrValue, size_t in_ptrValueSize)
+static int8_t get_value_by_key(const char* in_ptrFilename, const char* in_ptrKey,char* out_ptrValue, size_t *in_ptrValueSize)
 {
     esp_err_t err;
     int8_t iRet = 0;
@@ -488,7 +742,7 @@ static int8_t get_value_by_key(const char* in_ptrFilename, const char* in_ptrKey
     {
         if( nvs_get_str(my_handle, in_ptrKey, out_ptrValue, in_ptrValueSize) == ESP_OK)
         {
-            ESP_LOGE(TAG_CONFIG, "Key %s present with value: %s", in_ptrKey, out_ptrValue);
+            //ESP_LOGE(TAG_CONFIG, "Key %s present with value: %s", in_ptrKey, out_ptrValue);
             nvs_close(my_handle);
         }
         else 
@@ -599,322 +853,6 @@ esp_err_t save_wifi_credentials(const char* ssid, const char* pass) {
 #endif
 
 
-#if 0
-int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
-{
-    int iRet = 0;
-    if(check_for_config_file(in_ptrFilename) == 0)
-    {
-        
-        if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[0].key, &iKeyValueLength) == 0)
-        {
-            createConfigKeyValuePair[0].value = malloc(iKeyValueLength);        
-            if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[0].key, createConfigKeyValuePair[0].value, iKeyValueLength) != 0)
-            {
-                free(createConfigKeyValuePair[0].value);
-                ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[0].key);
-                iRet = -1;
-            }
-            else
-            {
-                stUSerConfig.strWifiSsid[0] = '\0'; // Ensure the string is null-terminated
-                strncpy(stUSerConfig.strWifiSsid, createConfigKeyValuePair[0].value, sizeof(stUSerConfig.strWifiSsid) - 1); // Copy value to user config
-                ESP_LOGI(TAG_CONFIG, "Key: %s Value: %s", createConfigKeyValuePair[0].key, createConfigKeyValuePair[0].value);
-            }
-        }
-        else
-        {
-            ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[0].key);
-            iRet = -1;
-        }
-
-        if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[0].key, &iKeyValueLength) == 0)
-        {
-            createConfigKeyValuePair[0].value = malloc(iKeyValueLength);        
-            if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[0].key, createConfigKeyValuePair[0].value, iKeyValueLength) != 0)
-            {
-                free(createConfigKeyValuePair[0].value);
-                ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[0].key);
-                iRet = -1;
-            }
-            else
-            {
-                stUSerConfig.strWifiSsid[0] = '\0'; // Ensure the string is null-terminated
-                strncpy(stUSerConfig.strWifiSsid, createConfigKeyValuePair[0].value, sizeof(stUSerConfig.strWifiSsid) - 1); // Copy value to user config
-                ESP_LOGI(TAG_CONFIG, "Key: %s Value: %s", createConfigKeyValuePair[0].key, createConfigKeyValuePair[0].value);
-            }
-        }
-        else
-        {
-            ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[0].key);
-            iRet = -1;
-        }
-
-        if(iRet == 0)
-        {
-            //createConfigKeyValuePair[1].key = "wifi_pass";
-            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[1].key   , &iKeyValueLength) == 0)
-            {
-                createConfigKeyValuePair[1].value = malloc(iKeyValueLength);    
-                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[1].key, createConfigKeyValuePair[1].value, iKeyValueLength) != 0)
-                {
-                    free(createConfigKeyValuePair[1].value);
-                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[1].key);
-                    iRet = -1;
-                }   
-            }
-            else
-            {
-                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[1].key);
-                iRet = -1;
-            }
-        }
-        if(iRet == 0)
-        {
-           // createConfigKeyValuePair[2].key = "ipaddress";
-            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[2].key   , &iKeyValueLength) == 0)
-            {
-                createConfigKeyValuePair[2].value = malloc(iKeyValueLength);    
-                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[2].key, createConfigKeyValuePair[2].value, iKeyValueLength) != 0)
-                {
-                    free(createConfigKeyValuePair[2].value);
-                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[2].key);
-                    iRet = -1;
-                }
-            }
-            else
-            {
-                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[2].key);
-                iRet = -1;
-            }            
-        }
-        if(iRet == 0)
-        {              
-            //createConfigKeyValuePair[3].key = "gateway";
-            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[3].key   , &iKeyValueLength)== 0)
-            {
-                createConfigKeyValuePair[3].value = malloc(iKeyValueLength);    
-                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[3].key, createConfigKeyValuePair[3].value, iKeyValueLength) != 0)
-                {
-                    free(createConfigKeyValuePair[3].value);
-                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[3].key);
-                    iRet = -1;
-                }   
-            }
-            else
-            {
-                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[3].key);
-                iRet = -1;
-            }
-        }
-        else
-        {
-            ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[3].key);
-            iRet = -1;
-        }
-        if(iRet == 0)
-        {
-            //createConfigKeyValuePair[4].key = "netmask";
-            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[4].key   , &iKeyValueLength)==0)
-            {
-                createConfigKeyValuePair[4].value = malloc(iKeyValueLength);    
-                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[4].key, createConfigKeyValuePair[4].value, iKeyValueLength) != 0)
-                {
-                    free(createConfigKeyValuePair[4].value);
-                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[4].key);
-                    iRet = -1;
-                }   
-            }
-            else
-            {
-                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[4].key);
-                iRet = -1;
-            }
-        }
-
-        if(iRet == 0)
-        {
-            //createConfigKeyValuePair[5].key = "hostname";
-            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[5].key   , &iKeyValueLength) == 0)
-            {
-                createConfigKeyValuePair[5].value = malloc(iKeyValueLength);    
-                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[5].key, createConfigKeyValuePair[5].value, iKeyValueLength) != 0)
-                {
-                    free(createConfigKeyValuePair[5].value);
-                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[5].key);
-                    iRet = -1;
-                }   
-            }
-            else
-            {
-                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[5].key);
-                iRet = -1;
-            }
-        }
-        else
-        {
-            ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[5].key);
-            iRet = -1;
-        }
-
-        if(iRet == 0)
-        {
-            //createConfigKeyValuePair[6].key = "static_dinamicIP";
-            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[6].key   , &iKeyValueLength) == 0)
-            {
-                createConfigKeyValuePair[6].value = malloc(iKeyValueLength);    
-                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[6].key, createConfigKeyValuePair[6].value, iKeyValueLength) != 0)
-                {
-                    free(createConfigKeyValuePair[5].value);
-                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[5].key);
-                    iRet = -1;
-                }   
-            }
-            else
-            {
-                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[5].key);
-                iRet = -1;
-            }
-        }
-        else
-        {
-            ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[5].key);
-            iRet = -1;
-        }
-  
-        if(iRet == 0)
-        {
-            //createConfigKeyValuePair[7].key = "ntpServer";
-            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[7].key   , &iKeyValueLength) == 0)
-            {
-                createConfigKeyValuePair[7].value = malloc(iKeyValueLength);    
-                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[7].key, createConfigKeyValuePair[7].value, iKeyValueLength) != 0)
-                {
-                    free(createConfigKeyValuePair[7].value);
-                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[7].key);
-                    iRet = -1;
-                }   
-            }
-            else    
-            {
-                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[7].key);
-                iRet = -1;
-            }
-        }
-
-        if(iRet == 0)
-        {   
-            //createConfigKeyValuePair[8].key = "timezone";
-            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[8].key   , &iKeyValueLength) == 0)
-             {
-                createConfigKeyValuePair[8].value = malloc(iKeyValueLength);    
-                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[8].key, createConfigKeyValuePair[8].value, iKeyValueLength) != 0)
-                {
-                    free(createConfigKeyValuePair[8].value);
-                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[8].key);
-                    iRet = -1;
-                }   
-            }
-            else
-            {
-                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[8].key);
-                iRet = -1;
-            }
-        }
-        
-        if(iRet == 0)
-        {        
-            //createConfigKeyValuePair[9].key = "mqttBrokerIP";
-            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[9].key   , &iKeyValueLength) == 0)
-            {
-                createConfigKeyValuePair[9].value = malloc(iKeyValueLength);    
-                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[9].key, createConfigKeyValuePair[9].value, iKeyValueLength) != 0)
-                {
-                    free(createConfigKeyValuePair[9].value);
-                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[9].key);
-                    iRet = -1;
-                }   
-            }
-            else
-            {
-                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[9].key);
-                iRet = -1;
-            }
-        }
-        else
-        {
-            ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[9].key);
-            iRet = -1;
-        }
-        
-        if(iRet == 0)
-        {              
-            //createConfigKeyValuePair[10].key = "mqttUserId";
-            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[10].key   , &iKeyValueLength) == 0)
-            {   
-                createConfigKeyValuePair[10].value = malloc(iKeyValueLength);    
-                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[10].key, createConfigKeyValuePair[10].value, iKeyValueLength) != 0)
-                {
-                    free(createConfigKeyValuePair[10].value);
-                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[10].key);
-                    iRet = -1;
-                }   
-            }
-            else
-            {
-                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[10].key);
-                iRet = -1;
-            }
-        }
-
-        if(iRet == 0)
-        {   
-            //createConfigKeyValuePair[11].key = "mqttPsw";
-            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[11].key   , &iKeyValueLength) == 0)
-            {   
-                createConfigKeyValuePair[11].value = malloc(iKeyValueLength);    
-                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[11].key, createConfigKeyValuePair[11].value, iKeyValueLength) != 0)
-                {
-                    free(createConfigKeyValuePair[11].value);
-                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[11].key);
-                    iRet = -1;
-                }   
-            }
-            else
-            {
-                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[11].key);
-                iRet = -1;
-            }
-        }  
-        if(iRet == 0)
-        {        
-            //createConfigKeyValuePair[12].key = "mqttClientId";
-            if(get_value_size_by_key(in_ptrFilename, createConfigKeyValuePair[12].key   , &iKeyValueLength) == 0)
-            {
-                createConfigKeyValuePair[12].value = malloc(iKeyValueLength);    
-                if(get_value_by_key(in_ptrFilename, createConfigKeyValuePair[12].key, createConfigKeyValuePair[12].value, iKeyValueLength) != 0)
-                {
-                    free(createConfigKeyValuePair[12].value);
-                    ESP_LOGE(TAG_CONFIG, "Errore nel recupero del valore per chiave: %s", createConfigKeyValuePair[12].key);
-                    iRet = -1;
-                }
-            }
-            else
-            {
-                ESP_LOGE(TAG_CONFIG, "Errore nel recupero della dimensione del valore per chiave: %s", createConfigKeyValuePair[12].key);
-                iRet = -1;
-            }
-        }
-
-        ESP_LOGI(TAG_CONFIG, "Config file '%s' downloaded successfully.", in_ptrFilename);
-    }
-    else
-    {
-        iRet = -1;
-    }
-    return iRet;
-}
-#else
 int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
 {
     int8_t iRet = 0;
@@ -924,23 +862,139 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
     if(in_ptrFilename != NULL)
     {
         ESP_LOGI(TAG_CONFIG, "Attempting to download config file '%s' from NVS.", in_ptrFilename);
-
-        while( (i < (sizeof(strKeyArray) / sizeof(strKeyArray[0]))) && (iRet == 0) )        
+        /*
+        for(int j= 0; j<KEY_ARRAY_SIZE;j++)
+        {
+           ESP_LOGI(TAG_CONFIG, "Processing key: %s", strKeyArray[j]);
+        }*/
+        while( (i < KEY_ARRAY_SIZE) && (iRet == 0) )        
         {
             ESP_LOGI(TAG_CONFIG, "Processing key: %s", strKeyArray[i]);
             if(get_value_size_by_key(in_ptrFilename, strKeyArray[i], &iKeyValueLength) == 0)
             {
                 //ptrTmpKeyValueBuffer = malloc(iKeyValueLength);        
-                if(get_value_by_key(in_ptrFilename, strKeyArray[i], ptrTmpKeyValueBuffer, iKeyValueLength) != 0)
+                if(get_value_by_key(in_ptrFilename, strKeyArray[i], ptrTmpKeyValueBuffer, &iKeyValueLength) != 0)
                 {                    
                     ESP_LOGE(TAG_CONFIG, "Error retrieving value for key: %s", strKeyArray[i]);
                     iRet = -1;
                 }
                 else
                 {
-                    stUSerConfig.strWifiSsid[0] = '\0'; // Ensure the string is null-terminated
-                    strncpy(stUSerConfig.strWifiSsid, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.strWifiSsid) - 1); // Copy value to user config
-                    ESP_LOGI(TAG_CONFIG, "Key: %s Value: %s", strKeyArray[i], ptrTmpKeyValueBuffer);
+                    switch(i)
+                    {
+                        case 0: // Hostname
+                            stUSerConfig.strHostname[0] = '\0'; // Ensure the string is null-terminated
+                            strncpy(stUSerConfig.strHostname, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.strHostname) - 1); // Copy value to user config
+                            break;
+                        case 1: // WifiSsid
+                            stUSerConfig.strWifiSsid[0] = '\0'; // Ensure the string is null-terminated
+                            strncpy(stUSerConfig.strWifiSsid, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.strWifiSsid) - 1); // Copy value to user config
+                            break;
+                        case 2: // WifiPass
+                            stUSerConfig.strWifiPassword[0] = '\0'; // Ensure the string is null-terminated
+                            strncpy(stUSerConfig.strWifiPassword, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.strWifiPassword) - 1); // Copy value to user config
+                            break;
+                        case 3: // IpAddress
+                            stUSerConfig.stNetworkConfig.strIpAddr[0] = '\0'; // Ensure the string is null-terminated      
+                            strncpy(stUSerConfig.stNetworkConfig.strIpAddr, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stNetworkConfig.strIpAddr) - 1); // Copy value to user config
+                            break;
+                        case 4: // Gateway
+                            stUSerConfig.stNetworkConfig.strGateway[0] = '\0'; // Ensure the string is null-terminated
+                            strncpy(stUSerConfig.stNetworkConfig.strGateway, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stNetworkConfig.strGateway) - 1); // Copy value to user config
+                            break;
+                        case 5: // Netmask
+                            stUSerConfig.stNetworkConfig.strNetMAsk[0] = '\0'; // Ensure the string is null-terminated
+                            strncpy(stUSerConfig.stNetworkConfig.strNetMAsk, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stNetworkConfig.strNetMAsk) - 1); // Copy value to user config
+                            break;
+                        case 6: // Static/Dynamic IP
+                            if(strncmp(ptrTmpKeyValueBuffer, "Static", 6) == 0)
+                            {
+                                stUSerConfig.stNetworkConfig.eStaticDynamic = STATIC_IP;
+                            }
+                            else if(strncmp(ptrTmpKeyValueBuffer, "Dynamic", 7) == 0)
+                            {
+                                stUSerConfig.stNetworkConfig.eStaticDynamic = DYNAMIC_IP;
+                            }
+                            else
+                            {
+                                ESP_LOGE(TAG_CONFIG, "Invalid value for Static/Dynamic IP: %s", ptrTmpKeyValueBuffer);
+                                iRet = -1;
+                            }       
+                            break;
+                        case 7: // RTC Manual/Auto
+                            if(strncmp(ptrTmpKeyValueBuffer, "Manual", 6) == 0)
+                            {
+                                stUSerConfig.eRtcManualAuto = RTC_MANUAL;
+                            }
+                            else if(strncmp(ptrTmpKeyValueBuffer, "NTP", 3) == 0)
+                            {
+                                stUSerConfig.eRtcManualAuto = RTC_FROM_NTP_SERVER;
+                            }
+                            else
+                            {
+                                ESP_LOGE(TAG_CONFIG, "Invalid value for RTC Manual/Auto: %s", ptrTmpKeyValueBuffer);
+                                iRet = -1;
+                            }       
+                            break;
+                        case 8: // NTP Server
+                            stUSerConfig.strNtpServer[0] = '\0'; // Ensure the string is null-terminated
+                            strncpy(stUSerConfig.strNtpServer, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.strNtpServer) - 1); // Copy value to user config
+                            break;
+                        case 9: // Weather Server
+                            stUSerConfig.stWeatherConfig.strWeatherServer[0] = '\0'; // Ensure the string is null-terminated
+                            strncpy(stUSerConfig.stWeatherConfig.strWeatherServer, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stWeatherConfig.strWeatherServer) - 1); // Copy value to user config
+                            break;  
+                        case 10: // Weather API Key
+                            stUSerConfig.stWeatherConfig.strWeatherApiKey[0] = '\0'; // Ensure the string is null-terminated
+                            strncpy(stUSerConfig.stWeatherConfig.strWeatherApiKey, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stWeatherConfig.strWeatherApiKey) - 1); // Copy value to user config
+                            break;  
+                        case 11: // MQTT Status
+                            if(strncmp(ptrTmpKeyValueBuffer, "Enabled", 7) == 0)
+                            {
+                                stUSerConfig.stMqttConfig.bMqttEnable = true;
+                            }
+                            else if(strncmp(ptrTmpKeyValueBuffer, "Disabled", 8) == 0)
+                            {
+                                stUSerConfig.stMqttConfig.bMqttEnable = false;
+                            }
+                            else
+                            {
+                                ESP_LOGE(TAG_CONFIG, "Invalid value for MQTT Status: %s", ptrTmpKeyValueBuffer);
+                                iRet = -1;
+                            }
+                            break;
+                        case 12: // MQTT Server
+                            stUSerConfig.stMqttConfig.strMqttBrokerIpAddr[0] = '\0'; // Ensure the string is null-terminated
+                            strncpy(stUSerConfig.stMqttConfig.strMqttBrokerIpAddr, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stMqttConfig.strMqttBrokerIpAddr) - 1); // Copy value to user config
+                            break;  
+                        case 13: // MQTT Port
+                            stUSerConfig.stMqttConfig.u16MqttBrokerPort = (uint16_t)strtoul(ptrTmpKeyValueBuffer, NULL, 10);
+                            break;
+                        case 14: // MQTT Username
+                            stUSerConfig.stMqttConfig.strMqttUserID[0] = '\0'; // Ensure the string is null-terminated
+                            strncpy(stUSerConfig.stMqttConfig.strMqttUserID, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stMqttConfig.strMqttUserID) - 1); // Copy value to user config
+                            break;
+                        case 15: // MQTT Password
+                            stUSerConfig.stMqttConfig.strMqttPassword[0] = '\0'; // Ensure the string is null-terminated
+                            strncpy(stUSerConfig.stMqttConfig.strMqttPassword, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stMqttConfig.strMqttPassword) - 1); // Copy value to user config
+                            break;
+                        case 16: // MQTT Client ID
+                            stUSerConfig.stMqttConfig.strMqttClientID[0] = '\0'; // Ensure the string is null-terminated
+                            strncpy(stUSerConfig.stMqttConfig.strMqttClientID, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stMqttConfig.strMqttClientID) - 1); // Copy value to user config
+                            break;
+                        case 17: // MQTT Topic
+                            stUSerConfig.stMqttConfig.strMqttTopic[0] = '\0 '; // Ensure the string is null-terminated
+                            strncpy(stUSerConfig.stMqttConfig.strMqttTopic, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stMqttConfig.strMqttTopic) - 1); // Copy value to user config
+                            break;
+                        case 18: // MQTT Subscribe
+                            stUSerConfig.stMqttConfig.strMqttSubscribe[0] = '\0'; // Ensure the string is null-terminated       
+                            strncpy(stUSerConfig.stMqttConfig.strMqttSubscribe, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stMqttConfig.strMqttSubscribe) - 1); // Copy value to user config
+                            break;
+                        default:
+                            ESP_LOGW(TAG_CONFIG, "Unhandled key index: %d", i);
+                            break;
+                    }
+                    ESP_LOGI(TAG_CONFIG, "Key: %s | Value: %s Length: %zu", strKeyArray[i], ptrTmpKeyValueBuffer, iKeyValueLength);
                 }
             }
             else
@@ -963,7 +1017,7 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
     }
     return iRet;
 }
-#endif
+
 void action_save_to_flash(lv_event_t *e) 
 {
     nvs_handle_t writeHandle;
@@ -976,7 +1030,8 @@ void action_save_to_flash(lv_event_t *e)
     if(nvs_open("config.txt", NVS_READWRITE, &writeHandle) != ESP_OK)
     {
         ESP_LOGE(TAG_CONFIG, "Error opening config.txt ");
-        MsgConfigBox();
+        MsgConfigBox("Error opening configuration file");
+        //MsgConfigBox();
     }
     else
     {
@@ -992,70 +1047,58 @@ void action_save_to_flash(lv_event_t *e)
         nvs_set_str(writeHandle, "Netmask", objUserConfig.stNetworkConfig.strNetMAsk);
 
         // Static IP represented as 0, Dynamic IP represented as 1
-        if(objUserConfig.stNetworkConfig.eStaticDynamic == STATIC_IP)
-        {
-            nvs_set_u32(writeHandle, "StaticDinamicIP", 0); 
-        }
-        else
-        {
-            nvs_set_u32(writeHandle, "StaticDinamicIP", 1);
-        }
+        nvs_set_str(writeHandle, "StaticDinamicIP", objUserConfig.stNetworkConfig.eStaticDynamic == STATIC_IP ? "Static" : "Dynamic");
+        
         // Clock Settings
         if(objUserConfig.eRtcManualAuto == RTC_FROM_NTP_SERVER)
         {
             // NTP Auto Clock Settings
-            nvs_set_u32(writeHandle, "RtcManualAuto", 1);
+            nvs_set_str(writeHandle, "RtcManualAuto", "NTP");
             nvs_set_str(writeHandle, "NtpServer", objUserConfig.strNtpServer);
-/*
-            nvs_set_u32(writeHandle, "Day"   , 1);
-            nvs_set_u32(writeHandle, "Month" , 1);
-            nvs_set_u32(writeHandle, "Year"  , 2025);
-            nvs_set_u32(writeHandle, "Hour"  , 1);
-            nvs_set_u32(writeHandle, "Minute", 0);
-*/             
         }
         else 
         {
-            nvs_set_u32(writeHandle, "RtcManualAuto", 0); 
-            /*
-            nvs_set_u32(writeHandle, "Day"   , objUserConfig.stRtcClock.tm_wday);
-            nvs_set_u32(writeHandle, "Month" , objUserConfig.stRtcClock.tm_mon);
-            nvs_set_u32(writeHandle, "Year"  , objUserConfig.stRtcClock.tm_year);
-            nvs_set_u32(writeHandle, "Hour"  , objUserConfig.stRtcClock.tm_hour);
-            nvs_set_u32(writeHandle, "Minute", objUserConfig.stRtcClock.tm_min);
-            nvs_set_u32(writeHandle, "Second", 0);        
-            */
+            nvs_set_str(writeHandle, "RtcManualAuto","Manual"); 
+            nvs_set_str(writeHandle, "NtpServer", " "); // Clear NTP server value if manual clock is selected
         }
         // Weather Server Settings
         nvs_set_str(writeHandle, "WeatherServer", objUserConfig.stWeatherConfig.strWeatherServer);
         nvs_set_str(writeHandle, "WeatherApiKey", objUserConfig.stWeatherConfig.strWeatherApiKey);
      
         // Mqtt Home Assistant Settings
+        
+        if(objUserConfig.stMqttConfig.bMqttEnable)
+        {
+            // Mqtt Protocol Enabled
+            nvs_set_str(writeHandle, "MqttStatus", "Enabled"); 
+        }
+        else
+        {
+            nvs_set_str(writeHandle, "MqttStatus", "Disabled"); 
+        } 
+        char ptrTmpBuffer[6]; // Temporary buffer to hold string representation of port number
+        sprintf(ptrTmpBuffer, "%d", objUserConfig.stMqttConfig.u16MqttBrokerPort); // Convert port number to string for storage
+
         nvs_set_str(writeHandle, "MqttServer"   , objUserConfig.stMqttConfig.strMqttBrokerIpAddr);
-        nvs_set_u32(writeHandle, "MqttPort"     , objUserConfig.stMqttConfig.u16MqttBrokerPort);
+        nvs_set_str(writeHandle, "MqttPort"     , ptrTmpBuffer);
         nvs_set_str(writeHandle, "MqttUsername" , objUserConfig.stMqttConfig.strMqttUserID);
         nvs_set_str(writeHandle, "MqttPassword" , objUserConfig.stMqttConfig.strMqttPassword);
         nvs_set_str(writeHandle, "MqttClientId" , objUserConfig.stMqttConfig.strMqttUserID);
         nvs_set_str(writeHandle, "MqttTopic"    , objUserConfig.stMqttConfig.strMqttTopic);
         nvs_set_str(writeHandle, "MqttSubscribe", objUserConfig.stMqttConfig.strMqttSubscribe);
 
-        if(objUserConfig.stMqttConfig.bMqttEnable)
-        {
-            // Mqtt Protocol Enabled
-            nvs_set_u32(writeHandle, "MqttStatus", 1); 
-        }
-        else
-        {
-            nvs_set_u32(writeHandle, "MqttStatus", 0); 
-        } 
         nvs_commit(writeHandle); // Commit the changes to ensure they are saved
         nvs_close(writeHandle);  // Close the handle after writing              
     }
 }
 
 
-void action_btn_erase_nvs(lv_event_t *e) 
+void action_btn_erase_flash(lv_event_t *e) 
 {
+    ESP_LOGE(TAG_CONFIG, "Erasing Configuration File from NVS");
     nvs_flash_erase_partition("nvs"); // remove NVS partition to ensure clean state before writing new config data
-    nvs_flash_init();
+    nvs_flash_init();     
+    MsgInfoBox("Configuration File Erased");
+
+   // MsgConfigBox();
 }

@@ -3,7 +3,8 @@
 
 #include <stdint.h>
 
-void MsgConfigBox(void);
+void MsgConfigBox(char *strMsg);
+void MsgInfoBox(char *strMsg);
 void lv_msgbox_factory_reset(void);
 void heating_screen(void);
 void goto_home_screen(void);

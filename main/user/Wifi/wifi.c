@@ -29,6 +29,17 @@ wifi_ap_record_t    ap_info[];  // Declare an array to store the AP records
 /* FreeRTOS event group to signal when we are connected/disconnected */
 static EventGroupHandle_t s_wifi_event_group;
 
+static esp_netif_t *sta_netif = NULL; // Declare a pointer for the Wi-Fi station network interface
+void WiFiShutdown(void *arg)
+{
+    ESP_LOGI(TAG_WIFI, "WiFiShutdown called, shutting down Wi-Fi...");
+    esp_wifi_disconnect();                      // Disconnect from the Wi-Fi network
+    esp_wifi_stop();                           // Stop Wi-Fi to save power
+    esp_wifi_deinit();                         // Deinitialize Wi-Fi
+
+    esp_netif_destroy_default_wifi(sta_netif); // Destroy the default Wi-Fi station network interface
+    esp_event_loop_delete_default();           // Delete the default event loop
+}
 
 int iWifiScan(wifi_ap_record_t out_stWifiScannList[], uint8_t u8MaxApCount)
 {    
@@ -37,7 +48,7 @@ int iWifiScan(wifi_ap_record_t out_stWifiScannList[], uint8_t u8MaxApCount)
     lv_obj_t *list_wifi_ssid = objs.drp_wifi_ssid;
     uint16_t number          = MIN(DEFAULT_SCAN_LIST_SIZE,u8MaxApCount);  // Maximum number of APs to be stored
     uint16_t ap_count        = 0;  // Variable to hold the actual number of APs found
-    esp_netif_t *sta_netif;
+   // esp_netif_t *sta_netif;
 
     if(out_stWifiScannList == NULL) 
     {
@@ -45,7 +56,11 @@ int iWifiScan(wifi_ap_record_t out_stWifiScannList[], uint8_t u8MaxApCount)
         iRet = -1;
     }
     else
-    {        
+    {      
+        if(sta_netif != NULL) 
+        {
+            WiFiShutdown(sta_netif); // Ensure Wi-Fi is stopped and deinitialized before starting a new scan           
+        } 
          // Create default event loop
         if(ESP_OK != esp_event_loop_create_default())
         {
@@ -119,13 +134,16 @@ int iWifiScan(wifi_ap_record_t out_stWifiScannList[], uint8_t u8MaxApCount)
                                     ESP_LOGI(TAG_WIFI, "Total APs scanned = %u, actual AP number wifi_scann_list holds = %u", ap_count, number);  // Log total and actual scanned APs
 
                                     memcpy(out_stWifiScannList, wifi_scann_list, sizeof(wifi_ap_record_t) * number);
-                                    
+                                    /*
+                                    ESP_LOGI(TAG_WIFI, "Release and shutting down Wi-Fi...");
                                     esp_wifi_scan_stop();                      // Stop ongoing WiFi scan
                                     esp_wifi_stop();                           // Stop WiFi to save power
                                     esp_wifi_deinit();                         // Deinitialize WiFi
                                     esp_netif_destroy_default_wifi(sta_netif); // Destroy the default WiFi station network interface
                                     esp_event_loop_delete_default();           // Delete the default event loop
+                                    */
                                     iRet = number;
+                                    setConfigStatus(NOT_CONFIG); // Set configuration status to NOT_CONFIG to indicate that Wi-Fi is not configured
                                 }
                             }
                         }           
@@ -202,6 +220,7 @@ static void vTryConnectEvHandler(void* arg,
 /* FreeRTOS event group to signal when we are connected*/
 
 const TickType_t xTicksToWait = 5000 / portTICK_PERIOD_MS;
+#if 0
 int iWifiConnectInStationMode(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t authmode)
 {    
     int iRet    = 0;
@@ -336,6 +355,8 @@ int iWifiConnectInStationMode(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t auth
     }
     return iRet;
 }
+#endif
+
 #if 0
 
 // Function to wait for Wi-Fi connection and obtain IP address
@@ -538,50 +559,7 @@ void action_wifi_txt_psw(lv_event_t *e)
     }
 }
 #endif
-void action_txt_net_cb(lv_event_t *e) 
-{
-    objects_t objs    = objects;
-    lv_keyboard_t *kb = (lv_keyboard_t *)objs.kek_keyboard;
-    uint8_t userData = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
-    lv_obj_set_size((lv_obj_t *)kb, lv_pct(100), lv_pct(40)); // Set size
-    lv_obj_align_to((lv_obj_t *)kb, lv_scr_act(), LV_ALIGN_TOP_MID, 0, 0); // Align to bottom
 
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t *ta         = lv_event_get_target(e);
- 
-    if(code == LV_EVENT_FOCUSED) 
-    {
-        lv_obj_clear_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
-        lv_keyboard_set_textarea((lv_obj_t *)kb, ta);
-        lv_keyboard_set_mode((lv_obj_t *)kb, LV_KEYBOARD_MODE_NUMBER ); // Set keyboard to number mode for IP address input              
-    }  
-    if(code == LV_EVENT_DEFOCUSED) 
-    {
-        lv_keyboard_set_textarea((lv_obj_t *)kb, NULL);
-        lv_obj_add_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
-        if(userData == 1)
-        {
-            // Ip Address
-            memcpy(stUSerConfig.stNetworkConfig.strIpAddr, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.strIpAddr));
-            ESP_LOGI(TAG_WIFI, "Click On IP Addr Textbox ");
-        }
-        else if(userData == 2)
-        {
-            memcpy(stUSerConfig.stNetworkConfig.strNetMAsk, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.strNetMAsk));
-            ESP_LOGI(TAG_WIFI, "Click On NetMask Textbox ");
-        }
-        else if(userData == 3)
-        {
-            memcpy(stUSerConfig.stNetworkConfig.strGateway, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.strGateway));
-            ESP_LOGI(TAG_WIFI, "Click On Gateway Textbox ");
-        }
-        else if(userData == 4)
-        {
-            memcpy(stUSerConfig.stNetworkConfig.strDns, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.strDns));
-            ESP_LOGI(TAG_WIFI, "Click On Dns Textbox ");
-        }      
-    }
-}
 #if 0
 void action_txt_ip_addr(lv_event_t *e) 
 {
@@ -692,16 +670,6 @@ void action_btn_restart(lv_event_t *e) {
 }
 
 
-void action_sw_static_dynamic_ip(lv_event_t *e) 
-{
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t        *obj = lv_event_get_target(e);
-    if(code == LV_EVENT_VALUE_CHANGED) 
-    {
-        ESP_LOGI(TAG_WIFI, "State: %s\n", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
-        stUSerConfig.stNetworkConfig.eStaticDynamic = lv_obj_has_state(obj, LV_STATE_CHECKED) ? DYNAMIC_IP : STATIC_IP;
-    }
-}
 
 void action_txt_ntp_server_cb(lv_event_t *e)
  {
@@ -1079,6 +1047,13 @@ void vGetDefaultConfig(USER_CONFIG *pUserConfig)
 const char *TAG_STA = "wifi_sta";    // Tag for Station mode (Wi-Fi client mode)
 esp_netif_ip_info_t ip_info; // Stores the IP information once connected to Wi-Fi
 
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+//// Initialize Wi-Fi in Station mode (STA mode) and connect to an AP
+/////////////////////////////////////////////////////////////////////////////
+
 // Function to wait for Wi-Fi connection and obtain IP address
 int8_t wifi_wait_connect()
 {
@@ -1092,11 +1067,11 @@ int8_t wifi_wait_connect()
     while (1)
     {
         // Get the network interface handle for the default Wi-Fi STA interface
-        esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-        if (netif)
+        /*esp_netif_t netif*/ sta_netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+        if (sta_netif)
         {
             // Get the IP information associated with the Wi-Fi STA interface
-            esp_err_t ret = esp_netif_get_ip_info(netif, &ip_info);
+            esp_err_t ret = esp_netif_get_ip_info(sta_netif, &ip_info);
             if (ret == ESP_OK && ip_info.ip.addr != 0) {
                 // If successfully connected and an IP address is obtained
                 ESP_LOGI("WiFi", "Connected with IP: " IPSTR, IP2STR(&ip_info.ip));
@@ -1144,13 +1119,25 @@ int8_t wifi_wait_connect()
     }
     return iRet;
 }
+void wifi_init(void)
+{
+    // Initialize the TCP/IP stack
+    ESP_ERROR_CHECK(esp_netif_init());
+    
+    // Create the default event loop
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    // Initialize the Wi-Fi driver with default configuration
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+}
 
 // Function to initialize Wi-Fi in Station mode (STA mode) and connect to an AP
 int8_t wifi_sta_init(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t authmode)
 {
     int8_t iRet = 0;
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));  // Set Wi-Fi mode to Station (STA) initially
-    
+   
     wifi_config_t wifi_config = {              \
         .sta = {                                \
             .threshold.authmode = authmode,     \
@@ -1163,22 +1150,8 @@ int8_t wifi_sta_init(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t authmode)
 
     // Set the Wi-Fi configuration for the station (STA) interface
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
-    esp_netif_create_default_wifi_sta();  // Create the default network interface for Wi-Fi STA
+    sta_netif = esp_netif_create_default_wifi_sta();  // Create the default network interface for Wi-Fi STA
     esp_wifi_start(); // Start the Wi-Fi with the new configuration
     ESP_ERROR_CHECK(esp_wifi_connect());  // Attempt to connect to the Wi-Fi AP
     return wifi_wait_connect();  // Wait for the connection to establish and get IP address
-}
-
-// Initialize Wi-Fi for STA (Station) and AP (Access Point) modes
-void wifi_init(void)
-{
-    // Initialize the TCP/IP stack
-    ESP_ERROR_CHECK(esp_netif_init());
-    
-    // Create the default event loop
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-
-    // Initialize the Wi-Fi driver with default configuration
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 }

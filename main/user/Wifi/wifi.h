@@ -50,6 +50,7 @@ int iWifiConnectInStationMode(uint8_t *ssid, uint8_t *pwd, wifi_auth_mode_t auth
  //void vGetDefaultConfig(USER_CONFIG *pUserConfig);
  void stop_wifi();
 
+ void WiFiShutdown(void *arg);
 
 extern wifi_ap_record_t ap_info[];  // Declare an array to store the AP records
 

@@ -1,7 +1,7 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/0",
-    "selectedActionObject": "[DomoHome.eez-project]:/actions/24",
+    "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/1",
+    "selectedActionObject": "[DomoHome.eez-project]:/actions/12",
     "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/26",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -73,7 +73,7 @@
           {
             "type": "border",
             "selected": 0,
-            "size": 267.5,
+            "size": 42.5,
             "location": "bottom",
             "children": [
               {
@@ -218,7 +218,8 @@
                   },
                   "icon": "svg:page"
                 }
-              ]
+              ],
+              "active": true
             },
             {
               "type": "row",
@@ -228,7 +229,7 @@
                 {
                   "type": "tabset",
                   "id": "#f8c2bdb4-e961-41c9-9a50-965e44482089",
-                  "weight": 2,
+                  "weight": 2.655574043261231,
                   "children": [
                     {
                       "type": "tab",
@@ -238,13 +239,12 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
                   "id": "#f393cecc-aac9-4c20-a003-c2e8c4af3ac1",
-                  "weight": 1,
+                  "weight": 0.34442595673876875,
                   "children": [
                     {
                       "type": "tab",
@@ -515,88 +515,6 @@
                       "id": "DEBUGGER_LOGS",
                       "name": "Logs",
                       "component": "logs",
-                      "enableClose": false,
-                      "icon": "svg:log"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      }
-    },
-    "rootDockerSimulator": {
-      "version": 1,
-      "json": {
-        "global": {
-          "splitterSize": 4,
-          "splitterExtra": 4,
-          "tabEnableRename": false,
-          "borderEnableAutoHide": true
-        },
-        "borders": [],
-        "layout": {
-          "type": "row",
-          "id": "#4fb99106-889a-4b12-9790-d4f7e7aaf152",
-          "children": [
-            {
-              "type": "tabset",
-              "id": "#67e7676c-2a52-420c-b6ec-01f3a525d0d8",
-              "weight": 70,
-              "enableDrop": false,
-              "enableDrag": false,
-              "enableClose": false,
-              "enableTabStrip": true,
-              "children": [
-                {
-                  "type": "tab",
-                  "id": "DOCKER_SIMULATOR_PREVIEW",
-                  "name": "Preview",
-                  "component": "dockerSimulatorPreview",
-                  "enableClose": false,
-                  "icon": "material:computer"
-                }
-              ]
-            },
-            {
-              "type": "row",
-              "id": "#79403c63-b452-4c93-8276-e0661ddbadab",
-              "weight": 30,
-              "children": [
-                {
-                  "type": "tabset",
-                  "id": "#b246db18-5622-4e4e-8d40-72a3f2ea5fe3",
-                  "weight": 50,
-                  "enableDrop": false,
-                  "enableDrag": false,
-                  "enableClose": false,
-                  "enableTabStrip": true,
-                  "children": [
-                    {
-                      "type": "tab",
-                      "id": "DOCKER_SIMULATOR_LOGS",
-                      "name": "Build Logs",
-                      "component": "dockerSimulatorLogs",
-                      "enableClose": false,
-                      "icon": "svg:log"
-                    }
-                  ]
-                },
-                {
-                  "type": "tabset",
-                  "id": "#f163b8ca-afe2-4476-8671-daf88bb5c6ba",
-                  "weight": 50,
-                  "enableDrop": false,
-                  "enableDrag": false,
-                  "enableClose": false,
-                  "enableTabStrip": true,
-                  "children": [
-                    {
-                      "type": "tab",
-                      "id": "DOCKER_SIMULATOR_PREVIEW_LOGS",
-                      "name": "Preview Logs",
-                      "component": "dockerSimulatorPreviewLogs",
                       "enableClose": false,
                       "icon": "svg:log"
                     }
@@ -1087,18 +1005,16 @@
           "3": {},
           "4": {},
           "5": {},
-          "7": {
-            "$selected": true
-          },
+          "7": {},
           "9": {}
         }
       },
       "transform": {
         "translate": {
-          "x": -418.6268656716418,
-          "y": -202.50373134328356
+          "x": -316.29333446404326,
+          "y": -193.06767299864316
         },
-        "scale": 0.8
+        "scale": 0.75
       },
       "timeline": {
         "isEditorActive": false,
@@ -1124,6 +1040,9 @@
           "30": {
             "0": {}
           },
+          "31": {
+            "$selected": true
+          },
           "32": {},
           "33": {},
           "36": {},
@@ -1134,10 +1053,10 @@
       },
       "transform": {
         "translate": {
-          "x": -450.0962000000001,
-          "y": -323.74200000000013
+          "x": -512,
+          "y": -300
         },
-        "scale": 0.8
+        "scale": 0.75
       },
       "timeline": {
         "isEditorActive": false,
@@ -1280,6 +1199,6 @@
   "lvglExpandedPropertiesGroup": [],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 0.8,
+  "flowZoom": 0.75,
   "implementationLanguage": "C"
 }

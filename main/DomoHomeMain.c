@@ -53,6 +53,9 @@ static void IRAM_ATTR gpio_isr_handler(void* arg)
 {
     uint32_t gpio_num = (uint32_t) arg;
     xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
+    ESP_LOGE(TAG, "Erasing Configuration File from NVS");
+    nvs_flash_erase_partition("nvs"); // remove NVS partition to ensure clean state before writing new config data
+    nvs_flash_init();     
 }
 
 
@@ -260,15 +263,12 @@ void app_main()
     {
         ESP_LOGE(TAG, "Failed to initialize PCF8523");
     }
-
-    // Initialize Wi-Fi settings (connect to the specified Wi-Fi network)
-   // wifi_init(); 
-
-
+  
     // Initialize the Non-Volatile Storage (NVS) for settings and data persistence
     // This ensures that user data and settings are retained even after power loss.
     // Initialize the Non-Volatile Storage (NVS) for Wi-Fi settings
     esp_err_t err = nvs_flash_init();
+
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {
         // If NVS has no free pages or a new version is found, erase and reinitialize NVS
@@ -326,38 +326,70 @@ void app_main()
             //ui_init();
             create_screens();
 
-            if(iDownloadConfigFileFromNVS("config.txt") == -1)
+            if(iDownloadConfigFileFromNVS(CONFIG_FILE_NAME) == -1)
             {
                 ESP_LOGI(TAG, "Configuration file not found");
-                MsgConfigBox();
+                MsgConfigBox("Configuration File Not Found");
+                //MsgConfigBox();
                 //loadScreen(SCREEN_ID_SETTINGS_SCREEN );
             }
             else
             {
                 USER_CONFIG objUserConfig;
                 vGetConfig(&objUserConfig);
-                ESP_LOGI(TAG, "Hostname: %s", objUserConfig.strHostname);
-                ESP_LOGI(TAG, "SSID    : %s, Password: %s", objUserConfig.strWifiSsid, objUserConfig.strWifiPassword);
+                ESP_LOGI(TAG, "###############################################################");
+                ESP_LOGI(TAG, "Hostname       : %s", objUserConfig.strHostname);
+                ESP_LOGI(TAG, "WifiSsid       : %s", objUserConfig.strWifiSsid);
+                ESP_LOGI(TAG, "WifiPass       : %s", objUserConfig.strWifiPassword);
 
-                ESP_LOGI(TAG, "IP Address: %s", objUserConfig.stNetworkConfig.strIpAddr);
-                ESP_LOGI(TAG, "NetMask   : %s", objUserConfig.stNetworkConfig.strNetMAsk);
-                ESP_LOGI(TAG, "Gateway   : %s", objUserConfig.stNetworkConfig.strGateway);
-                ESP_LOGI(TAG, "DNS       : %s", objUserConfig.stNetworkConfig.strDns);
-                //ESP_LOGI(TAG, "DHCP Enable: %d", objUserConfig.stNetworkConfig.dhcp_enable);
-                ESP_LOGI(TAG, "Static/Dynamic IP: %s", objUserConfig.stNetworkConfig.eStaticDynamic == 0 ? "Static IP" : "Dynamic IP");
-                ESP_LOGI(TAG, "NTP Server: %s", objUserConfig.strNtpServer);
-                
-                ESP_LOGI(TAG, "Weather Server: %s", objUserConfig.stWeatherConfig.strWeatherServer);
-                ESP_LOGI(TAG, "Weather API Key: %s", objUserConfig.stWeatherConfig.strWeatherApiKey);
-
-                ESP_LOGI(TAG, "MQTT Enable         : %s", objUserConfig.stMqttConfig.bMqttEnable == true ? "MQTT ON" : "MQTT OFF");       
-                ESP_LOGI(TAG, "MQTT BrokerServer IP: %s, Port: %d", objUserConfig.stMqttConfig.strMqttBrokerIpAddr, objUserConfig.stMqttConfig.u16MqttBrokerPort);                
-                ESP_LOGI(TAG, "MQTT Client ID      : %s", objUserConfig.stMqttConfig.strMqttClientID);        
-                ESP_LOGI(TAG, "MQTT User ID        : %s", objUserConfig.stMqttConfig.strMqttUserID);
-                ESP_LOGI(TAG, "MQTT Password       : %s", objUserConfig.stMqttConfig.strMqttPassword);
+                ESP_LOGI(TAG, "Ipaddress      : %s", objUserConfig.stNetworkConfig.strIpAddr);                
+                ESP_LOGI(TAG, "Gateway        : %s", objUserConfig.stNetworkConfig.strGateway);
+                ESP_LOGI(TAG, "NetMask        : %s", objUserConfig.stNetworkConfig.strNetMAsk);
+                if(objUserConfig.stNetworkConfig.eStaticDynamic == STATIC_IP)
+                {
+                ESP_LOGI(TAG, "StaticDinamicIP: Static IP");
+                }
+                else
+                {
+                    ESP_LOGI(TAG, "StaticDinamicIP: Dynamic IP");
+                }
+                if(objUserConfig.eRtcManualAuto == RTC_MANUAL)
+                {
+                    ESP_LOGI(TAG, "RtcManualAuto  : Manual");
+                }
+                else
+                {
+                    ESP_LOGI(TAG, "RtcManualAuto  : Auto");                    
+                }
+                ESP_LOGI(TAG, "NtpServer      : %s", objUserConfig.strNtpServer);
+                ESP_LOGI(TAG, "WeatherServer  : %s", objUserConfig.stWeatherConfig.strWeatherServer);
+                ESP_LOGI(TAG, "WeatherApiKey  : %s", objUserConfig.stWeatherConfig.strWeatherApiKey);                    
+                ESP_LOGI(TAG, "MqttStatus     : %s", objUserConfig.stMqttConfig.bMqttEnable == true ? "Enabled" : "Disabled");       
+                ESP_LOGI(TAG, "MqttServer     : %s", objUserConfig.stMqttConfig.strMqttBrokerIpAddr);                
+                ESP_LOGI(TAG, "MqttPort       : %d", objUserConfig.stMqttConfig.u16MqttBrokerPort);                
+                ESP_LOGI(TAG, "MqttUsername   : %s", objUserConfig.stMqttConfig.strMqttUserID);
+                ESP_LOGI(TAG, "MqttPassword   : %s", objUserConfig.stMqttConfig.strMqttPassword);
+                ESP_LOGI(TAG, "MqttClientId   : %s", objUserConfig.stMqttConfig.strMqttClientID);                                        
+                ESP_LOGI(TAG, "MqttTopic      : %s", objUserConfig.stMqttConfig.strMqttTopic);        
+                ESP_LOGI(TAG, "MqttSubscribe  : %s", objUserConfig.stMqttConfig.strMqttSubscribe);
+                ESP_LOGI(TAG, "###############################################################");
 
                 setConfigStatus(CONFIG);
                 loadScreen(SCREEN_ID_MAIN);
+
+                // Initialize Wi-Fi settings after NVS init
+                wifi_init(); 
+                #if 1
+                if( wifi_sta_init((uint8_t*)objUserConfig.strWifiSsid, (uint8_t*)objUserConfig.strWifiPassword, WIFI_AUTH_WPA2_PSK) == ESP_OK)
+                {
+                    ESP_LOGE(TAG, "Success to connect to Wi-Fi network");
+                }
+                else
+                {
+                    ESP_LOGE(TAG, "Failed to connect to Wi-Fi network");
+                }
+                #else
+              
                 if( wifi_sta_init((uint8_t*)"dlinkAP", (uint8_t*)"DMINGL6Intrepido123.", WIFI_AUTH_WPA2_PSK) == ESP_OK)
                 {
                     ESP_LOGE(TAG, "Success to connect to Wi-Fi network");
@@ -366,6 +398,7 @@ void app_main()
                 {
                     ESP_LOGE(TAG, "Failed to connect to Wi-Fi network");
                 }
+                #endif    
             }            
 
             // Release the mutex after LVGL operations are complete
