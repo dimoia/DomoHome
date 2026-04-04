@@ -671,17 +671,6 @@ void action_btn_restart(lv_event_t *e) {
 
 
 
-void action_txt_ntp_server_cb(lv_event_t *e)
- {
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t        *obj = lv_event_get_target(e);
-    if(code == LV_EVENT_FOCUSED) 
-    {
-        ESP_LOGI(TAG_WIFI, "Click On Ntp Server Textbox ");
-        memcpy(stUSerConfig.strNtpServer, lv_textarea_get_text(obj), sizeof(stUSerConfig.strNtpServer));
-    }   
-}
-
 #if 0
 // Save Configuration
 void action_set_clock(lv_event_t *e) {

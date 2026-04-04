@@ -355,13 +355,14 @@ void app_main()
                 }
                 if(objUserConfig.eRtcManualAuto == RTC_MANUAL)
                 {
-                    ESP_LOGI(TAG, "RtcManualAuto  : Manual");
+                    ESP_LOGI(TAG, "RtcManualAuto  : RTC");
                 }
                 else
                 {
                     ESP_LOGI(TAG, "RtcManualAuto  : Auto");                    
                 }
                 ESP_LOGI(TAG, "NtpServer      : %s", objUserConfig.strNtpServer);
+                ESP_LOGI(TAG, "Weather Status : %s", objUserConfig.stWeatherConfig.bWeatherStatus == true ? "Enabled" : "Disabled");
                 ESP_LOGI(TAG, "WeatherServer  : %s", objUserConfig.stWeatherConfig.strWeatherServer);
                 ESP_LOGI(TAG, "WeatherApiKey  : %s", objUserConfig.stWeatherConfig.strWeatherApiKey);                    
                 ESP_LOGI(TAG, "MqttStatus     : %s", objUserConfig.stMqttConfig.bMqttEnable == true ? "Enabled" : "Disabled");       

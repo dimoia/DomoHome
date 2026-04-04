@@ -1,7 +1,7 @@
 {
   "navigation": {
     "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/1",
-    "selectedActionObject": "[DomoHome.eez-project]:/actions/12",
+    "selectedActionObject": "[DomoHome.eez-project]:/actions/13",
     "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/26",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -126,6 +126,7 @@
                   "type": "tabset",
                   "id": "#751090f9-898a-494d-8ac2-845ed731e798",
                   "weight": 1.262127088859336,
+                  "selected": 2,
                   "enableClose": false,
                   "children": [
                     {
@@ -191,11 +192,22 @@
             {
               "type": "tabset",
               "id": "EDITORS",
-              "weight": 50.743624503167645,
-              "selected": 1,
+              "weight": 49.62779611095139,
+              "selected": 2,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
+                {
+                  "type": "tab",
+                  "id": "#3771b06d-3b82-4ffb-9483-3183ea4fcadf",
+                  "name": "heating_screen",
+                  "component": "editor",
+                  "config": {
+                    "objectPath": "[DomoHome.eez-project]:/userPages/2",
+                    "permanent": false
+                  },
+                  "icon": "svg:page"
+                },
                 {
                   "type": "tab",
                   "id": "#06bf3ae2-bdb8-4221-abf9-46ad3b2aa52f",
@@ -224,12 +236,12 @@
             {
               "type": "row",
               "id": "#5cbf9b4d-bc35-413b-af80-2a2b0b90dcb9",
-              "weight": 23.48553092188492,
+              "weight": 24.601359314101174,
               "children": [
                 {
                   "type": "tabset",
                   "id": "#f8c2bdb4-e961-41c9-9a50-965e44482089",
-                  "weight": 2.655574043261231,
+                  "weight": 1.9939467312348669,
                   "children": [
                     {
                       "type": "tab",
@@ -244,7 +256,7 @@
                 {
                   "type": "tabset",
                   "id": "#f393cecc-aac9-4c20-a003-c2e8c4af3ac1",
-                  "weight": 0.34442595673876875,
+                  "weight": 1.0060532687651331,
                   "children": [
                     {
                       "type": "tab",
@@ -1014,7 +1026,7 @@
           "x": -316.29333446404326,
           "y": -193.06767299864316
         },
-        "scale": 0.75
+        "scale": 0.67
       },
       "timeline": {
         "isEditorActive": false,
@@ -1040,23 +1052,24 @@
           "30": {
             "0": {}
           },
-          "31": {
-            "$selected": true
-          },
+          "31": {},
           "32": {},
           "33": {},
           "36": {},
           "37": {},
+          "41": {
+            "$selected": true
+          },
           "52": {},
           "53": {}
         }
       },
       "transform": {
         "translate": {
-          "x": -512,
-          "y": -300
+          "x": -356.23969696969624,
+          "y": -235.7060606060606
         },
-        "scale": 0.75
+        "scale": 0.67
       },
       "timeline": {
         "isEditorActive": false,
@@ -1097,7 +1110,7 @@
           "x": -409.6,
           "y": -240
         },
-        "scale": 0.8
+        "scale": 0.67
       },
       "timeline": {
         "isEditorActive": false,
@@ -1199,6 +1212,6 @@
   "lvglExpandedPropertiesGroup": [],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 0.75,
+  "flowZoom": 0.67,
   "implementationLanguage": "C"
 }

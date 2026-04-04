@@ -32,6 +32,7 @@ typedef enum _DYNAMIC_IP_STATIC_IP
 
 typedef struct _WEATHER_
 {
+    bool bWeatherStatus;
     char strWeatherServer[64];
     char strWeatherApiKey[32];
 } WEATHER;

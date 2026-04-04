@@ -160,20 +160,20 @@
       "name": "goto_home"
     },
     {
-      "objID": "a85efc81-f4a4-475c-ffbc-dabc3ab7e76d",
-      "components": [],
-      "connectionLines": [],
-      "localVariables": [],
-      "userProperties": [],
-      "name": "SliderTemp1Change"
-    },
-    {
       "objID": "5f76c2b8-1dc9-4044-c722-d98667eb652a",
       "components": [],
       "connectionLines": [],
       "localVariables": [],
       "userProperties": [],
       "name": "goto_settings_screen"
+    },
+    {
+      "objID": "a85efc81-f4a4-475c-ffbc-dabc3ab7e76d",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "userProperties": [],
+      "name": "SliderTemp1Change"
     },
     {
       "objID": "cbf98380-8cd9-4b61-aa0f-7d734806a32b",
@@ -294,6 +294,54 @@
       "localVariables": [],
       "userProperties": [],
       "name": "btn_erase_flash"
+    },
+    {
+      "objID": "21a3c229-7e38-4b79-a7ee-9de8bf0f2d9a",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "userProperties": [],
+      "name": "sw_wheater"
+    },
+    {
+      "objID": "f24da4b2-2741-47cd-c1a5-2faa5349fdb2",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "userProperties": [],
+      "name": "combo_weather_server"
+    },
+    {
+      "objID": "8bab8d52-de23-49c4-ef6a-0853fcbb41c5",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "userProperties": [],
+      "name": "txt_weather_key"
+    },
+    {
+      "objID": "8285940e-9de1-4d1e-c00e-5f2380db2009",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "userProperties": [],
+      "name": "sw_mqtt_status"
+    },
+    {
+      "objID": "8797d25c-746d-41da-809d-219d694a62c3",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "userProperties": [],
+      "name": "mqtt_config"
+    },
+    {
+      "objID": "cbb2cced-f3f8-43fb-b69f-765f54175012",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "userProperties": [],
+      "name": "txt_brokerPort"
     }
   ],
   "userPages": [
@@ -3201,6 +3249,13 @@
                   "handlerType": "action",
                   "action": "txt_ntpServer_cb",
                   "userData": 0
+                },
+                {
+                  "objID": "959e4512-87d4-4212-ca42-dbeb5dfb8058",
+                  "eventName": "DEFOCUSED",
+                  "handlerType": "action",
+                  "action": "txt_ntpServer_cb",
+                  "userData": 0
                 }
               ],
               "identifier": "txt_ntp_server",
@@ -4378,8 +4433,8 @@
             {
               "objID": "d28e8e19-bcd2-42ba-89cf-46c6119fa0a8",
               "type": "LVGLLabelWidget",
-              "left": 21,
-              "top": 386,
+              "left": 224,
+              "top": 385,
               "width": 156,
               "height": 22,
               "customInputs": [],
@@ -5189,15 +5244,15 @@
                   "objID": "e1142ce8-7fbe-4316-ba28-5793d1c5f164",
                   "eventName": "FOCUSED",
                   "handlerType": "action",
-                  "action": "txtNet_cb",
-                  "userData": 1
+                  "action": "mqtt_config",
+                  "userData": 0
                 },
                 {
                   "objID": "8c71f021-2fde-4fdf-f76c-597aa9dd1fbd",
                   "eventName": "DEFOCUSED",
                   "handlerType": "action",
                   "action": "txtNet_cb",
-                  "userData": 1
+                  "userData": 0
                 }
               ],
               "identifier": "txt_brokerIP",
@@ -5307,8 +5362,15 @@
                   "objID": "57550d69-bdfb-48a1-9d50-b8fd8f4966f8",
                   "eventName": "FOCUSED",
                   "handlerType": "action",
-                  "action": "txt_ntpServer_cb",
-                  "userData": 0
+                  "action": "mqtt_config",
+                  "userData": 4
+                },
+                {
+                  "objID": "363a8282-7c4b-4ea0-bdb4-46f63ac24a66",
+                  "eventName": "DEFOCUSED",
+                  "handlerType": "action",
+                  "action": "mqtt_config",
+                  "userData": 4
                 }
               ],
               "identifier": "txt_mqttuserid",
@@ -5418,8 +5480,15 @@
                   "objID": "bc72f29c-cd1a-47fb-906d-6b7cf15476a0",
                   "eventName": "FOCUSED",
                   "handlerType": "action",
-                  "action": "txt_ntpServer_cb",
-                  "userData": 0
+                  "action": "mqtt_config",
+                  "userData": 3
+                },
+                {
+                  "objID": "09aa7775-0bf9-42e6-cc03-9702cd44cbe9",
+                  "eventName": "DEFOCUSED",
+                  "handlerType": "action",
+                  "action": "mqtt_config",
+                  "userData": 3
                 }
               ],
               "identifier": "txt_mqttpassword",
@@ -5529,8 +5598,15 @@
                   "objID": "f36cb48d-5a03-4af9-b894-8e4c157b78f6",
                   "eventName": "FOCUSED",
                   "handlerType": "action",
-                  "action": "txt_ntpServer_cb",
-                  "userData": 0
+                  "action": "mqtt_config",
+                  "userData": 2
+                },
+                {
+                  "objID": "e4069bd6-dd52-4c82-beb3-59e9fb791cd3",
+                  "eventName": "DEFOCUSED",
+                  "handlerType": "action",
+                  "action": "mqtt_config",
+                  "userData": 2
                 }
               ],
               "identifier": "txt_mqttclientID",
@@ -5573,8 +5649,8 @@
             {
               "objID": "44a52834-afb8-4923-b24c-1a6ebe431c0a",
               "type": "LVGLDropdownWidget",
-              "left": 195,
-              "top": 373,
+              "left": 387,
+              "top": 375,
               "width": 174,
               "height": 42,
               "customInputs": [],
@@ -5586,8 +5662,16 @@
                 "childStyles": []
               },
               "timeline": [],
-              "eventHandlers": [],
-              "identifier": "txt_weather_server",
+              "eventHandlers": [
+                {
+                  "objID": "8b7f813a-fc64-49fb-a690-01265eb5ad46",
+                  "eventName": "VALUE_CHANGED",
+                  "handlerType": "action",
+                  "action": "combo_weather_server",
+                  "userData": 0
+                }
+              ],
+              "identifier": "combo_weather_server",
               "leftUnit": "px",
               "topUnit": "px",
               "widthUnit": "px",
@@ -5938,15 +6022,15 @@
                   "objID": "31bbd86b-766e-46d3-9aba-84ee8cb765a2",
                   "eventName": "FOCUSED",
                   "handlerType": "action",
-                  "action": "txtNet_cb",
-                  "userData": 1
+                  "action": "txt_brokerPort",
+                  "userData": 0
                 },
                 {
                   "objID": "f2f2b326-c184-4e87-dc05-ad94381a3a85",
                   "eventName": "DEFOCUSED",
                   "handlerType": "action",
-                  "action": "txtNet_cb",
-                  "userData": 1
+                  "action": "txt_brokerPort",
+                  "userData": 0
                 }
               ],
               "identifier": "txt_brokerPort",
@@ -5990,7 +6074,7 @@
               "objID": "39118340-64cb-4c7d-e9ec-60a809091cb1",
               "type": "LVGLTextareaWidget",
               "left": 747,
-              "top": 376,
+              "top": 375,
               "width": 253,
               "height": 42,
               "customInputs": [],
@@ -6007,11 +6091,18 @@
                   "objID": "abca9c46-79eb-4450-b135-879f103db782",
                   "eventName": "FOCUSED",
                   "handlerType": "action",
-                  "action": "txt_ntpServer_cb",
-                  "userData": 0
+                  "action": "txt_weather_key",
+                  "userData": 4
+                },
+                {
+                  "objID": "2c66c62f-2c54-4e1b-b4ea-007de90eff19",
+                  "eventName": "DEFOCUSED",
+                  "handlerType": "action",
+                  "action": "txt_weather_key",
+                  "userData": 4
                 }
               ],
-              "identifier": "txt_mqttuserid_1",
+              "identifier": "txt_weather_key",
               "leftUnit": "px",
               "topUnit": "px",
               "widthUnit": "px",
@@ -6052,7 +6143,7 @@
               "objID": "d2c95fec-f5f6-44a5-f5db-285eede6ef06",
               "type": "LVGLLabelWidget",
               "left": 570,
-              "top": 386,
+              "top": 385,
               "width": 169,
               "height": 22,
               "customInputs": [],
@@ -6100,8 +6191,8 @@
             {
               "objID": "760dcfe2-49c3-403a-b194-73fe0d370dec",
               "type": "LVGLSwitchWidget",
-              "left": 97,
-              "top": 450,
+              "left": 109,
+              "top": 449,
               "width": 50,
               "height": 25,
               "customInputs": [],
@@ -6113,7 +6204,15 @@
                 "childStyles": []
               },
               "timeline": [],
-              "eventHandlers": [],
+              "eventHandlers": [
+                {
+                  "objID": "2e39a864-a821-48c0-9ca9-41a6919e229a",
+                  "eventName": "VALUE_CHANGED",
+                  "handlerType": "action",
+                  "action": "sw_mqtt_status",
+                  "userData": 0
+                }
+              ],
               "identifier": "sw_mqtt_status",
               "leftUnit": "px",
               "topUnit": "px",
@@ -6140,8 +6239,8 @@
             {
               "objID": "7520a55e-dca9-4b54-f051-3fe7df0150b3",
               "type": "LVGLLabelWidget",
-              "left": 157,
-              "top": 450,
+              "left": 18,
+              "top": 449,
               "width": 77,
               "height": 22,
               "customInputs": [],
@@ -6189,8 +6288,8 @@
             {
               "objID": "d2e3394b-61a9-4277-fc37-0781ca502ba8",
               "type": "LVGLLabelWidget",
-              "left": 20,
-              "top": 450,
+              "left": 171,
+              "top": 449,
               "width": 71,
               "height": 22,
               "customInputs": [],
@@ -6256,8 +6355,15 @@
                   "objID": "553c0099-68a4-4d11-d554-72e0a14e7799",
                   "eventName": "FOCUSED",
                   "handlerType": "action",
-                  "action": "txt_ntpServer_cb",
-                  "userData": 0
+                  "action": "mqtt_config",
+                  "userData": 5
+                },
+                {
+                  "objID": "b80b230e-300a-4c35-a5f6-59d7ecafb9ee",
+                  "eventName": "DEFOCUSED",
+                  "handlerType": "action",
+                  "action": "mqtt_config",
+                  "userData": 5
                 }
               ],
               "identifier": "txt_mqtttopic",
@@ -6416,8 +6522,15 @@
                   "objID": "c3631f16-8fe0-40e2-f927-08b5b15161c4",
                   "eventName": "FOCUSED",
                   "handlerType": "action",
-                  "action": "txt_ntpServer_cb",
-                  "userData": 0
+                  "action": "mqtt_config",
+                  "userData": 6
+                },
+                {
+                  "objID": "de114ea5-d640-4be7-9b18-51ba83551713",
+                  "eventName": "DEFOCUSED",
+                  "handlerType": "action",
+                  "action": "mqtt_config",
+                  "userData": 6
                 }
               ],
               "identifier": "txt_mqttsubscribe",
@@ -6456,6 +6569,153 @@
               "passwordMode": false,
               "acceptedCharacters": "",
               "maxTextLength": 16
+            },
+            {
+              "objID": "cbfa2f9f-470c-4f7d-de4c-056996b3d89d",
+              "type": "LVGLSwitchWidget",
+              "left": 66,
+              "top": 384,
+              "width": 56,
+              "height": 25,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "671831e9-b4b8-4ea1-8c27-f287781ae940",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [
+                {
+                  "objID": "45284d88-996e-4443-f5c2-a5f2ab5312c9",
+                  "eventName": "VALUE_CHANGED",
+                  "handlerType": "action",
+                  "action": "sw_wheater",
+                  "userData": 0
+                }
+              ],
+              "identifier": "sw_wheater",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "px",
+              "heightUnit": "px",
+              "children": [],
+              "widgetFlags": "CHECKABLE|CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_ON_FOCUS|SCROLL_WITH_ARROW|SNAPPABLE",
+              "hiddenFlagType": "literal",
+              "clickableFlag": true,
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedState": false,
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "e74418c5-e11d-4f70-ac34-7421487fbb49"
+              },
+              "group": "",
+              "groupIndex": 0
+            },
+            {
+              "objID": "08eb4aa4-01b2-44ee-8e45-0cfa28b705ad",
+              "type": "LVGLLabelWidget",
+              "left": 14,
+              "top": 387,
+              "width": 43,
+              "height": 22,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "62d2d535-e4e3-4807-d0ad-820c258638c4",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "dcf99fc6-40a3-4074-99b3-9538e58c8313",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_font": "MONTSERRAT_20"
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "OFF",
+              "textType": "literal",
+              "longMode": "WRAP",
+              "recolor": false
+            },
+            {
+              "objID": "311b759b-e966-4dd6-f948-35c69860c0ca",
+              "type": "LVGLLabelWidget",
+              "left": 134,
+              "top": 387,
+              "width": 33,
+              "height": 22,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "5f579362-c6c2-4672-a0de-7ef768ac5eef",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "8133b49f-ce72-4751-88d7-df80b3d12692",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_font": "MONTSERRAT_20"
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "ON",
+              "textType": "literal",
+              "longMode": "WRAP",
+              "recolor": false
             }
           ],
           "widgetFlags": "CLICKABLE|PRESS_LOCK|CLICK_FOCUSABLE|GESTURE_BUBBLE|SNAPPABLE|SCROLLABLE|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER",
@@ -6621,8 +6881,8 @@
               "type": "LVGLLabelWidget",
               "left": 920,
               "top": 9,
-              "width": 52,
-              "height": 16,
+              "width": 75,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -6674,8 +6934,8 @@
               "type": "LVGLLabelWidget",
               "left": 519,
               "top": 10,
-              "width": 45,
-              "height": 16,
+              "width": 65,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -6725,8 +6985,8 @@
               "type": "LVGLLabelWidget",
               "left": 18,
               "top": 9,
-              "width": 134,
-              "height": 16,
+              "width": 186,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -6775,8 +7035,8 @@
               "type": "LVGLLabelWidget",
               "left": 19,
               "top": 85,
-              "width": 58,
-              "height": 16,
+              "width": 83,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -6871,8 +7131,8 @@
               "type": "LVGLLabelWidget",
               "left": 462,
               "top": 53,
-              "width": 71,
-              "height": 16,
+              "width": 103,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -7050,8 +7310,8 @@
               "type": "LVGLLabelWidget",
               "left": 775,
               "top": 53,
-              "width": 71,
-              "height": 16,
+              "width": 103,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -7100,8 +7360,8 @@
               "type": "LVGLLabelWidget",
               "left": 691,
               "top": 84,
-              "width": 9,
-              "height": 16,
+              "width": 13,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -7150,8 +7410,8 @@
               "type": "LVGLLabelWidget",
               "left": 957,
               "top": 84,
-              "width": 17,
-              "height": 16,
+              "width": 24,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -7200,8 +7460,8 @@
               "type": "LVGLLabelWidget",
               "left": 377,
               "top": 84,
-              "width": 9,
-              "height": 16,
+              "width": 13,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -7250,8 +7510,8 @@
               "type": "LVGLLabelWidget",
               "left": 639,
               "top": 84,
-              "width": 17,
-              "height": 16,
+              "width": 25,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -7349,8 +7609,8 @@
               "type": "LVGLLabelWidget",
               "left": 17,
               "top": 159,
-              "width": 60,
-              "height": 16,
+              "width": 85,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -7445,8 +7705,8 @@
               "type": "LVGLLabelWidget",
               "left": 460,
               "top": 127,
-              "width": 71,
-              "height": 16,
+              "width": 103,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -7627,8 +7887,8 @@
               "type": "LVGLLabelWidget",
               "left": 773,
               "top": 127,
-              "width": 71,
-              "height": 16,
+              "width": 103,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -7677,8 +7937,8 @@
               "type": "LVGLLabelWidget",
               "left": 687,
               "top": 158,
-              "width": 9,
-              "height": 16,
+              "width": 13,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -7727,8 +7987,8 @@
               "type": "LVGLLabelWidget",
               "left": 953,
               "top": 158,
-              "width": 17,
-              "height": 16,
+              "width": 24,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -7777,8 +8037,8 @@
               "type": "LVGLLabelWidget",
               "left": 373,
               "top": 158,
-              "width": 9,
-              "height": 16,
+              "width": 13,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -7827,8 +8087,8 @@
               "type": "LVGLLabelWidget",
               "left": 635,
               "top": 158,
-              "width": 17,
-              "height": 16,
+              "width": 25,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -7877,8 +8137,8 @@
               "type": "LVGLLabelWidget",
               "left": 19,
               "top": 232,
-              "width": 86,
-              "height": 16,
+              "width": 120,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -7973,8 +8233,8 @@
               "type": "LVGLLabelWidget",
               "left": 465,
               "top": 200,
-              "width": 71,
-              "height": 16,
+              "width": 103,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -8152,8 +8412,8 @@
               "type": "LVGLLabelWidget",
               "left": 775,
               "top": 200,
-              "width": 71,
-              "height": 16,
+              "width": 103,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -8202,8 +8462,8 @@
               "type": "LVGLLabelWidget",
               "left": 691,
               "top": 231,
-              "width": 9,
-              "height": 16,
+              "width": 13,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -8252,8 +8512,8 @@
               "type": "LVGLLabelWidget",
               "left": 957,
               "top": 231,
-              "width": 17,
-              "height": 16,
+              "width": 24,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -8302,8 +8562,8 @@
               "type": "LVGLLabelWidget",
               "left": 377,
               "top": 231,
-              "width": 9,
-              "height": 16,
+              "width": 13,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -8352,8 +8612,8 @@
               "type": "LVGLLabelWidget",
               "left": 639,
               "top": 231,
-              "width": 17,
-              "height": 16,
+              "width": 25,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -8402,8 +8662,8 @@
               "type": "LVGLLabelWidget",
               "left": 17,
               "top": 309,
-              "width": 67,
-              "height": 16,
+              "width": 95,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -8498,8 +8758,8 @@
               "type": "LVGLLabelWidget",
               "left": 464,
               "top": 277,
-              "width": 71,
-              "height": 16,
+              "width": 103,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -8677,8 +8937,8 @@
               "type": "LVGLLabelWidget",
               "left": 780,
               "top": 277,
-              "width": 71,
-              "height": 16,
+              "width": 103,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -8727,8 +8987,8 @@
               "type": "LVGLLabelWidget",
               "left": 689,
               "top": 308,
-              "width": 9,
-              "height": 16,
+              "width": 13,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -8777,8 +9037,8 @@
               "type": "LVGLLabelWidget",
               "left": 955,
               "top": 308,
-              "width": 17,
-              "height": 16,
+              "width": 24,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -8827,8 +9087,8 @@
               "type": "LVGLLabelWidget",
               "left": 375,
               "top": 308,
-              "width": 9,
-              "height": 16,
+              "width": 13,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -8877,8 +9137,8 @@
               "type": "LVGLLabelWidget",
               "left": 637,
               "top": 308,
-              "width": 17,
-              "height": 16,
+              "width": 25,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -8927,8 +9187,8 @@
               "type": "LVGLLabelWidget",
               "left": 18,
               "top": 384,
-              "width": 45,
-              "height": 16,
+              "width": 64,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -9023,8 +9283,8 @@
               "type": "LVGLLabelWidget",
               "left": 465,
               "top": 352,
-              "width": 71,
-              "height": 16,
+              "width": 103,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -9202,8 +9462,8 @@
               "type": "LVGLLabelWidget",
               "left": 774,
               "top": 352,
-              "width": 71,
-              "height": 16,
+              "width": 103,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -9252,8 +9512,8 @@
               "type": "LVGLLabelWidget",
               "left": 690,
               "top": 383,
-              "width": 9,
-              "height": 16,
+              "width": 13,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -9302,8 +9562,8 @@
               "type": "LVGLLabelWidget",
               "left": 956,
               "top": 383,
-              "width": 17,
-              "height": 16,
+              "width": 24,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -9352,8 +9612,8 @@
               "type": "LVGLLabelWidget",
               "left": 376,
               "top": 383,
-              "width": 9,
-              "height": 16,
+              "width": 13,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -9402,8 +9662,8 @@
               "type": "LVGLLabelWidget",
               "left": 638,
               "top": 383,
-              "width": 17,
-              "height": 16,
+              "width": 25,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -9452,8 +9712,8 @@
               "type": "LVGLLabelWidget",
               "left": 19,
               "top": 463,
-              "width": 65,
-              "height": 16,
+              "width": 91,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -9548,8 +9808,8 @@
               "type": "LVGLLabelWidget",
               "left": 468,
               "top": 431,
-              "width": 71,
-              "height": 16,
+              "width": 103,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -9727,8 +9987,8 @@
               "type": "LVGLLabelWidget",
               "left": 777,
               "top": 431,
-              "width": 71,
-              "height": 16,
+              "width": 103,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -9777,8 +10037,8 @@
               "type": "LVGLLabelWidget",
               "left": 691,
               "top": 462,
-              "width": 9,
-              "height": 16,
+              "width": 13,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -9827,8 +10087,8 @@
               "type": "LVGLLabelWidget",
               "left": 957,
               "top": 462,
-              "width": 17,
-              "height": 16,
+              "width": 24,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -9877,8 +10137,8 @@
               "type": "LVGLLabelWidget",
               "left": 377,
               "top": 462,
-              "width": 9,
-              "height": 16,
+              "width": 13,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -9927,8 +10187,8 @@
               "type": "LVGLLabelWidget",
               "left": 639,
               "top": 462,
-              "width": 17,
-              "height": 16,
+              "width": 25,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -9977,8 +10237,8 @@
               "type": "LVGLLabelWidget",
               "left": 17,
               "top": 540,
-              "width": 55,
-              "height": 16,
+              "width": 77,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -10073,8 +10333,8 @@
               "type": "LVGLLabelWidget",
               "left": 466,
               "top": 508,
-              "width": 71,
-              "height": 16,
+              "width": 103,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -10252,8 +10512,8 @@
               "type": "LVGLLabelWidget",
               "left": 775,
               "top": 508,
-              "width": 71,
-              "height": 16,
+              "width": 103,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -10302,8 +10562,8 @@
               "type": "LVGLLabelWidget",
               "left": 689,
               "top": 539,
-              "width": 9,
-              "height": 16,
+              "width": 13,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -10352,8 +10612,8 @@
               "type": "LVGLLabelWidget",
               "left": 955,
               "top": 539,
-              "width": 17,
-              "height": 16,
+              "width": 24,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -10402,8 +10662,8 @@
               "type": "LVGLLabelWidget",
               "left": 375,
               "top": 539,
-              "width": 9,
-              "height": 16,
+              "width": 13,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -10452,8 +10712,8 @@
               "type": "LVGLLabelWidget",
               "left": 637,
               "top": 539,
-              "width": 17,
-              "height": 16,
+              "width": 25,
+              "height": 22,
               "customInputs": [],
               "customOutputs": [],
               "style": {

@@ -2,11 +2,85 @@
 #include "pcf8523.h"
 #include "LVGLCustom.h"
 
+const char *TAG_CONFIG = "config";    // Tag for Station mode (Wi-Fi client mode)
+static USER_CONFIG stUSerConfig;
+static wifi_ap_record_t wifi_scann_list[DEFAULT_SCAN_LIST_SIZE];  // Array to store the AP records
+static CONFIG_STATUS enActualState = NOT_CONFIG;
+static lv_keyboard_t *kb;
+
+#define KEY_ARRAY_SIZE 20
+
+static const char *strKeyArray[] = 
+{
+    "Hostname",
+    "WifiSsid",
+    "WifiPass",
+    "Ipaddress",
+    "Gateway",
+    "Netmask",
+    "StaticDinamicIP",
+    "RtcManualAuto",
+    "NtpServer",
+    "WeatherStatus",
+    "WeatherServer",
+    "WeatherApiKey",
+    "MqttStatus",
+    "MqttServer",
+    "MqttPort",
+    "MqttUsername",
+    "MqttPassword",
+    "MqttClientId",
+    "MqttTopic",
+    "MqttSubscribe"
+};
+static const char * kb_map[] = {"1", "2", "3", "\n",
+                                "4", "5", "6", "\n",
+                                "7", "8", "9", "\n",
+                                ".", "0", LV_SYMBOL_BACKSPACE, ""};
+static const lv_btnmatrix_ctrl_t kb_ctrl[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+
+static const char * kb_map_number[] = {"1", "2", "3", "\n",
+                                       "4", "5", "6", "\n",
+                                       "7", "8", "9", "\n",
+                                       "0", LV_SYMBOL_BACKSPACE, ""};
+static const lv_btnmatrix_ctrl_t kb_ctrl_number[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};                                
+
+#include "esp_mac.h"
+
+static int8_t get_mac_address(uint8_t *ptrMacAddr) 
+{
+    
+    
+    // Legge il MAC address per l'interfaccia Wi-Fi Station
+    // ESP32-S3 ha il MAC di fabbrica pre-programmato negli eFuse
+    esp_err_t ret = esp_read_mac(ptrMacAddr, ESP_MAC_WIFI_STA);
+
+    if (ret == ESP_OK) 
+    {
+        ESP_LOGI(TAG_CONFIG, "Indirizzo MAC (STA) %02x:%02x:%02x:%02x:%02x:%02x",
+               ptrMacAddr[0], ptrMacAddr[1], ptrMacAddr[2], ptrMacAddr[3], ptrMacAddr[4], ptrMacAddr[5]);
+        return 0;
+    } 
+    else 
+    {
+        return -1;
+    }
+}
+
 // Function to disable a textarea and handle associated keyboard (if needed)
-static void disable_textarea_with_kb(lv_obj_t *ta, lv_keyboard_t *kb) {
+static void disable_textarea_with_kb(lv_obj_t *ta, lv_keyboard_t *kb) 
+{
     lv_obj_add_state(ta, LV_STATE_DISABLED  );
     // Additional logic (e.g., hiding keyboard) can be added here if required
 }   
+
+static void enable_kb(lv_obj_t *ta, lv_keyboard_t *kb) 
+{
+    // This function can be used to enable the textarea and show the keyboard if needed
+    lv_obj_clear_state(ta, LV_STATE_DISABLED);
+    // Additional logic (e.g., showing keyboard) can be added here if required
+}
+
 
 static void disable_and_hide_kb(lv_obj_t * ta, lv_obj_t * kb) 
 {
@@ -23,36 +97,170 @@ static void disable_and_hide_kb(lv_obj_t * ta, lv_obj_t * kb)
     }
 }
 
-const char *TAG_CONFIG = "config";    // Tag for Station mode (Wi-Fi client mode)
-static USER_CONFIG stUSerConfig;
-static wifi_ap_record_t wifi_scann_list[DEFAULT_SCAN_LIST_SIZE];  // Array to store the AP records
-static CONFIG_STATUS enActualState = NOT_CONFIG;
-static lv_keyboard_t *kb;
-
-#define KEY_ARRAY_SIZE 19
-
-static const char *strKeyArray[] = 
+static void disable_net_config(lv_event_t *e)
 {
-    "Hostname",
-    "WifiSsid",
-    "WifiPass",
-    "Ipaddress",
-    "Gateway",
-    "Netmask",
-    "StaticDinamicIP",
-    "RtcManualAuto",
-    "NtpServer",
-    "WeatherServer",
-    "WeatherApiKey",
-    "MqttStatus",
-    "MqttServer",
-    "MqttPort",
-    "MqttUsername",
-    "MqttPassword",
-    "MqttClientId",
-    "MqttTopic",
-    "MqttSubscribe"
-};
+    objects_t objs = objects;
+        
+    // If Dynamic IP is selected, hide the IP address, gateway, and netmask fields       
+    static lv_style_t style_grigio;
+    lv_style_init(&style_grigio);
+
+    // Colore del testo grigio
+    lv_style_set_text_color(&style_grigio, lv_palette_main(LV_PALETTE_GREY));
+    // Sfondo grigio molto chiaro
+    lv_style_set_bg_color(&style_grigio, lv_palette_lighten(LV_PALETTE_GREY, 3));
+    // Opzionale: rendi l'intero widget un po' trasparente
+    lv_style_set_opa(&style_grigio, LV_OPA_60);
+
+    // APPLICA LO STILE SOLO PER LO STATO DISABLED
+    lv_obj_add_style(objs.txt_ipaddress, &style_grigio, LV_STATE_DISABLED);
+    lv_obj_add_style(objs.txt_gateway, &style_grigio, LV_STATE_DISABLED);
+    lv_obj_add_style(objs.txt_netmask, &style_grigio, LV_STATE_DISABLED);
+    
+    /* lv_keyboard_t **/kb = (lv_keyboard_t *)objs.kek_keyboard;
+
+    disable_and_hide_kb(objs.txt_ipaddress, kb);
+    disable_and_hide_kb(objs.txt_gateway, kb);
+    disable_and_hide_kb(objs.txt_netmask, kb);
+}
+
+static void enable_net_config(lv_event_t *e)
+{
+    objects_t objs = objects;
+    // Rimuovi lo stato DISABLED per rendere i campi nuovamente interattivi
+    lv_obj_clear_state(objs.txt_ipaddress, LV_STATE_DISABLED);
+    lv_obj_clear_state(objs.txt_gateway, LV_STATE_DISABLED);
+    lv_obj_clear_state(objs.txt_netmask, LV_STATE_DISABLED);
+    // Rimuovi lo stile grigio (opzionale, se vuoi tornare al colore originale)
+    lv_obj_remove_style(objs.txt_ipaddress, NULL, LV_STATE_DISABLED);
+    lv_obj_remove_style(objs.txt_gateway, NULL, LV_STATE_DISABLED);
+    lv_obj_remove_style(objs.txt_netmask, NULL, LV_STATE_DISABLED);
+    
+    /* lv_keyboard_t **/kb = (lv_keyboard_t *)objs.kek_keyboard;
+    // La tastiera verrà mostrata automaticamente quando l'utente clicca su uno dei campi abilitati, quindi non è necessario forzarne la visualizzazione qui.
+    enable_kb(objs.txt_ipaddress, kb);
+}
+
+static void enable_netweather_config(void)
+{
+     objects_t objs = objects;
+     lv_obj_clear_state(objs.combo_weather_server, LV_STATE_DISABLED);
+
+     lv_obj_clear_state(objs.txt_weather_key, LV_STATE_DISABLED);
+     lv_obj_remove_style(objs.txt_weather_key, NULL, LV_STATE_DISABLED);
+}
+
+static void disable_netweather_config(void)
+{
+    objects_t objs = objects;
+    lv_obj_add_state(objs.combo_weather_server, LV_STATE_DISABLED); // La rende non cliccabile e grigia
+        
+  
+    // If Dynamic IP is selected, hide the IP address, gateway, and netmask fields       
+    static lv_style_t style_grigio;
+    lv_style_init(&style_grigio);
+
+    // Colore del testo grigio
+    lv_style_set_text_color(&style_grigio, lv_palette_main(LV_PALETTE_GREY));
+    // Sfondo grigio molto chiaro
+    lv_style_set_bg_color(&style_grigio, lv_palette_lighten(LV_PALETTE_GREY, 3));
+    // Opzionale: rendi l'intero widget un po' trasparente
+    lv_style_set_opa(&style_grigio, LV_OPA_60);
+
+    // APPLICA LO STILE SOLO PER LO STATO DISABLED
+    lv_obj_add_style(objs.txt_weather_key, &style_grigio, LV_STATE_DISABLED);
+  
+    kb = (lv_keyboard_t *)objs.kek_keyboard;
+    disable_and_hide_kb(objs.txt_weather_key, kb);
+    
+}
+
+static void enable_ntp_server(void)
+{
+    objects_t objs = objects;
+    lv_obj_add_state(objs.drop_day, LV_STATE_DISABLED); // La rende non cliccabile e grigia
+    lv_obj_add_state(objs.drop_month, LV_STATE_DISABLED); // La rende non cliccabile e grigia
+    lv_obj_add_state(objs.drop_year, LV_STATE_DISABLED); // La rende non cliccabile e grigia
+    lv_obj_add_state(objs.drop_hour, LV_STATE_DISABLED); // La rende non cliccabile e grigia
+    lv_obj_add_state(objs.drop_minute, LV_STATE_DISABLED); // La rende non cliccabile e grigia
+    lv_obj_add_state(objs.btn_set_clock, LV_STATE_DISABLED);
+
+    lv_obj_clear_state(objs.txt_ntp_server, LV_STATE_DISABLED);
+    lv_obj_remove_style(objs.txt_ntp_server, NULL, LV_STATE_DISABLED);
+}
+
+static void disable_ntp_server(void)
+{
+
+    objects_t objs = objects;
+
+    lv_obj_clear_state(objs.drop_day, LV_STATE_DISABLED);        
+    lv_obj_clear_state(objs.btn_set_clock, LV_STATE_DISABLED);
+
+    // If Dynamic IP is selected, hide the IP address, gateway, and netmask fields       
+    static lv_style_t style_grigio;
+    lv_style_init(&style_grigio);
+
+    // Colore del testo grigio
+    lv_style_set_text_color(&style_grigio, lv_palette_main(LV_PALETTE_GREY));
+    // Sfondo grigio molto chiaro
+    lv_style_set_bg_color(&style_grigio, lv_palette_lighten(LV_PALETTE_GREY, 3));
+    // Opzionale: rendi l'intero widget un po' trasparente
+    lv_style_set_opa(&style_grigio, LV_OPA_60);
+
+    // APPLICA LO STILE SOLO PER LO STATO DISABLED
+    lv_obj_add_style(objs.txt_ntp_server, &style_grigio, LV_STATE_DISABLED);
+  
+    kb = (lv_keyboard_t *)objs.kek_keyboard;
+    disable_and_hide_kb(objs.txt_ntp_server, kb);
+}
+
+void enable_mqtt_config(void)
+{
+   objects_t objs = objects;
+   lv_obj_clear_state(objs.txt_broker_ip,     LV_STATE_DISABLED);
+   lv_obj_clear_state(objs.txt_broker_port,   LV_STATE_DISABLED);
+   lv_obj_clear_state(objs.txt_mqttclient_id, LV_STATE_DISABLED);
+   lv_obj_clear_state(objs.txt_mqttpassword,  LV_STATE_DISABLED);
+   lv_obj_clear_state(objs.txt_mqttuserid,    LV_STATE_DISABLED);
+   lv_obj_clear_state(objs.txt_mqtttopic,     LV_STATE_DISABLED);
+   lv_obj_clear_state(objs.txt_mqttsubscribe, LV_STATE_DISABLED);
+
+}
+
+void disable_mqtt_config(void)
+{
+    objects_t objs = objects;
+    static lv_style_t style_grigio;
+    kb = (lv_keyboard_t *)objs.kek_keyboard;
+
+    lv_style_init(&style_grigio);
+
+    // Colore del testo grigio
+    lv_style_set_text_color(&style_grigio, lv_palette_main(LV_PALETTE_GREY));
+    // Sfondo grigio molto chiaro
+    lv_style_set_bg_color(&style_grigio, lv_palette_lighten(LV_PALETTE_GREY, 3));
+    // Opzionale: rendi l'intero widget un po' trasparente
+    lv_style_set_opa(&style_grigio, LV_OPA_60);
+
+    // APPLICA LO STILE SOLO PER LO STATO DISABLED
+    lv_obj_add_style(objs.txt_broker_ip,     &style_grigio, LV_STATE_DISABLED);
+    lv_obj_add_style(objs.txt_broker_port,   &style_grigio, LV_STATE_DISABLED);
+    lv_obj_add_style(objs.txt_mqttclient_id, &style_grigio, LV_STATE_DISABLED);
+    lv_obj_add_style(objs.txt_mqttpassword,  &style_grigio, LV_STATE_DISABLED);
+    lv_obj_add_style(objs.txt_mqttuserid,    &style_grigio, LV_STATE_DISABLED);
+    lv_obj_add_style(objs.txt_mqtttopic,     &style_grigio, LV_STATE_DISABLED);
+    lv_obj_add_style(objs.txt_mqttsubscribe, &style_grigio, LV_STATE_DISABLED);
+  
+    
+    disable_and_hide_kb(objs.txt_broker_ip,     kb);
+    disable_and_hide_kb(objs.txt_broker_port,   kb);
+    disable_and_hide_kb(objs.txt_mqttclient_id, kb);
+    disable_and_hide_kb(objs.txt_mqttpassword,  kb);
+    disable_and_hide_kb(objs.txt_mqttuserid,    kb);
+    disable_and_hide_kb(objs.txt_mqtttopic,     kb);
+    disable_and_hide_kb(objs.txt_mqttsubscribe, kb);
+}
 
 void iConfigInit(void)
 {    
@@ -140,13 +348,14 @@ void action_settings_screen_cb(lv_event_t *e)
     }
     if(stUSerConfig.eRtcManualAuto == RTC_MANUAL)
     {
-        ESP_LOGI(TAG_CONFIG, "RtcManualAuto  : Manual");
+        ESP_LOGI(TAG_CONFIG, "RtcManualAuto  : RTC");
     }
     else
     {
-        ESP_LOGI(TAG_CONFIG, "RtcManualAuto  : Auto");                    
+        ESP_LOGI(TAG_CONFIG, "RtcManualAuto  : NTP Server");                    
     }
     ESP_LOGI(TAG_CONFIG, "NtpServer      : %s", stUSerConfig.strNtpServer);
+    ESP_LOGI(TAG_CONFIG, "Weather Status : %s", stUSerConfig.stWeatherConfig.bWeatherStatus == true ? "Enabled" : "Disabled");
     ESP_LOGI(TAG_CONFIG, "WeatherServer  : %s", stUSerConfig.stWeatherConfig.strWeatherServer);
     ESP_LOGI(TAG_CONFIG, "WeatherApiKey  : %s", stUSerConfig.stWeatherConfig.strWeatherApiKey);                    
     ESP_LOGI(TAG_CONFIG, "MqttStatus     : %s", stUSerConfig.stMqttConfig.bMqttEnable == true ? "Enabled" : "Disabled");       
@@ -209,35 +418,9 @@ void action_settings_screen_cb(lv_event_t *e)
         lv_obj_clear_state(objs.txt_netmask, LV_STATE_DISABLED);
     }
     else
-    {
+    {        
         lv_obj_clear_state(sw, LV_STATE_CHECKED);
-        // If Dynamic IP is selected, hide the IP address, gateway, and netmask fields
-       ESP_LOGI(TAG_CONFIG, "IP DINAMICO");
-       static lv_style_t style_grigio;
-        lv_style_init(&style_grigio);
-
-        // Colore del testo grigio
-        lv_style_set_text_color(&style_grigio, lv_palette_main(LV_PALETTE_GREY));
-        // Sfondo grigio molto chiaro
-        lv_style_set_bg_color(&style_grigio, lv_palette_lighten(LV_PALETTE_GREY, 3));
-        // Opzionale: rendi l'intero widget un po' trasparente
-        lv_style_set_opa(&style_grigio, LV_OPA_60);
-
-        // APPLICA LO STILE SOLO PER LO STATO DISABLED
-        lv_obj_add_style(objs.txt_ipaddress, &style_grigio, LV_STATE_DISABLED);
-        lv_obj_add_style(objs.txt_gateway, &style_grigio, LV_STATE_DISABLED);
-        lv_obj_add_style(objs.txt_netmask, &style_grigio, LV_STATE_DISABLED);
-
-        
-       /* lv_keyboard_t **/kb = (lv_keyboard_t *)objs.kek_keyboard;
-
-        disable_and_hide_kb(objs.txt_ipaddress, kb);
-        disable_and_hide_kb(objs.txt_gateway, kb);
-        disable_and_hide_kb(objs.txt_netmask, kb);
-        /*
-        disable_textarea_with_kb(objs.txt_ipaddress, kb);
-        disable_textarea_with_kb(objs.txt_netmask, kb);
-        disable_textarea_with_kb(objs.txt_gateway, kb);*/
+        disable_net_config(NULL);              
     }
     // Get RTC Manual/NTP Server
     sw = objs.sw_manual_rtc_ntp_server;
@@ -263,10 +446,30 @@ void action_settings_screen_cb(lv_event_t *e)
         lv_obj_t *ta = objs.txt_ntp_server;
         lv_textarea_set_text(ta, stUSerConfig.strNtpServer);
     }
+
+    if(stUSerConfig.stWeatherConfig.bWeatherStatus == true)
+    {
+        // enable weather Server/Key
+        enable_netweather_config();
+        lv_obj_t *sw = objs.sw_wheater;
+        lv_obj_add_state(sw, LV_STATE_CHECKED);
+         ESP_LOGE(TAG_CONFIG, "stUSerConfig.stWeatherConfig.bWeatherStatus = true");
+    }
+    else
+    {
+        lv_obj_t *sw = objs.sw_wheater;
+        disable_netweather_config();
+        
+        // disable weather Server/Key
+        ///lv_obj_clear_state(objs.combo_weather_server, LV_STATE_DISABLED);
+        //lv_obj_clear_state(objs.txt_weather_key, LV_STATE_DISABLED);
+        lv_obj_clear_state(sw, LV_STATE_CHECKED);
+        ESP_LOGE(TAG_CONFIG, "stUSerConfig.stWeatherConfig.bWeatherStatus = false");
+    }
     // Get Weather Server
     if (strlen(stUSerConfig.stWeatherConfig.strWeatherServer) > 0)
     {
-        lv_obj_t *ta = objs.txt_weather_server;
+        lv_obj_t *ta = objs.combo_weather_server;
         lv_textarea_set_text(ta, stUSerConfig.stWeatherConfig.strWeatherServer);
     }
     // Get Weather API Key
@@ -275,9 +478,7 @@ void action_settings_screen_cb(lv_event_t *e)
         lv_obj_t *ta = objs.btn_energy_power;
         lv_textarea_set_text(ta, stUSerConfig.stWeatherConfig.strWeatherApiKey);
     }
-       
-    
-
+   
     // Get current time from RTC and populate the dropdowns
     if(Pcf8523_Get_Time(&currentTime) < 0) 
     {
@@ -322,6 +523,38 @@ void action_settings_screen_cb(lv_event_t *e)
         lv_dropdown_set_selected(dropdown, stUSerConfig.stRtcClock.tm_min); // Minutes are 0-59
     
     }        
+    if(stUSerConfig.stMqttConfig.bMqttEnable == true)
+    {
+        // enable weather Server/Key
+        enable_mqtt_config();
+        lv_obj_t *sw = objs.sw_wheater;
+        lv_obj_add_state(sw, LV_STATE_CHECKED);     
+    }
+    else
+    {
+        lv_obj_t *sw = objs.sw_wheater;
+        lv_obj_clear_state(sw, LV_STATE_CHECKED);
+
+    }
+    if (strlen(stUSerConfig.stMqttConfig.strMqttBrokerIpAddr) > 0)
+    {
+        lv_obj_t *ta = objs.txt_broker_ip;
+        lv_textarea_set_text(ta, stUSerConfig.stMqttConfig.strMqttBrokerIpAddr);        
+    }   
+    uint8_t u8MacAdd[6]; 
+    if(get_mac_address(u8MacAdd) == 0)
+    {
+        lv_obj_t *ta = objs.txt_mqttclient_id;
+        lv_textarea_set_text(ta, (char*)&u8MacAdd[0]);     
+    }
+    else
+    {
+        if (strlen(stUSerConfig.stMqttConfig.strMqttClientID) > 0)
+        {
+            lv_obj_t *ta = objs.txt_mqttclient_id;
+            lv_textarea_set_text(ta, stUSerConfig.stMqttConfig.strMqttClientID);  
+        }
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -362,21 +595,67 @@ void action_btn_real_time_set_clock_cb(lv_event_t *e)
     }
 }
 
+void action_txt_ntp_server_cb(lv_event_t *e)
+ {
+    objects_t objs    = objects;
+    kb = (lv_keyboard_t *)objs.kek_keyboard;
+   
+    lv_obj_set_size((lv_obj_t *)kb, lv_pct(100), lv_pct(40)); // Set size
+    lv_obj_align_to((lv_obj_t *)kb, lv_scr_act(), LV_ALIGN_TOP_MID, 0, 0); // Align to bottom
+
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *ta         = lv_event_get_target(e);
+ 
+    if(code == LV_EVENT_FOCUSED) 
+    {
+        lv_obj_clear_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
+        lv_keyboard_set_textarea((lv_obj_t *)kb, ta);
+        lv_obj_move_foreground(kb); 
+        lv_keyboard_set_mode((lv_obj_t *)kb, LV_KEYBOARD_MODE_TEXT_LOWER ); // Set keyboard to number mode for IP address input  
+        ESP_LOGI(TAG_CONFIG, "Click On NtpServer ");
+    }  
+    if(code == LV_EVENT_DEFOCUSED) 
+    {
+        lv_keyboard_set_textarea((lv_obj_t *)kb, NULL);
+        lv_obj_add_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
+        memcpy(stUSerConfig.strNtpServer, lv_textarea_get_text(ta), sizeof(stUSerConfig.strNtpServer));        
+        ESP_LOGI(TAG_CONFIG, "Defocus On NTPServer ");
+    }
+}   
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// @brief  Action Callback When RealTme Switch Manual/NTP Server is clicked
 /// @param e  Pointer to LVGL event structure
 /// @return none
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 void action_sw_manual_rtc_ntp_server(lv_event_t *e)
-{
+{    
+    if (e == NULL) {
+        ESP_LOGE(TAG_CONFIG, "Event pointer is NULL");
+        return;
+    }
     lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t        *obj = lv_event_get_target(e);
-    if(code == LV_EVENT_VALUE_CHANGED) 
+    lv_obj_t *obj        = lv_event_get_target(e);
+
+    if (code == LV_EVENT_VALUE_CHANGED) 
     {
-        ESP_LOGI(TAG_CONFIG, "State: %s\n", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
-        stUSerConfig.eRtcManualAuto = lv_obj_has_state(obj, LV_STATE_CHECKED) ? RTC_MANUAL : RTC_FROM_NTP_SERVER;
+        bool isChecked = lv_obj_has_state(obj, LV_STATE_CHECKED);        
+        if(isChecked) 
+        {
+            // Enabled NTP Server           
+            stUSerConfig.eRtcManualAuto = RTC_FROM_NTP_SERVER;
+            enable_ntp_server();
+        } 
+        else 
+        {            
+            // Use RTC
+            stUSerConfig.eRtcManualAuto = RTC_MANUAL;
+            disable_ntp_server();
+        }
+        ESP_LOGI(TAG_CONFIG, "NtpSwitch Status: %s", isChecked ? "Enabled" : "Disabled");
     }
 }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// @brief  Action Callback When RealTme Date/Time Dropdown is changed
@@ -429,6 +708,138 @@ void action_drop_date_time(lv_event_t *e)
         }        
     } 
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// MQTT Section
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+void action_sw_mqtt_status(lv_event_t *e) 
+{
+    if (e == NULL) {
+        ESP_LOGE(TAG_CONFIG, "Event pointer is NULL");
+        return;
+    }
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *obj        = lv_event_get_target(e);
+
+    if (code == LV_EVENT_VALUE_CHANGED) 
+    {
+        bool isChecked = lv_obj_has_state(obj, LV_STATE_CHECKED);
+        stUSerConfig.stMqttConfig.bMqttEnable = isChecked;
+        if(isChecked) 
+        {
+            // Enabled             
+            enable_mqtt_config();
+        } 
+        else 
+        {
+            // Disabled
+             disable_mqtt_config();
+        }
+        ESP_LOGI(TAG_CONFIG, "MQTT Status: %s", isChecked ? "Enabled" : "Disabled");
+    }
+}
+
+void action_txt_broker_port(lv_event_t *e) 
+{
+    objects_t objs    = objects;
+    kb = (lv_keyboard_t *)objs.kek_keyboard;
+    uint8_t userData  = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+    lv_obj_set_size((lv_obj_t *)kb, lv_pct(100), lv_pct(40)); // Set size
+    lv_obj_align_to((lv_obj_t *)kb, lv_scr_act(), LV_ALIGN_TOP_MID, 0, 0); // Align to bottom
+
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *ta         = lv_event_get_target(e);
+
+    if(code == LV_EVENT_FOCUSED) 
+    {
+        lv_obj_clear_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
+        lv_keyboard_set_textarea((lv_obj_t *)kb, ta);
+        lv_keyboard_set_map(kb, LV_KEYBOARD_MODE_USER_1, kb_map_number, kb_ctrl_number);
+        lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_USER_1);
+    }
+    if(code == LV_EVENT_DEFOCUSED) 
+    {
+        lv_keyboard_set_textarea((lv_obj_t *)kb, NULL);
+        lv_obj_add_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
+        stUSerConfig.stMqttConfig.u16MqttBrokerPort = atoi(lv_textarea_get_text(ta));        
+        ESP_LOGI(TAG_CONFIG, "Defocus On Mqtt Broker Port ");
+    }
+
+}
+void action_mqtt_config(lv_event_t *e) 
+{
+    objects_t objs    = objects;
+    kb = (lv_keyboard_t *)objs.kek_keyboard;
+    uint8_t userData  = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+    lv_obj_set_size((lv_obj_t *)kb, lv_pct(100), lv_pct(40)); // Set size
+    lv_obj_align_to((lv_obj_t *)kb, lv_scr_act(), LV_ALIGN_TOP_MID, 0, 0); // Align to bottom
+
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *ta         = lv_event_get_target(e);
+
+    if(code == LV_EVENT_FOCUSED) 
+    {
+        if(userData != 0) 
+        {
+            lv_obj_clear_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN); // mostra la tastiera
+            lv_keyboard_set_textarea((lv_obj_t *)kb, ta);
+            lv_keyboard_set_map(kb, LV_KEYBOARD_MODE_USER_1, kb_map, kb_ctrl);
+            lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_USER_1);        
+        }
+        else // Broker IP
+        {
+            lv_obj_clear_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
+            lv_keyboard_set_textarea((lv_obj_t *)kb, ta);
+            lv_obj_move_foreground(kb); 
+            lv_keyboard_set_mode((lv_obj_t *)kb, LV_KEYBOARD_MODE_TEXT_LOWER ); // Set keyboard to number mode for IP address input          
+        }
+        ESP_LOGI(TAG_CONFIG, "Click On Mqtt Config ");
+    }  
+    if(code == LV_EVENT_DEFOCUSED) 
+    {
+        lv_keyboard_set_textarea((lv_obj_t *)kb, NULL);
+        lv_obj_add_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
+        switch(userData)
+        {
+            case 0:
+                // BrokerIP
+                memcpy(stUSerConfig.stMqttConfig.strMqttBrokerIpAddr, lv_textarea_get_text(ta), sizeof(stUSerConfig.stMqttConfig.strMqttBrokerIpAddr));
+                ESP_LOGI(TAG_CONFIG, "Click On Broker ");
+                break;
+                /*
+            case 1:
+                memcpy(stUSerConfig.stMqttConfig.u16MqttBrokerPort, lv_textarea_get_text(ta), sizeof(stUSerConfig.stMqttConfig.u16MqttBrokerPort));
+                ESP_LOGI(TAG_CONFIG, "Click On Broker Port ");
+                break;*/
+            case 2:
+                memcpy(stUSerConfig.stMqttConfig.strMqttClientID, lv_textarea_get_text(ta), sizeof(stUSerConfig.stMqttConfig.strMqttClientID));
+                ESP_LOGI(TAG_CONFIG, "Click On Client ID ");
+                break;
+            case 3:
+                memcpy(stUSerConfig.stMqttConfig.strMqttPassword, lv_textarea_get_text(ta), sizeof(stUSerConfig.stMqttConfig.strMqttPassword));
+                ESP_LOGI(TAG_CONFIG, "Click On Password ");
+                break;
+            case 4:
+                memcpy(stUSerConfig.stMqttConfig.strMqttUserID, lv_textarea_get_text(ta), sizeof(stUSerConfig.stMqttConfig.strMqttUserID));
+                ESP_LOGI(TAG_CONFIG, "Click On User ID ");
+                break;
+            case 5:
+                memcpy(stUSerConfig.stMqttConfig.strMqttTopic, lv_textarea_get_text(ta), sizeof(stUSerConfig.stMqttConfig.strMqttTopic));
+                ESP_LOGI(TAG_CONFIG, "Click On Topic ");
+                break;                
+            case 6:
+                memcpy(stUSerConfig.stMqttConfig.strMqttSubscribe, lv_textarea_get_text(ta), sizeof(stUSerConfig.stMqttConfig.strMqttSubscribe));
+                ESP_LOGI(TAG_CONFIG, "Click On Topic ");
+                break;                                
+
+            default:            
+                break;
+        }       
+        ESP_LOGI(TAG_CONFIG, "Defocus On Network Config Textbox ");
+    }
+}
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// WiFi Section
@@ -545,12 +956,6 @@ void action_wifi_txt_psw(lv_event_t *e)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Action Callback When Network Config Textbox is edited (IP Address, Netmask, Gateway, Dns)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-static const char * kb_map[] = {"1", "2", "3", "\n",
-                                "4", "5", "6", "\n",
-                                "7", "8", "9", "\n",
-                                ".", "0", LV_SYMBOL_BACKSPACE, ""};
-static const lv_btnmatrix_ctrl_t kb_ctrl[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-
 void action_txt_net_cb(lv_event_t *e) 
 {
     objects_t objs    = objects;
@@ -558,10 +963,7 @@ void action_txt_net_cb(lv_event_t *e)
     uint8_t userData  = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
     lv_obj_set_size((lv_obj_t *)kb, lv_pct(100), lv_pct(40)); // Set size
     lv_obj_align_to((lv_obj_t *)kb, lv_scr_act(), LV_ALIGN_BOTTOM_MID, 0, 0); // Align to bottom
-/*
-    lv_obj_set_size((lv_obj_t *)kb, lv_pct(100), lv_pct(40)); // Set size
-    lv_obj_align_to((lv_obj_t *)kb, lv_scr_act(), LV_ALIGN_TOP_MID, 0, 0); // Align to bottom
-*/
+
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t *ta         = lv_event_get_target(e);
  
@@ -593,6 +995,7 @@ void action_txt_net_cb(lv_event_t *e)
                 memcpy(stUSerConfig.stNetworkConfig.strGateway, lv_textarea_get_text(ta), sizeof(stUSerConfig.stNetworkConfig.strGateway));
                 ESP_LOGI(TAG_CONFIG, "Click On Gateway Textbox ");
                 break;
+
             default:            
                 break;
         }       
@@ -611,9 +1014,106 @@ void action_sw_static_dynamic_ip(lv_event_t *e)
     if(code == LV_EVENT_VALUE_CHANGED) 
     {
         ESP_LOGI(TAG_CONFIG, "State: %s\n", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
+        if(lv_obj_has_state(obj, LV_STATE_CHECKED) == true) 
+        {
+            // Static  IP is selected
+
+            enable_net_config(NULL);
+            /*
+            lv_obj_clear_state(objs.txt_ipaddress, LV_STATE_DISABLED);
+            lv_obj_clear_state(objs.txt_gateway, LV_STATE_DISABLED);
+            lv_obj_clear_state(objs.txt_netmask, LV_STATE_DISABLED);
+            */
+        }
+        else
+        {
+            // DHCP is selected
+            disable_net_config(NULL);            
+        }
         stUSerConfig.stNetworkConfig.eStaticDynamic = lv_obj_has_state(obj, LV_STATE_CHECKED) ? STATIC_IP : DYNAMIC_IP;
     }
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Weather Management
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+void action_sw_wheater(lv_event_t *e) 
+{
+    // TODO: Implement action sw_wheater here
+    if (e == NULL) {
+        ESP_LOGE(TAG_CONFIG, "Event pointer is NULL");
+        return;
+    }
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *obj = lv_event_get_target(e);
+
+    if (code == LV_EVENT_VALUE_CHANGED) 
+    {
+        bool isChecked = lv_obj_has_state(obj, LV_STATE_CHECKED);
+        stUSerConfig.stWeatherConfig.bWeatherStatus = isChecked;
+        if(isChecked) 
+        {
+            // Enabled             
+            enable_netweather_config();
+        } 
+        else 
+        {
+            // Disabled
+             disable_netweather_config();
+        }
+        ESP_LOGI(TAG_CONFIG, "Weather Status: %s", isChecked ? "Enabled" : "Disabled");
+    }
+
+}
+
+void action_combo_weather_server(lv_event_t *e) 
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * obj       = lv_event_get_target(e);    
+    if(code == LV_EVENT_VALUE_CHANGED) 
+    {
+        // 1. Ottieni l'indice della voce selezionata (0, 1, 2...)
+        uint16_t sel = lv_dropdown_get_selected(obj);
+
+        // 2. Ottieni il testo della voce selezionata
+        char buf[sizeof(stUSerConfig.stWeatherConfig.strWeatherServer)];
+        lv_dropdown_get_selected_str(obj, buf, sizeof(buf));
+
+        ESP_LOGI(TAG_CONFIG, "Selected %s ", buf);
+        memcpy(stUSerConfig.stWeatherConfig.strWeatherServer,buf, sizeof(stUSerConfig.stWeatherConfig.strWeatherServer));
+    } 
+}
+
+void action_txt_weather_key(lv_event_t *e) 
+{       
+    objects_t objs    = objects;
+    kb = (lv_keyboard_t *)objs.kek_keyboard;
+   
+    lv_obj_set_size((lv_obj_t *)kb, lv_pct(100), lv_pct(40)); // Set size
+    lv_obj_align_to((lv_obj_t *)kb, lv_scr_act(), LV_ALIGN_TOP_MID, 0, 0); // Align to bottom
+
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *ta         = lv_event_get_target(e);
+ 
+    if(code == LV_EVENT_FOCUSED) 
+    {
+        lv_obj_clear_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
+        lv_keyboard_set_textarea((lv_obj_t *)kb, ta);
+        lv_obj_move_foreground(kb); 
+        lv_keyboard_set_mode((lv_obj_t *)kb, LV_KEYBOARD_MODE_TEXT_LOWER ); // Set keyboard to number mode for IP address input  
+        ESP_LOGI(TAG_CONFIG, "Click On Weather Key ");
+    }  
+    if(code == LV_EVENT_DEFOCUSED) 
+    {
+        lv_keyboard_set_textarea((lv_obj_t *)kb, NULL);
+        lv_obj_add_flag((lv_obj_t *)kb, LV_OBJ_FLAG_HIDDEN);
+        memcpy(stUSerConfig.stWeatherConfig.strWeatherApiKey, lv_textarea_get_text(ta), sizeof(stUSerConfig.stWeatherConfig.strWeatherApiKey));        
+        ESP_LOGI(TAG_CONFIG, "Defocus On Weather Key ");
+    }
+}
+
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Action Callback When WiFi Connect Button is Clicked
@@ -753,7 +1253,7 @@ static int8_t get_value_by_key(const char* in_ptrFilename, const char* in_ptrKey
     }    
     return iRet;
 }
-
+#if 0
 static int8_t check_for_config_file(const char* in_ptrFilename)
 {
     int8_t iRet = 0;
@@ -789,7 +1289,7 @@ static int8_t delete_file(const char* filename)
     }
     return iRet;
 }
-#if 0
+
 static int8_t read_config(const char* in_ptrFilename,const char *in_ptrKey, char* out_ptrValue, size_t *out_ptrMaxLen)
 
     int8_t iRet = 0;
@@ -880,6 +1380,7 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
                 }
                 else
                 {
+                    ESP_LOGI(TAG_CONFIG, "Key: %s Value: %s", strKeyArray[i], ptrTmpKeyValueBuffer);
                     switch(i)
                     {
                         case 0: // Hostname
@@ -922,7 +1423,7 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
                             }       
                             break;
                         case 7: // RTC Manual/Auto
-                            if(strncmp(ptrTmpKeyValueBuffer, "Manual", 6) == 0)
+                            if(strncmp(ptrTmpKeyValueBuffer, "RTC", 6) == 0)
                             {
                                 stUSerConfig.eRtcManualAuto = RTC_MANUAL;
                             }
@@ -940,15 +1441,30 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
                             stUSerConfig.strNtpServer[0] = '\0'; // Ensure the string is null-terminated
                             strncpy(stUSerConfig.strNtpServer, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.strNtpServer) - 1); // Copy value to user config
                             break;
-                        case 9: // Weather Server
+                        case 9: // Weather status
+                            if(strncmp(ptrTmpKeyValueBuffer, "Enabled", 7) == 0)
+                            {
+                                stUSerConfig.stWeatherConfig.bWeatherStatus = true;
+                            }
+                            else if(strncmp(ptrTmpKeyValueBuffer, "Disabled", 8) == 0)
+                            {
+                                stUSerConfig.stWeatherConfig.bWeatherStatus = false;
+                            }
+                            else
+                            {
+                                ESP_LOGE(TAG_CONFIG, "Invalid value for Weather Status: %s", ptrTmpKeyValueBuffer);
+                                iRet = -1;
+                            }
+                            break;                             
+                        case 10: // Weather Server
                             stUSerConfig.stWeatherConfig.strWeatherServer[0] = '\0'; // Ensure the string is null-terminated
                             strncpy(stUSerConfig.stWeatherConfig.strWeatherServer, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stWeatherConfig.strWeatherServer) - 1); // Copy value to user config
                             break;  
-                        case 10: // Weather API Key
+                        case 11: // Weather API Key
                             stUSerConfig.stWeatherConfig.strWeatherApiKey[0] = '\0'; // Ensure the string is null-terminated
                             strncpy(stUSerConfig.stWeatherConfig.strWeatherApiKey, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stWeatherConfig.strWeatherApiKey) - 1); // Copy value to user config
-                            break;  
-                        case 11: // MQTT Status
+                            break; 
+                        case 12: // MQTT Status
                             if(strncmp(ptrTmpKeyValueBuffer, "Enabled", 7) == 0)
                             {
                                 stUSerConfig.stMqttConfig.bMqttEnable = true;
@@ -963,30 +1479,30 @@ int8_t iDownloadConfigFileFromNVS(const char* in_ptrFilename)
                                 iRet = -1;
                             }
                             break;
-                        case 12: // MQTT Server
+                        case 13: // MQTT Server
                             stUSerConfig.stMqttConfig.strMqttBrokerIpAddr[0] = '\0'; // Ensure the string is null-terminated
                             strncpy(stUSerConfig.stMqttConfig.strMqttBrokerIpAddr, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stMqttConfig.strMqttBrokerIpAddr) - 1); // Copy value to user config
                             break;  
-                        case 13: // MQTT Port
+                        case 14: // MQTT Port
                             stUSerConfig.stMqttConfig.u16MqttBrokerPort = (uint16_t)strtoul(ptrTmpKeyValueBuffer, NULL, 10);
                             break;
-                        case 14: // MQTT Username
+                        case 15: // MQTT Username
                             stUSerConfig.stMqttConfig.strMqttUserID[0] = '\0'; // Ensure the string is null-terminated
                             strncpy(stUSerConfig.stMqttConfig.strMqttUserID, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stMqttConfig.strMqttUserID) - 1); // Copy value to user config
                             break;
-                        case 15: // MQTT Password
+                        case 16: // MQTT Password
                             stUSerConfig.stMqttConfig.strMqttPassword[0] = '\0'; // Ensure the string is null-terminated
                             strncpy(stUSerConfig.stMqttConfig.strMqttPassword, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stMqttConfig.strMqttPassword) - 1); // Copy value to user config
                             break;
-                        case 16: // MQTT Client ID
+                        case 17: // MQTT Client ID
                             stUSerConfig.stMqttConfig.strMqttClientID[0] = '\0'; // Ensure the string is null-terminated
                             strncpy(stUSerConfig.stMqttConfig.strMqttClientID, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stMqttConfig.strMqttClientID) - 1); // Copy value to user config
                             break;
-                        case 17: // MQTT Topic
+                        case 18: // MQTT Topic
                             stUSerConfig.stMqttConfig.strMqttTopic[0] = '\0 '; // Ensure the string is null-terminated
                             strncpy(stUSerConfig.stMqttConfig.strMqttTopic, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stMqttConfig.strMqttTopic) - 1); // Copy value to user config
                             break;
-                        case 18: // MQTT Subscribe
+                        case 19: // MQTT Subscribe
                             stUSerConfig.stMqttConfig.strMqttSubscribe[0] = '\0'; // Ensure the string is null-terminated       
                             strncpy(stUSerConfig.stMqttConfig.strMqttSubscribe, ptrTmpKeyValueBuffer, sizeof(stUSerConfig.stMqttConfig.strMqttSubscribe) - 1); // Copy value to user config
                             break;
@@ -1058,10 +1574,19 @@ void action_save_to_flash(lv_event_t *e)
         }
         else 
         {
-            nvs_set_str(writeHandle, "RtcManualAuto","Manual"); 
+            nvs_set_str(writeHandle, "RtcManualAuto","RTC"); 
             nvs_set_str(writeHandle, "NtpServer", " "); // Clear NTP server value if manual clock is selected
-        }
+        }        
         // Weather Server Settings
+        if(objUserConfig.stWeatherConfig.bWeatherStatus)
+        {
+            nvs_set_str(writeHandle, "WeatherStatus", "Enabled"); 
+        }
+        else
+        {
+            // Weather Server Enabled
+            nvs_set_str(writeHandle, "WeatherStatus", "Disabled"); 
+        }
         nvs_set_str(writeHandle, "WeatherServer", objUserConfig.stWeatherConfig.strWeatherServer);
         nvs_set_str(writeHandle, "WeatherApiKey", objUserConfig.stWeatherConfig.strWeatherApiKey);
      

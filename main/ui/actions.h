@@ -13,8 +13,8 @@ extern void action_hour_change(lv_event_t * e);
 extern void action_minute_change(lv_event_t * e);
 extern void action_goto_heating_screen(lv_event_t * e);
 extern void action_goto_home(lv_event_t * e);
-extern void action_slider_temp1_change(lv_event_t * e);
 extern void action_goto_settings_screen(lv_event_t * e);
+extern void action_slider_temp1_change(lv_event_t * e);
 extern void action_wifi_scann(lv_event_t * e);
 extern void action_ssid_select(lv_event_t * e);
 extern void action_wifi_txt_psw(lv_event_t * e);
@@ -30,6 +30,12 @@ extern void action_wifi_connect_cb(lv_event_t * e);
 extern void action_btn_restart(lv_event_t * e);
 extern void action_save_to_flash(lv_event_t * e);
 extern void action_btn_erase_flash(lv_event_t * e);
+extern void action_sw_wheater(lv_event_t * e);
+extern void action_combo_weather_server(lv_event_t * e);
+extern void action_txt_weather_key(lv_event_t * e);
+extern void action_sw_mqtt_status(lv_event_t * e);
+extern void action_mqtt_config(lv_event_t * e);
+extern void action_txt_broker_port(lv_event_t * e);
 
 
 #ifdef __cplusplus
