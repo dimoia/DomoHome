@@ -17,7 +17,7 @@ static void event_handler_config(lv_event_t * e)
     } 
     else if(strcmp(txt, "Cancella") == 0) {
         // Logica per il pulsante Cancella
-        loadScreen(SCREEN_ID_TEST);
+        loadScreen(SCREEN_ID_CONFIG_TERMOSTATO);
     }
 
     lv_msgbox_close(mbox);
@@ -201,3 +201,41 @@ void action_goto_home(lv_event_t *e)
     lv_obj_add_event_cb(btn_goto_home_from_config_screen, action_goto_home, LV_EVENT_CLICKED, NULL); 
     lvgl_port_unlock();
  }
+
+
+static lv_obj_t * popup_box;
+static lv_obj_t * popup_bar;
+static lv_obj_t * popup_label;
+void create_progress_bar(void) 
+{
+  
+    // Crea un oggetto "velo" grigio trasparente su tutto lo schermo
+    popup_box = lv_obj_create(lv_scr_act());
+    lv_obj_set_size(popup_box, LV_PCT(100), LV_PCT(100));
+    lv_obj_set_style_bg_color(popup_box, lv_palette_main(LV_PALETTE_GREY), 0);
+    lv_obj_set_style_bg_opa(popup_box, LV_OPA_50, 0);
+    lv_obj_align(popup_box, LV_ALIGN_CENTER, 0, 0);
+
+    // Contenitore centrale bianco
+    lv_obj_t * cont = lv_obj_create(popup_box);
+    lv_obj_set_size(cont, 220, 120);
+    lv_obj_align(cont, LV_ALIGN_CENTER, 0, 0);
+
+    popup_label = lv_label_create(cont);
+    lv_label_set_text(popup_label, "Scrittura in NVS...");
+    lv_obj_align(popup_label, LV_ALIGN_TOP_MID, 0, 10);
+
+    popup_bar = lv_bar_create(cont);
+    lv_obj_set_size(popup_bar, 180, 20);
+    lv_obj_align(popup_bar, LV_ALIGN_CENTER, 0, 10);
+    lv_bar_set_range(popup_bar, 0, 100);
+}
+void update_bar(uint32_t value)
+{
+    lv_bar_set_value(popup_bar, value, LV_ANIM_ON);
+}
+void close_pupup_bar(void)
+{
+  // 3. Chiudi il pop-up alla fine
+  lv_obj_del(popup_box);
+}

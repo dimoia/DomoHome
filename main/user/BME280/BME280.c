@@ -76,7 +76,7 @@ void bmp280_task(void *arg)
     lv_obj_t *Lbl_temperature    = objs.lbl_temperature;
     lv_obj_t *Lbl_temp_value     = objs.lbl_temp_value;
 
-    lv_obj_t *Lbl_temp_value_1           = objs.lbl_temp_value_1;
+   // lv_obj_t *Lbl_temp_value_1           = objs.lbl_temp_value_1;
     lv_obj_t *Lbl_temp_value_farheneit   = objs.lbl_temp_value_farheneit;
     lv_obj_t *Lbl_humi_value             = objs.lbl_humi_value;
     lv_obj_t *Lbl_press_value            = objs.lbl_press_value;
@@ -157,7 +157,7 @@ void bmp280_task(void *arg)
        // lv_label_set_text(Lbl_Humidity, "Humidity [%]: ");
         lv_label_set_text(Lbl_humidity_value, strHumidity);
 
-        lv_label_set_text(Lbl_temp_value_1, strTempC);
+       // lv_label_set_text(Lbl_temp_value_1, strTempC);
         lv_label_set_text(Lbl_temp_value_farheneit, strTempF); // Convert to Fahrenheit
 
         lv_label_set_text(Lbl_humi_value, strHumidity);

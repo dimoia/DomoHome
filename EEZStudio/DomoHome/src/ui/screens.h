@@ -7,11 +7,22 @@
 extern "C" {
 #endif
 
+// Screens
+
+enum ScreensEnum {
+    _SCREEN_ID_FIRST = 1,
+    SCREEN_ID_MAIN = 1,
+    SCREEN_ID_SETTINGS_SCREEN = 2,
+    SCREEN_ID_HEATING_SCREEN = 3,
+    SCREEN_ID_CONFIG_TERMOSTATO = 4,
+    _SCREEN_ID_LAST = 4
+};
+
 typedef struct _objects_t {
     lv_obj_t *main;
     lv_obj_t *settings_screen;
     lv_obj_t *heating_screen;
-    lv_obj_t *test;
+    lv_obj_t *config_termostato;
     lv_obj_t *btn_goto_home;
     lv_obj_t *lbl_home;
     lv_obj_t *lbl_time;
@@ -156,37 +167,76 @@ typedef struct _objects_t {
     lv_obj_t *obj43;
     lv_obj_t *obj44;
     lv_obj_t *obj45;
-    lv_obj_t *obj46;
-    lv_obj_t *obj47;
-    lv_obj_t *lbl_c_4;
-    lv_obj_t *lbl_temp_value_4;
-    lv_obj_t *lbl_temperature_2;
-    lv_obj_t *clk_meter;
-    lv_obj_t *calendar_data;
-    lv_obj_t *roller_hour;
-    lv_obj_t *roller_minute;
-    lv_obj_t *lbl_press_hpa_1;
-    lv_obj_t *img_temperature;
-    lv_obj_t *img_humidity;
-    lv_obj_t *lbl_pressure_1;
-    lv_obj_t *lbl_press_value_1;
-    lv_obj_t *lbl_temperature_1;
-    lv_obj_t *lbl_temp_value_1;
-    lv_obj_t *lbl_humidity_1;
-    lv_obj_t *lbl_humidity_value_1;
-    lv_obj_t *lbl_c;
-    lv_obj_t *lbl_percent;
     lv_obj_t *chart_humy;
+    lv_obj_t *tab_configuration;
+    lv_obj_t *tab_wifi_config;
+    lv_obj_t *txt_tab_wifi_password;
+    lv_obj_t *obj46;
+    lv_obj_t *drp_tab_wifi_ssid;
+    lv_obj_t *txt_tab_wifi_hostname;
+    lv_obj_t *btn_scann_tab_wifi_config;
+    lv_obj_t *tab_network_config;
+    lv_obj_t *txt_tab_net_dns;
+    lv_obj_t *txt_tab_net_ipaddress;
+    lv_obj_t *sw_tab_net_static_ip_dynamic_ip;
+    lv_obj_t *txt_tab_net_gateway;
+    lv_obj_t *txt_tab_net_netmask;
+    lv_obj_t *tab_time_config;
+    lv_obj_t *obj47;
+    lv_obj_t *obj48;
+    lv_obj_t *obj49;
+    lv_obj_t *tab_time_config_sw_wheater;
+    lv_obj_t *tab_time_txt_weather_key;
+    lv_obj_t *tab_time_combo_weather_server;
+    lv_obj_t *sw_tab_time_config_rtc_or_ntp;
+    lv_obj_t *tab_time_confiig_txt_ntp_server;
+    lv_obj_t *drop_tab_time_config_minute;
+    lv_obj_t *drop_tab_time_config_hour;
+    lv_obj_t *drop_tab_time_config_year;
+    lv_obj_t *drop_tab_time_config_month;
+    lv_obj_t *drop_tab_time_config_day;
+    lv_obj_t *btn_tab_time_config_set_clock;
+    lv_obj_t *tab_ha_config;
+    lv_obj_t *tab_ha_txt_mqttsubscribe;
+    lv_obj_t *tab_ha_txt_mqtttopic;
+    lv_obj_t *tab_ha_sw_mqtt_status;
+    lv_obj_t *tab_ha_txt_broker_port;
+    lv_obj_t *tab_ha_txt_mqttclient_id;
+    lv_obj_t *tab_ha_txt_mqttpassword;
+    lv_obj_t *tab_ha_txt_mqttuserid;
+    lv_obj_t *tab_ha_txt_broker_ip;
+    lv_obj_t *btn_save_to_nvs;
+    lv_obj_t *btn_erase_nvs;
+    lv_obj_t *btn_restart_device;
+    lv_obj_t *btn_config_termostato_return_to_home;
+    lv_obj_t *btn_goto_home_3;
+    lv_obj_t *lbl_home_4;
 } objects_t;
 
 extern objects_t objects;
 
-enum ScreensEnum {
-    SCREEN_ID_MAIN = 1,
-    SCREEN_ID_SETTINGS_SCREEN = 2,
-    SCREEN_ID_HEATING_SCREEN = 3,
-    SCREEN_ID_TEST = 4,
-};
+typedef struct {
+    lv_meter_scale_t *scale;
+    lv_meter_indicator_t *indicator;
+    lv_meter_indicator_t *indicator1;
+    lv_meter_indicator_t *indicator2;
+    lv_meter_indicator_t *indicator3;
+    lv_meter_indicator_t *indicator4;
+    lv_meter_indicator_t *indicator5;
+    lv_meter_indicator_t *indicator6;
+    lv_meter_indicator_t *indicator7;
+    lv_meter_indicator_t *indicator8;
+    lv_meter_indicator_t *indicator9;
+    lv_meter_scale_t *scale1;
+    lv_meter_indicator_t *indicator10;
+    lv_meter_indicator_t *indicator11;
+    lv_meter_indicator_t *indicator12;
+    lv_meter_indicator_t *indicator13;
+    lv_meter_scale_t *scale2;
+    lv_meter_indicator_t *indicator14;
+} screen_main_state_t;
+
+extern screen_main_state_t screen_main_state;
 
 void create_screen_main();
 void tick_screen_main();
@@ -197,14 +247,13 @@ void tick_screen_settings_screen();
 void create_screen_heating_screen();
 void tick_screen_heating_screen();
 
-void create_screen_test();
-void tick_screen_test();
+void create_screen_config_termostato();
+void tick_screen_config_termostato();
 
 void tick_screen_by_id(enum ScreensEnum screenId);
 void tick_screen(int screen_index);
 
 void create_screens();
-
 
 #ifdef __cplusplus
 }

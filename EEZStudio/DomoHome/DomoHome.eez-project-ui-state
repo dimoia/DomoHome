@@ -1,7 +1,7 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/1",
-    "selectedActionObject": "[DomoHome.eez-project]:/actions/13",
+    "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/3",
+    "selectedActionObject": "[DomoHome.eez-project]:/actions/33",
     "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/26",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -125,8 +125,7 @@
                 {
                   "type": "tabset",
                   "id": "#751090f9-898a-494d-8ac2-845ed731e798",
-                  "weight": 1.262127088859336,
-                  "selected": 2,
+                  "weight": 0.6163212394664345,
                   "enableClose": false,
                   "children": [
                     {
@@ -158,7 +157,7 @@
                 {
                   "type": "tabset",
                   "id": "#c5edcf08-d000-450b-a241-a938ba8aabef",
-                  "weight": 1.06457676190744,
+                  "weight": 2.277818601183683,
                   "enableClose": false,
                   "children": [
                     {
@@ -174,7 +173,7 @@
                 {
                   "type": "tabset",
                   "id": "#0ed2a1f0-8bed-4eb2-8607-4980ab49f41a",
-                  "weight": 0.6732961492332235,
+                  "weight": 0.10586015934988273,
                   "enableClose": false,
                   "children": [
                     {
@@ -192,18 +191,17 @@
             {
               "type": "tabset",
               "id": "EDITORS",
-              "weight": 49.62779611095139,
-              "selected": 2,
+              "weight": 54.19737905050369,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
                 {
                   "type": "tab",
-                  "id": "#3771b06d-3b82-4ffb-9483-3183ea4fcadf",
-                  "name": "heating_screen",
+                  "id": "#acc41461-66af-4821-a1c9-b5a3e0a5c921",
+                  "name": "config_termostato",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[DomoHome.eez-project]:/userPages/2",
+                    "objectPath": "[DomoHome.eez-project]:/userPages/3",
                     "permanent": false
                   },
                   "icon": "svg:page"
@@ -236,12 +234,12 @@
             {
               "type": "row",
               "id": "#5cbf9b4d-bc35-413b-af80-2a2b0b90dcb9",
-              "weight": 24.601359314101174,
+              "weight": 20.03177637454891,
               "children": [
                 {
                   "type": "tabset",
                   "id": "#f8c2bdb4-e961-41c9-9a50-965e44482089",
-                  "weight": 1.9939467312348669,
+                  "weight": 2.328087167070218,
                   "children": [
                     {
                       "type": "tab",
@@ -256,7 +254,7 @@
                 {
                   "type": "tabset",
                   "id": "#f393cecc-aac9-4c20-a003-c2e8c4af3ac1",
-                  "weight": 1.0060532687651331,
+                  "weight": 0.6719128329297821,
                   "children": [
                     {
                       "type": "tab",
@@ -471,21 +469,10 @@
               "type": "tabset",
               "id": "RUNTIME-EDITORS",
               "weight": 1,
+              "selected": -1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
-              "children": [
-                {
-                  "type": "tab",
-                  "id": "#b496428c-6ab6-4a97-b224-55817545fcdf",
-                  "name": "Main",
-                  "component": "editor",
-                  "config": {
-                    "objectPath": "[DomoHome.eez-project]:/userPages/0",
-                    "permanent": false
-                  },
-                  "icon": "svg:page"
-                }
-              ],
+              "children": [],
               "active": true
             },
             {
@@ -527,6 +514,88 @@
                       "id": "DEBUGGER_LOGS",
                       "name": "Logs",
                       "component": "logs",
+                      "enableClose": false,
+                      "icon": "svg:log"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "rootDockerSimulator": {
+      "version": 1,
+      "json": {
+        "global": {
+          "splitterSize": 4,
+          "splitterExtra": 4,
+          "tabEnableRename": false,
+          "borderEnableAutoHide": true
+        },
+        "borders": [],
+        "layout": {
+          "type": "row",
+          "id": "#e36cce43-76e9-442d-b853-eb30974053b5",
+          "children": [
+            {
+              "type": "tabset",
+              "id": "#4595b61a-bebc-4371-9661-9120ba03dc35",
+              "weight": 70,
+              "enableDrop": false,
+              "enableDrag": false,
+              "enableClose": false,
+              "enableTabStrip": true,
+              "children": [
+                {
+                  "type": "tab",
+                  "id": "DOCKER_SIMULATOR_PREVIEW",
+                  "name": "Preview",
+                  "component": "dockerSimulatorPreview",
+                  "enableClose": false,
+                  "icon": "material:computer"
+                }
+              ]
+            },
+            {
+              "type": "row",
+              "id": "#4a9168ad-38bb-4d8d-96bc-c58119ba8ae3",
+              "weight": 30,
+              "children": [
+                {
+                  "type": "tabset",
+                  "id": "#1051e236-3bea-46f1-8998-3e090d12619a",
+                  "weight": 50,
+                  "enableDrop": false,
+                  "enableDrag": false,
+                  "enableClose": false,
+                  "enableTabStrip": true,
+                  "children": [
+                    {
+                      "type": "tab",
+                      "id": "DOCKER_SIMULATOR_LOGS",
+                      "name": "Build Logs",
+                      "component": "dockerSimulatorLogs",
+                      "enableClose": false,
+                      "icon": "svg:log"
+                    }
+                  ]
+                },
+                {
+                  "type": "tabset",
+                  "id": "#fa139b1f-9f41-45d5-a04c-ad54e1242a63",
+                  "weight": 50,
+                  "enableDrop": false,
+                  "enableDrag": false,
+                  "enableClose": false,
+                  "enableTabStrip": true,
+                  "children": [
+                    {
+                      "type": "tab",
+                      "id": "DOCKER_SIMULATOR_PREVIEW_LOGS",
+                      "name": "Preview Logs",
+                      "component": "dockerSimulatorPreviewLogs",
                       "enableClose": false,
                       "icon": "svg:log"
                     }
@@ -1026,7 +1095,7 @@
           "x": -316.29333446404326,
           "y": -193.06767299864316
         },
-        "scale": 0.67
+        "scale": 0.75
       },
       "timeline": {
         "isEditorActive": false,
@@ -1067,9 +1136,9 @@
       "transform": {
         "translate": {
           "x": -356.23969696969624,
-          "y": -235.7060606060606
+          "y": -335.7060606060606
         },
-        "scale": 0.67
+        "scale": 0.75
       },
       "timeline": {
         "isEditorActive": false,
@@ -1080,15 +1149,14 @@
       "selectionFront": {},
       "selectionBack": {
         "0": {
-          "0": {},
+          "15": {
+            "$selected": true
+          },
           "33": {},
           "34": {
-            "0": {
-              "$selected": true
-            }
+            "0": {}
           },
-          "49": {},
-          "50": {}
+          "49": {}
         }
       }
     },
@@ -1107,10 +1175,10 @@
       },
       "transform": {
         "translate": {
-          "x": -409.6,
-          "y": -240
+          "x": -356.23969696969624,
+          "y": -335.7060606060606
         },
-        "scale": 0.67
+        "scale": 0.75
       },
       "timeline": {
         "isEditorActive": false,
@@ -1121,9 +1189,12 @@
       "selectionFront": {},
       "selectionBack": {
         "0": {
-          "14": {
+          "0": {
             "$selected": true
-          }
+          },
+          "33": {},
+          "34": {},
+          "49": {}
         }
       }
     },
@@ -1142,10 +1213,10 @@
       },
       "transform": {
         "translate": {
-          "x": -521.5,
-          "y": -154.5
+          "x": -487.4761507801898,
+          "y": -206.93639755766594
         },
-        "scale": 0.8
+        "scale": 0.75
       },
       "timeline": {
         "isEditorActive": false,
@@ -1156,8 +1227,8 @@
       "selectionFront": {},
       "selectionBack": {
         "0": {
-          "15": {
-            "$selected": true
+          "1": {
+            "2": {}
           }
         }
       }
@@ -1208,10 +1279,13 @@
   "logsPanelFilter": "all",
   "selectedStylePropertyName": "",
   "lvglPart": "MAIN",
-  "lvglState": "DEFAULT",
-  "lvglExpandedPropertiesGroup": [],
+  "lvglState": "EDITED",
+  "lvglExpandedPropertiesGroup": [
+    "TEXT",
+    "BORDER"
+  ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 0.67,
+  "flowZoom": 0.75,
   "implementationLanguage": "C"
 }

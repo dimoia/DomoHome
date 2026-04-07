@@ -36,7 +36,11 @@ extern void action_txt_weather_key(lv_event_t * e);
 extern void action_sw_mqtt_status(lv_event_t * e);
 extern void action_mqtt_config(lv_event_t * e);
 extern void action_txt_broker_port(lv_event_t * e);
-
+extern void action_tab_main_config(lv_event_t * e);
+extern void action_tab_wifi_config(lv_event_t * e);
+extern void action_tab_network_config(lv_event_t * e);
+extern void action_tab_time_config(lv_event_t * e);
+extern void action_tab_ha_config(lv_event_t * e);
 
 #ifdef __cplusplus
 }
