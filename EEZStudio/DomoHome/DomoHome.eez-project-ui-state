@@ -1,7 +1,7 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/3",
-    "selectedActionObject": "[DomoHome.eez-project]:/actions/33",
+    "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/1",
+    "selectedActionObject": "[DomoHome.eez-project]:/actions/20",
     "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/26",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -125,7 +125,8 @@
                 {
                   "type": "tabset",
                   "id": "#751090f9-898a-494d-8ac2-845ed731e798",
-                  "weight": 0.6163212394664345,
+                  "weight": 1.7992571771002617,
+                  "selected": 1,
                   "enableClose": false,
                   "children": [
                     {
@@ -152,12 +153,13 @@
                       "enableClose": false,
                       "icon": "material:code"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
                   "id": "#c5edcf08-d000-450b-a241-a938ba8aabef",
-                  "weight": 2.277818601183683,
+                  "weight": 1.094882663549855,
                   "enableClose": false,
                   "children": [
                     {
@@ -192,16 +194,17 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 54.19737905050369,
+              "selected": 2,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
                 {
                   "type": "tab",
                   "id": "#acc41461-66af-4821-a1c9-b5a3e0a5c921",
-                  "name": "config_termostato",
+                  "name": "heating_screen",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[DomoHome.eez-project]:/userPages/3",
+                    "objectPath": "[DomoHome.eez-project]:/userPages/2",
                     "permanent": false
                   },
                   "icon": "svg:page"
@@ -228,8 +231,7 @@
                   },
                   "icon": "svg:page"
                 }
-              ],
-              "active": true
+              ]
             },
             {
               "type": "row",
@@ -1149,14 +1151,16 @@
       "selectionFront": {},
       "selectionBack": {
         "0": {
-          "15": {
-            "$selected": true
-          },
+          "15": {},
+          "30": {},
           "33": {},
           "34": {
             "0": {}
           },
-          "49": {}
+          "49": {},
+          "50": {
+            "$selected": true
+          }
         }
       }
     },
@@ -1228,7 +1232,12 @@
       "selectionBack": {
         "0": {
           "1": {
-            "2": {}
+            "0": {},
+            "2": {},
+            "3": {}
+          },
+          "4": {
+            "$selected": true
           }
         }
       }

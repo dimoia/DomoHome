@@ -2103,8 +2103,8 @@ void create_screen_config_termostato() {
                             lv_textarea_set_max_length(obj, 32);
                             lv_textarea_set_one_line(obj, true);
                             lv_textarea_set_password_mode(obj, true);
-                            lv_obj_add_event_cb(obj, action_wifi_txt_psw, LV_EVENT_FOCUSED, (void *)0);
-                            lv_obj_add_event_cb(obj, action_wifi_txt_psw, LV_EVENT_DEFOCUSED, (void *)0);
+                            lv_obj_add_event_cb(obj, action_txt_tab_wifi_password, LV_EVENT_FOCUSED, (void *)0);
+                            lv_obj_add_event_cb(obj, action_txt_tab_wifi_password, LV_EVENT_DEFOCUSED, (void *)0);
                             lv_obj_set_style_border_color(obj, lv_color_hex(0xfff9f9f9), LV_PART_MAIN | LV_STATE_DEFAULT);
                         }
                         {
@@ -2138,7 +2138,7 @@ void create_screen_config_termostato() {
                             lv_obj_set_size(obj, 343, LV_SIZE_CONTENT);
                             lv_dropdown_set_options(obj, "");
                             lv_dropdown_set_selected(obj, 0);
-                            lv_obj_add_event_cb(obj, action_ssid_select, LV_EVENT_VALUE_CHANGED, (void *)0);
+                            lv_obj_add_event_cb(obj, action_drp_tab_wifi_ssid, LV_EVENT_VALUE_CHANGED, (void *)0);
                         }
                         {
                             // txt_tab_wifi_hostname
@@ -2150,8 +2150,8 @@ void create_screen_config_termostato() {
                             lv_textarea_set_placeholder_text(obj, "Termostato");
                             lv_textarea_set_one_line(obj, true);
                             lv_textarea_set_password_mode(obj, false);
-                            lv_obj_add_event_cb(obj, action_txt_hostname_cb, LV_EVENT_FOCUSED, (void *)0);
-                            lv_obj_add_event_cb(obj, action_txt_hostname_cb, LV_EVENT_DEFOCUSED, (void *)0);
+                            lv_obj_add_event_cb(obj, action_tab_wifi_txt_hostname_cb, LV_EVENT_FOCUSED, (void *)0);
+                            lv_obj_add_event_cb(obj, action_tab_wifi_txt_hostname_cb, LV_EVENT_DEFOCUSED, (void *)0);
                             lv_obj_set_style_border_color(obj, lv_color_hex(0xfff9f9f9), LV_PART_MAIN | LV_STATE_DEFAULT);
                         }
                         {
@@ -2160,6 +2160,7 @@ void create_screen_config_termostato() {
                             objects.btn_scann_tab_wifi_config = obj;
                             lv_obj_set_pos(obj, 645, 16);
                             lv_obj_set_size(obj, 186, 50);
+                            lv_obj_add_event_cb(obj, action_scann_wifi_network, LV_EVENT_CLICKED, (void *)0);
                             {
                                 lv_obj_t *parent_obj = obj;
                                 {
@@ -2216,7 +2217,7 @@ void create_screen_config_termostato() {
                             objects.sw_tab_net_static_ip_dynamic_ip = obj;
                             lv_obj_set_pos(obj, 539, 76);
                             lv_obj_set_size(obj, 56, 25);
-                            lv_obj_add_event_cb(obj, action_sw_static_dynamic_ip, LV_EVENT_VALUE_CHANGED, (void *)0);
+                            lv_obj_add_event_cb(obj, action_sw_static_or_dynamic_ip, LV_EVENT_VALUE_CHANGED, (void *)0);
                             lv_obj_add_state(obj, LV_STATE_CHECKED);
                         }
                         {
@@ -2373,7 +2374,7 @@ void create_screen_config_termostato() {
                             lv_textarea_set_max_length(obj, 16);
                             lv_textarea_set_one_line(obj, true);
                             lv_textarea_set_password_mode(obj, false);
-                            lv_obj_add_event_cb(obj, action_txt_weather_key, LV_EVENT_FOCUSED, (void *)4);
+                            lv_obj_add_event_cb(obj, action_tab_txt_weather_key, LV_EVENT_FOCUSED, (void *)4);
                             lv_obj_add_event_cb(obj, action_txt_weather_key, LV_EVENT_DEFOCUSED, (void *)4);
                             lv_obj_set_style_border_color(obj, lv_color_hex(0xfff9f9f9), LV_PART_MAIN | LV_STATE_DEFAULT);
                         }
@@ -2385,7 +2386,7 @@ void create_screen_config_termostato() {
                             lv_obj_set_size(obj, 174, LV_SIZE_CONTENT);
                             lv_dropdown_set_options(obj, "OpenWeatherMap\nWeatherAPI\nAccuWeather");
                             lv_dropdown_set_selected(obj, 0);
-                            lv_obj_add_event_cb(obj, action_combo_weather_server, LV_EVENT_VALUE_CHANGED, (void *)0);
+                            lv_obj_add_event_cb(obj, action_sw_cmb_weather_server_selected, LV_EVENT_VALUE_CHANGED, (void *)0);
                         }
                         {
                             lv_obj_t *obj = lv_label_create(parent_obj);
@@ -2558,8 +2559,8 @@ void create_screen_config_termostato() {
                             lv_textarea_set_max_length(obj, 16);
                             lv_textarea_set_one_line(obj, true);
                             lv_textarea_set_password_mode(obj, false);
-                            lv_obj_add_event_cb(obj, action_mqtt_config, LV_EVENT_FOCUSED, (void *)6);
-                            lv_obj_add_event_cb(obj, action_mqtt_config, LV_EVENT_DEFOCUSED, (void *)6);
+                            lv_obj_add_event_cb(obj, action_tab_mqtt_config, LV_EVENT_FOCUSED, (void *)6);
+                            lv_obj_add_event_cb(obj, action_tab_mqtt_config, LV_EVENT_DEFOCUSED, (void *)6);
                             lv_obj_set_style_border_color(obj, lv_color_hex(0xfff9f9f9), LV_PART_MAIN | LV_STATE_DEFAULT);
                         }
                         {
@@ -2585,8 +2586,8 @@ void create_screen_config_termostato() {
                             lv_textarea_set_max_length(obj, 16);
                             lv_textarea_set_one_line(obj, true);
                             lv_textarea_set_password_mode(obj, false);
-                            lv_obj_add_event_cb(obj, action_mqtt_config, LV_EVENT_FOCUSED, (void *)5);
-                            lv_obj_add_event_cb(obj, action_mqtt_config, LV_EVENT_DEFOCUSED, (void *)5);
+                            lv_obj_add_event_cb(obj, action_tab_mqtt_config, LV_EVENT_FOCUSED, (void *)5);
+                            lv_obj_add_event_cb(obj, action_tab_mqtt_config, LV_EVENT_DEFOCUSED, (void *)5);
                             lv_obj_set_style_border_color(obj, lv_color_hex(0xfff9f9f9), LV_PART_MAIN | LV_STATE_DEFAULT);
                         }
                         {
@@ -2609,7 +2610,7 @@ void create_screen_config_termostato() {
                             objects.tab_ha_sw_mqtt_status = obj;
                             lv_obj_set_pos(obj, 246, 5);
                             lv_obj_set_size(obj, 50, 25);
-                            lv_obj_add_event_cb(obj, action_sw_mqtt_status, LV_EVENT_VALUE_CHANGED, (void *)0);
+                            lv_obj_add_event_cb(obj, action_sw_mqtt_protocol_on_off, LV_EVENT_VALUE_CHANGED, (void *)0);
                         }
                         {
                             // tab_ha_txt_broker_port
@@ -2643,8 +2644,8 @@ void create_screen_config_termostato() {
                             lv_textarea_set_max_length(obj, 6);
                             lv_textarea_set_one_line(obj, true);
                             lv_textarea_set_password_mode(obj, false);
-                            lv_obj_add_event_cb(obj, action_mqtt_config, LV_EVENT_FOCUSED, (void *)2);
-                            lv_obj_add_event_cb(obj, action_mqtt_config, LV_EVENT_DEFOCUSED, (void *)2);
+                            lv_obj_add_event_cb(obj, action_tab_mqtt_config, LV_EVENT_FOCUSED, (void *)2);
+                            lv_obj_add_event_cb(obj, action_tab_mqtt_config, LV_EVENT_DEFOCUSED, (void *)2);
                             lv_obj_set_style_border_color(obj, lv_color_hex(0xfff9f9f9), LV_PART_MAIN | LV_STATE_DEFAULT);
                         }
                         {
@@ -2663,8 +2664,8 @@ void create_screen_config_termostato() {
                             lv_textarea_set_max_length(obj, 16);
                             lv_textarea_set_one_line(obj, true);
                             lv_textarea_set_password_mode(obj, true);
-                            lv_obj_add_event_cb(obj, action_mqtt_config, LV_EVENT_FOCUSED, (void *)3);
-                            lv_obj_add_event_cb(obj, action_mqtt_config, LV_EVENT_DEFOCUSED, (void *)3);
+                            lv_obj_add_event_cb(obj, action_tab_mqtt_config, LV_EVENT_FOCUSED, (void *)3);
+                            lv_obj_add_event_cb(obj, action_tab_mqtt_config, LV_EVENT_DEFOCUSED, (void *)3);
                             lv_obj_set_style_border_color(obj, lv_color_hex(0xfff9f9f9), LV_PART_MAIN | LV_STATE_DEFAULT);
                         }
                         {
@@ -2683,8 +2684,8 @@ void create_screen_config_termostato() {
                             lv_textarea_set_max_length(obj, 16);
                             lv_textarea_set_one_line(obj, true);
                             lv_textarea_set_password_mode(obj, false);
-                            lv_obj_add_event_cb(obj, action_mqtt_config, LV_EVENT_FOCUSED, (void *)4);
-                            lv_obj_add_event_cb(obj, action_mqtt_config, LV_EVENT_DEFOCUSED, (void *)4);
+                            lv_obj_add_event_cb(obj, action_tab_mqtt_config, LV_EVENT_FOCUSED, (void *)4);
+                            lv_obj_add_event_cb(obj, action_tab_mqtt_config, LV_EVENT_DEFOCUSED, (void *)4);
                             lv_obj_set_style_border_color(obj, lv_color_hex(0xfff9f9f9), LV_PART_MAIN | LV_STATE_DEFAULT);
                         }
                         {
@@ -2704,8 +2705,8 @@ void create_screen_config_termostato() {
                             lv_textarea_set_max_length(obj, 16);
                             lv_textarea_set_one_line(obj, true);
                             lv_textarea_set_password_mode(obj, false);
-                            lv_obj_add_event_cb(obj, action_mqtt_config, LV_EVENT_FOCUSED, (void *)0);
-                            lv_obj_add_event_cb(obj, action_txt_net_cb, LV_EVENT_DEFOCUSED, (void *)0);
+                            lv_obj_add_event_cb(obj, action_tab_mqtt_config, LV_EVENT_FOCUSED, (void *)0);
+                            lv_obj_add_event_cb(obj, action_tab_mqtt_config, LV_EVENT_DEFOCUSED, (void *)0);
                             lv_obj_set_style_border_color(obj, lv_color_hex(0xfff9f9f9), LV_PART_MAIN | LV_STATE_DEFAULT);
                         }
                         {
@@ -2725,6 +2726,7 @@ void create_screen_config_termostato() {
             objects.btn_save_to_nvs = obj;
             lv_obj_set_pos(obj, 265, 530);
             lv_obj_set_size(obj, 100, 50);
+            lv_obj_add_event_cb(obj, action_save_config_to_nvs, LV_EVENT_CLICKED, (void *)0);
             {
                 lv_obj_t *parent_obj = obj;
                 {
@@ -2742,6 +2744,7 @@ void create_screen_config_termostato() {
             objects.btn_erase_nvs = obj;
             lv_obj_set_pos(obj, 498, 530);
             lv_obj_set_size(obj, 100, 50);
+            lv_obj_add_event_cb(obj, action_erase_nvs_flash, LV_EVENT_CLICKED, (void *)0);
             {
                 lv_obj_t *parent_obj = obj;
                 {
@@ -2759,6 +2762,7 @@ void create_screen_config_termostato() {
             objects.btn_restart_device = obj;
             lv_obj_set_pos(obj, 730, 530);
             lv_obj_set_size(obj, 100, 50);
+            lv_obj_add_event_cb(obj, action_restart_micro, LV_EVENT_CLICKED, (void *)0);
             {
                 lv_obj_t *parent_obj = obj;
                 {

@@ -418,6 +418,141 @@
       "componentGroups": [],
       "userProperties": [],
       "name": "tab_ha_config"
+    },
+    {
+      "objID": "fd85a555-2626-4621-e49b-c99485062f22",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "scann_wifi_network"
+    },
+    {
+      "objID": "b676eb3f-fe8d-4b36-a2d6-bd5ed8d6a7df",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "tab_wifi_txt_Hostname_cb"
+    },
+    {
+      "objID": "2b9f369b-141f-41f6-aa59-7afd9d8d86ed",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "txt_tab_wifi_password"
+    },
+    {
+      "objID": "45b83c7a-9ec8-4752-a8a4-f8891765790e",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "drp_tab_wifi_ssid"
+    },
+    {
+      "objID": "24ebf25b-3171-401a-b094-2f3ff9e4c2c0",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "network_config"
+    },
+    {
+      "objID": "a368292f-cd96-49a7-8c40-a7fc488d4940",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "sw_static_or_dynamic_ip"
+    },
+    {
+      "objID": "edeb0419-539a-4dca-8d79-cd190453dcef",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "weather_enable_disable"
+    },
+    {
+      "objID": "3d281b88-7d11-4faa-c3f4-a1ad15bf10c5",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "sw_cmb_weather_server_selected"
+    },
+    {
+      "objID": "acb62191-3dcc-4cc0-dbb3-71d575bb51ae",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "tab_txt_weather_key"
+    },
+    {
+      "objID": "dfa6cf6a-e1a3-4133-9c77-fd3cac773bfe",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "sw_mqtt_protocol_on_off"
+    },
+    {
+      "objID": "53d057b2-2ef0-4f1f-9e1d-f996a364ae41",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "tab_mqtt_config"
+    },
+    {
+      "objID": "f44a6ab7-20cb-4d46-a669-263f5c71aa37",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "tab_mqtt_broker_port"
+    },
+    {
+      "objID": "bebff4e8-b418-4f22-c110-67d74819c5e3",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "save_config_to_nvs"
+    },
+    {
+      "objID": "c49c2785-fab1-46af-b0c5-cc8467a29907",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "erase_nvs_flash"
+    },
+    {
+      "objID": "6e3b6f16-2cf0-44a4-df0d-fd542970c764",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "restart_micro"
     }
   ],
   "userPages": [
@@ -11030,14 +11165,14 @@
                           "objID": "8c700c5c-95e8-4e0e-df55-c69bb95055ec",
                           "eventName": "FOCUSED",
                           "handlerType": "action",
-                          "action": "wifi_txt_psw",
+                          "action": "txt_tab_wifi_password",
                           "userData": 0
                         },
                         {
                           "objID": "dc29081a-0ed1-4475-951b-e5015eb63ab6",
                           "eventName": "DEFOCUSED",
                           "handlerType": "action",
-                          "action": "wifi_txt_psw",
+                          "action": "txt_tab_wifi_password",
                           "userData": 0
                         }
                       ],
@@ -11247,7 +11382,7 @@
                           "objID": "c6825bda-5b50-4a77-95cb-d46a9b18cb24",
                           "eventName": "VALUE_CHANGED",
                           "handlerType": "action",
-                          "action": "ssid_select",
+                          "action": "drp_tab_wifi_ssid",
                           "userData": 0
                         }
                       ],
@@ -11300,14 +11435,14 @@
                           "objID": "690eaf87-94bc-4a86-d4ce-3b937713e3a8",
                           "eventName": "FOCUSED",
                           "handlerType": "action",
-                          "action": "txt_Hostname_cb",
+                          "action": "tab_wifi_txt_Hostname_cb",
                           "userData": 0
                         },
                         {
                           "objID": "23d5f3f0-7ba5-4ae0-c62c-a13d364d2e34",
                           "eventName": "DEFOCUSED",
                           "handlerType": "action",
-                          "action": "txt_Hostname_cb",
+                          "action": "tab_wifi_txt_Hostname_cb",
                           "userData": 0
                         }
                       ],
@@ -11364,7 +11499,15 @@
                         "childStyles": []
                       },
                       "timeline": [],
-                      "eventHandlers": [],
+                      "eventHandlers": [
+                        {
+                          "objID": "2c187dd0-e34c-4e7a-b81a-0c4f32b13410",
+                          "eventName": "CLICKED",
+                          "handlerType": "action",
+                          "action": "scann_wifi_network",
+                          "userData": 0
+                        }
+                      ],
                       "identifier": "btn_scann_tab_wifi_config",
                       "leftUnit": "px",
                       "topUnit": "px",
@@ -11649,7 +11792,7 @@
                           "objID": "5cbd62da-ce21-4181-f37e-a691a7463fa9",
                           "eventName": "VALUE_CHANGED",
                           "handlerType": "action",
-                          "action": "sw_static_dynamic_ip",
+                          "action": "sw_static_or_dynamic_ip",
                           "userData": 0
                         }
                       ],
@@ -12523,7 +12666,7 @@
                           "objID": "b05ad11d-dd36-410d-8fda-19c313ccb28d",
                           "eventName": "FOCUSED",
                           "handlerType": "action",
-                          "action": "txt_weather_key",
+                          "action": "tab_txt_weather_key",
                           "userData": 4
                         },
                         {
@@ -12592,7 +12735,7 @@
                           "objID": "2a9352a9-86f4-4484-f03e-7ffced009fd5",
                           "eventName": "VALUE_CHANGED",
                           "handlerType": "action",
-                          "action": "combo_weather_server",
+                          "action": "sw_cmb_weather_server_selected",
                           "userData": 0
                         }
                       ],
@@ -13627,14 +13770,14 @@
                           "objID": "623f3ce3-5e49-427a-8d7d-d144254f730c",
                           "eventName": "FOCUSED",
                           "handlerType": "action",
-                          "action": "mqtt_config",
+                          "action": "tab_mqtt_config",
                           "userData": 6
                         },
                         {
                           "objID": "25cc3370-46bd-4cc4-a111-321571b7baf0",
                           "eventName": "DEFOCUSED",
                           "handlerType": "action",
-                          "action": "mqtt_config",
+                          "action": "tab_mqtt_config",
                           "userData": 6
                         }
                       ],
@@ -13794,14 +13937,14 @@
                           "objID": "27a2ca20-bc3c-48ff-8347-acbfe45e20f7",
                           "eventName": "FOCUSED",
                           "handlerType": "action",
-                          "action": "mqtt_config",
+                          "action": "tab_mqtt_config",
                           "userData": 5
                         },
                         {
                           "objID": "013369b9-f295-4787-8718-43f4af9a52f9",
                           "eventName": "DEFOCUSED",
                           "handlerType": "action",
-                          "action": "mqtt_config",
+                          "action": "tab_mqtt_config",
                           "userData": 5
                         }
                       ],
@@ -13961,7 +14104,7 @@
                           "objID": "2319219e-b7b0-4c82-99a2-a8d2edd44f2b",
                           "eventName": "VALUE_CHANGED",
                           "handlerType": "action",
-                          "action": "sw_mqtt_status",
+                          "action": "sw_mqtt_protocol_on_off",
                           "userData": 0
                         }
                       ],
@@ -14127,14 +14270,14 @@
                           "objID": "7093ab7c-a562-4f1c-8875-613b23794b67",
                           "eventName": "FOCUSED",
                           "handlerType": "action",
-                          "action": "mqtt_config",
+                          "action": "tab_mqtt_config",
                           "userData": 2
                         },
                         {
                           "objID": "c4135cec-6b7f-4c13-9134-d4c71801930a",
                           "eventName": "DEFOCUSED",
                           "handlerType": "action",
-                          "action": "mqtt_config",
+                          "action": "tab_mqtt_config",
                           "userData": 2
                         }
                       ],
@@ -14245,14 +14388,14 @@
                           "objID": "6dd58528-e1c0-4936-a9a4-931bb41bf12f",
                           "eventName": "FOCUSED",
                           "handlerType": "action",
-                          "action": "mqtt_config",
+                          "action": "tab_mqtt_config",
                           "userData": 3
                         },
                         {
                           "objID": "8eb24548-824e-4a93-f6d7-fb3ad9fc45af",
                           "eventName": "DEFOCUSED",
                           "handlerType": "action",
-                          "action": "mqtt_config",
+                          "action": "tab_mqtt_config",
                           "userData": 3
                         }
                       ],
@@ -14363,14 +14506,14 @@
                           "objID": "0a50ab30-796b-46dc-85e5-823ee6acfeb2",
                           "eventName": "FOCUSED",
                           "handlerType": "action",
-                          "action": "mqtt_config",
+                          "action": "tab_mqtt_config",
                           "userData": 4
                         },
                         {
                           "objID": "40bb1e5b-6ef5-4ac4-ad7d-c2065ea8ed37",
                           "eventName": "DEFOCUSED",
                           "handlerType": "action",
-                          "action": "mqtt_config",
+                          "action": "tab_mqtt_config",
                           "userData": 4
                         }
                       ],
@@ -14481,14 +14624,14 @@
                           "objID": "5fb20e5a-5bcc-430d-eb94-1f897e80d604",
                           "eventName": "FOCUSED",
                           "handlerType": "action",
-                          "action": "mqtt_config",
+                          "action": "tab_mqtt_config",
                           "userData": 0
                         },
                         {
                           "objID": "7b75fc8d-f61b-4dee-c3d2-6e51f3a26552",
                           "eventName": "DEFOCUSED",
                           "handlerType": "action",
-                          "action": "txtNet_cb",
+                          "action": "tab_mqtt_config",
                           "userData": 0
                         }
                       ],
@@ -14636,7 +14779,15 @@
                 "childStyles": []
               },
               "timeline": [],
-              "eventHandlers": [],
+              "eventHandlers": [
+                {
+                  "objID": "3220c50d-7a08-4fde-9ae3-c7c79bad6ebe",
+                  "eventName": "CLICKED",
+                  "handlerType": "action",
+                  "action": "save_config_to_nvs",
+                  "userData": 0
+                }
+              ],
               "identifier": "btn_save_to_nvs",
               "leftUnit": "px",
               "topUnit": "px",
@@ -14726,7 +14877,15 @@
                 "childStyles": []
               },
               "timeline": [],
-              "eventHandlers": [],
+              "eventHandlers": [
+                {
+                  "objID": "4efd3b25-1258-4157-f0ba-b34e662b7a81",
+                  "eventName": "CLICKED",
+                  "handlerType": "action",
+                  "action": "erase_nvs_flash",
+                  "userData": 0
+                }
+              ],
               "identifier": "btn_erase_nvs",
               "leftUnit": "px",
               "topUnit": "px",
@@ -14816,7 +14975,15 @@
                 "childStyles": []
               },
               "timeline": [],
-              "eventHandlers": [],
+              "eventHandlers": [
+                {
+                  "objID": "bd8a8ed6-1c0a-4726-f4af-fc84e33cdb73",
+                  "eventName": "CLICKED",
+                  "handlerType": "action",
+                  "action": "restart_micro",
+                  "userData": 0
+                }
+              ],
               "identifier": "btn_restart_device",
               "leftUnit": "px",
               "topUnit": "px",

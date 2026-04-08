@@ -41,6 +41,21 @@ extern void action_tab_wifi_config(lv_event_t * e);
 extern void action_tab_network_config(lv_event_t * e);
 extern void action_tab_time_config(lv_event_t * e);
 extern void action_tab_ha_config(lv_event_t * e);
+extern void action_scann_wifi_network(lv_event_t * e);
+extern void action_tab_wifi_txt_hostname_cb(lv_event_t * e);
+extern void action_txt_tab_wifi_password(lv_event_t * e);
+extern void action_drp_tab_wifi_ssid(lv_event_t * e);
+extern void action_network_config(lv_event_t * e);
+extern void action_sw_static_or_dynamic_ip(lv_event_t * e);
+extern void action_weather_enable_disable(lv_event_t * e);
+extern void action_sw_cmb_weather_server_selected(lv_event_t * e);
+extern void action_tab_txt_weather_key(lv_event_t * e);
+extern void action_sw_mqtt_protocol_on_off(lv_event_t * e);
+extern void action_tab_mqtt_config(lv_event_t * e);
+extern void action_tab_mqtt_broker_port(lv_event_t * e);
+extern void action_save_config_to_nvs(lv_event_t * e);
+extern void action_erase_nvs_flash(lv_event_t * e);
+extern void action_restart_micro(lv_event_t * e);
 
 #ifdef __cplusplus
 }
