@@ -126,7 +126,6 @@
                   "type": "tabset",
                   "id": "#751090f9-898a-494d-8ac2-845ed731e798",
                   "weight": 1.7992571771002617,
-                  "selected": 2,
                   "enableClose": false,
                   "children": [
                     {
@@ -193,16 +192,17 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 54.19737905050369,
+              "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
                 {
                   "type": "tab",
                   "id": "#cd735f2d-d082-4a77-a0af-267db78a49c1",
-                  "name": "heating_screen",
+                  "name": "settings_screen",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[DomoHome.eez-project]:/userPages/0",
+                    "objectPath": "[DomoHome.eez-project]:/userPages/2",
                     "permanent": false
                   },
                   "icon": "svg:page"
@@ -210,7 +210,7 @@
                 {
                   "type": "tab",
                   "id": "#06bf3ae2-bdb8-4221-abf9-46ad3b2aa52f",
-                  "name": "Main",
+                  "name": "heating_screen",
                   "component": "editor",
                   "config": {
                     "objectPath": "[DomoHome.eez-project]:/userPages/0",
@@ -229,8 +229,7 @@
                   },
                   "icon": "svg:page"
                 }
-              ],
-              "active": true
+              ]
             },
             {
               "type": "row",
@@ -250,7 +249,8 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -1109,9 +1109,13 @@
         "0": {
           "5": {},
           "7": {},
+          "16": {},
           "33": {},
           "34": {},
           "49": {},
+          "66": {
+            "$selected": true
+          },
           "75": {}
         }
       }

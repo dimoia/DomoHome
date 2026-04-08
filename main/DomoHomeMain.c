@@ -43,6 +43,7 @@
 #include "mqtt_client.h"
 #include "LVGLCustom.h"
 #include "ota_upload.h"
+#include "heating_config.h"
 
 static const char    *TAG = "DomoHomeMain"; // Tag used for ESP log output
 static QueueHandle_t gpio_evt_queue = NULL;
@@ -190,10 +191,13 @@ void action_slider_temp1_change(lv_event_t *e) {
 
 void app_main()
 {
+    int8_t iSpiFfsRet = 0;
     static esp_lcd_panel_handle_t panel_handle = NULL; // Handle for the LCD panel
     static esp_lcd_touch_handle_t tp_handle = NULL;    // Handle for the touch panel  
 
     ESP_LOGI(TAG, "DomoHome Main Application Starting...");
+    
+    iSpiFfsRet = InitHeatingConfig();
 
     setConfigStatus(NOT_CONFIG);
     iConfigInit();
