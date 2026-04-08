@@ -14,7 +14,6 @@ extern void action_minute_change(lv_event_t * e);
 extern void action_goto_heating_screen(lv_event_t * e);
 extern void action_goto_home(lv_event_t * e);
 extern void action_goto_settings_screen(lv_event_t * e);
-extern void action_slider_temp1_change(lv_event_t * e);
 extern void action_wifi_scann(lv_event_t * e);
 extern void action_ssid_select(lv_event_t * e);
 extern void action_wifi_txt_psw(lv_event_t * e);
@@ -56,6 +55,11 @@ extern void action_tab_mqtt_broker_port(lv_event_t * e);
 extern void action_save_config_to_nvs(lv_event_t * e);
 extern void action_erase_nvs_flash(lv_event_t * e);
 extern void action_restart_micro(lv_event_t * e);
+extern void action_heating_slider_temperature(lv_event_t * e);
+extern void action_heating_slider_timer(lv_event_t * e);
+extern void action_heating_sw(lv_event_t * e);
+extern void action_heating_screen_config(lv_event_t * e);
+extern void action_heating_save_config(lv_event_t * e);
 
 #ifdef __cplusplus
 }

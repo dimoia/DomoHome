@@ -42,12 +42,12 @@
 #include "mqtt_manager.h"
 #include "mqtt_client.h"
 #include "LVGLCustom.h"
+#include "ota_upload.h"
 
 static const char    *TAG = "DomoHomeMain"; // Tag used for ESP log output
 static QueueHandle_t gpio_evt_queue = NULL;
 static TaskHandle_t  boot_TaskHandle;
 static const uint32_t u32BootPressedForSeconds = 5 * 1000 * 1000; // Time in seconds to consider a long press
-
 
 static void IRAM_ATTR gpio_isr_handler(void* arg)
 {
@@ -57,9 +57,6 @@ static void IRAM_ATTR gpio_isr_handler(void* arg)
     nvs_flash_erase_partition("nvs"); // remove NVS partition to ensure clean state before writing new config data
     nvs_flash_init();     
 }
-
-
-
 
 static void boot_task(void* arg)
 {
@@ -381,7 +378,9 @@ void app_main()
                 // Initialize Wi-Fi settings after NVS init
                 wifi_init(); 
                 #if 1
-                if( wifi_sta_init((uint8_t*)objUserConfig.strWifiSsid, (uint8_t*)objUserConfig.strWifiPassword, WIFI_AUTH_WPA2_PSK) == ESP_OK)
+                err = wifi_sta_init((uint8_t*)objUserConfig.strWifiSsid, (uint8_t*)objUserConfig.strWifiPassword, WIFI_AUTH_WPA2_PSK);
+
+                if( err == ESP_OK)
                 {
                     ESP_LOGE(TAG, "Success to connect to Wi-Fi network");
                 }
@@ -451,8 +450,13 @@ void app_main()
             lv_calendar_set_today_date(calendar, 2021, 02, 23);
         lv_calendar_set_showed_date(calendar, 2021, 02);
         */
+            if (err != -1)   
+            {
+                mqtt_manager_init();
+                vTaskDelay(pdMS_TO_TICKS(5000)); 
+                start_webserver();
                 
-            mqtt_manager_init();
+            }
                 
             
             // Delay to ensure all initializations are stable
