@@ -60,6 +60,7 @@ extern void action_heating_slider_timer(lv_event_t * e);
 extern void action_heating_sw(lv_event_t * e);
 extern void action_heating_screen_config(lv_event_t * e);
 extern void action_heating_save_config(lv_event_t * e);
+extern void action_heating_sw_init(lv_event_t * e);
 
 #ifdef __cplusplus
 }

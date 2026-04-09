@@ -1,7 +1,7 @@
 {
   "navigation": {
     "selectedUserPageObject": "[DomoHome.eez-project]:/userPages/0",
-    "selectedActionObject": "[DomoHome.eez-project]:/actions/52",
+    "selectedActionObject": "[DomoHome.eez-project]:/actions/48",
     "selectedBitmapObject": "[DomoHome.eez-project]:/bitmaps/26",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -126,6 +126,7 @@
                   "type": "tabset",
                   "id": "#751090f9-898a-494d-8ac2-845ed731e798",
                   "weight": 1.7992571771002617,
+                  "selected": 2,
                   "enableClose": false,
                   "children": [
                     {
@@ -168,7 +169,8 @@
                       "enableClose": false,
                       "icon": "svg:hierarchy"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -249,8 +251,7 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -1108,11 +1109,11 @@
       "selectionBack": {
         "0": {
           "5": {},
-          "7": {},
-          "16": {},
-          "18": {
+          "7": {
             "$selected": true
           },
+          "16": {},
+          "18": {},
           "33": {},
           "34": {},
           "49": {},

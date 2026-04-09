@@ -105,6 +105,7 @@ void create_screen_heating_screen() {
             lv_dropdown_set_options(obj, "Off\nTemperature Select\nTimer Select");
             lv_dropdown_set_selected(obj, 0);
             lv_obj_add_event_cb(obj, action_heating_sw, LV_EVENT_VALUE_CHANGED, (void *)1);
+            lv_obj_add_event_cb(obj, action_heating_sw_init, LV_EVENT_SCREEN_LOADED, (void *)1);
         }
         {
             // lblFromToTemp_1
@@ -125,7 +126,7 @@ void create_screen_heating_screen() {
             lv_slider_set_mode(obj, LV_SLIDER_MODE_RANGE);
             lv_slider_set_value(obj, 20, LV_ANIM_ON);
             lv_slider_set_left_value(obj, 0, LV_ANIM_ON);
-            lv_obj_add_event_cb(obj, action_heating_slider_temperature, LV_EVENT_SCROLL, (void *)1);
+            lv_obj_add_event_cb(obj, action_heating_slider_temperature, LV_EVENT_VALUE_CHANGED, (void *)1);
             lv_obj_set_style_outline_width(obj, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_outline_color(obj, lv_color_hex(0xffd1b14f), LV_PART_MAIN | LV_STATE_DEFAULT);
         }
@@ -139,7 +140,7 @@ void create_screen_heating_screen() {
             lv_slider_set_mode(obj, LV_SLIDER_MODE_RANGE);
             lv_slider_set_value(obj, 23, LV_ANIM_OFF);
             lv_slider_set_left_value(obj, 0, LV_ANIM_OFF);
-            lv_obj_add_event_cb(obj, action_heating_slider_timer, LV_EVENT_SCROLL, (void *)1);
+            lv_obj_add_event_cb(obj, action_heating_slider_timer, LV_EVENT_VALUE_CHANGED, (void *)1);
             lv_obj_set_style_outline_width(obj, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_outline_color(obj, lv_color_hex(0xffd1b14f), LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_outline_pad(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);

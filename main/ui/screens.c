@@ -105,6 +105,7 @@ void create_screen_heating_screen() {
             lv_dropdown_set_options(obj, "Off\nTemperature Select\nTimer Select");
             lv_dropdown_set_selected(obj, 0);
             lv_obj_add_event_cb(obj, action_heating_sw, LV_EVENT_VALUE_CHANGED, (void *)1);
+            lv_obj_add_event_cb(obj, action_heating_sw_init, LV_EVENT_SCREEN_LOADED, (void *)1);
         }
         {
             // lblFromToTemp_1

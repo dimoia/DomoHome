@@ -589,6 +589,15 @@
       "componentGroups": [],
       "userProperties": [],
       "name": "heating_save_config"
+    },
+    {
+      "objID": "3e61bc8e-79dc-4f55-c134-a2f4643591d6",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "heating_sw_init"
     }
   ],
   "userPages": [
@@ -961,6 +970,13 @@
                   "handlerType": "action",
                   "action": "heating_sw",
                   "userData": 1
+                },
+                {
+                  "objID": "199181fe-4557-41a6-be73-69ca42fcfa07",
+                  "eventName": "SCREEN_LOADED",
+                  "handlerType": "action",
+                  "action": "heating_sw_init",
+                  "userData": 1
                 }
               ],
               "identifier": "drop_day_monday",
@@ -1060,7 +1076,7 @@
               "eventHandlers": [
                 {
                   "objID": "cfb3efd3-db8d-473e-fca9-d95245630e05",
-                  "eventName": "SCROLL",
+                  "eventName": "VALUE_CHANGED",
                   "handlerType": "action",
                   "action": "heating_slider_temperature",
                   "userData": 1
@@ -1128,7 +1144,7 @@
               "eventHandlers": [
                 {
                   "objID": "4b8dcb69-d882-4998-df2f-77cf1c03edce",
-                  "eventName": "SCROLL",
+                  "eventName": "VALUE_CHANGED",
                   "handlerType": "action",
                   "action": "heating_slider_timer",
                   "userData": 1

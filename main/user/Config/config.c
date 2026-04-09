@@ -507,7 +507,7 @@ void action_settings_screen_cb(lv_event_t *e)
     ESP_LOGI(TAG_CONFIG, "NetMask        : %s", stUSerConfig.stNetworkConfig.strNetMAsk);
     if(stUSerConfig.stNetworkConfig.eStaticDynamic == STATIC_IP)
     {
-    ESP_LOGI(TAG_CONFIG, "StaticDinamicIP: Static IP");
+        ESP_LOGI(TAG_CONFIG, "StaticDinamicIP: Static IP");
     }
     else
     {
