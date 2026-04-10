@@ -39,7 +39,7 @@
         "actions.h": "c",
         "freertos.h": "c"
     },
-    "cmake.sourceDirectory": "D:/GITHUB_PROJECTS/DomoHome",
+    "cmake.sourceDirectory": "D:/ESPWorkSpace/DomoHome",
     "idf.portWin": "COM12",
     "idf.flashBaudRate": "1150000",
     "idf.customExtraVars": {
