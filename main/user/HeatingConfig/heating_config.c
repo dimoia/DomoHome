@@ -40,7 +40,7 @@ static void CloseFile(void)
     fclose(ptrToFILE);
 }
 
-static int8_t OpenFile(char chMode)
+static int8_t OpenFile(char* chMode)
 {    
     int8_t iRet = 0;
     ptrToFILE = fopen("/spiffs/config.cfg", chMode);
@@ -72,7 +72,7 @@ void action_heating_screen_config(lv_event_t *e)
     // Download Configuration from spifs
     memset(heatingConfigArray,0,sizeof(heatingConfigArray));
 
-    if(OpenFile('r') != -1)
+    if(OpenFile("r") != -1)
     {
         if(ReadConfig(heatingConfigArray) != -1)
         {
@@ -234,6 +234,14 @@ void action_heating_screen_config(lv_event_t *e)
                 lv_slider_set_range(objs.slider_temp_sunday, heatingConfigArray[6].stTimerRange.u8ClockMin, heatingConfigArray[6].stTimerRange.u8ClockMax);
             }
         }
+        else
+        {
+            ESP_LOGE(TAG, "Error To Read Config File");
+        }
+    }
+    else
+    {
+        ESP_LOGE(TAG, "Error To Open File");
     }
 #if 0
     switch(heatingConfigArray[0].enConfigType)
@@ -692,7 +700,7 @@ int8_t InitHeatingConfig(void)
     lblTimeArray[6].lblTimeMax = objects.sunday_time_max;
     lblTimeArray[6].u16XposLblTimeMax = 964;
     lblTimeArray[6].u16YposLblTimeMax = 440;    
-
+/*
     for(int i = 0; i < HEATING_CONFIG_ARRAY_SIZE;i++)
     {
         lv_obj_set_pos(lblTempArray[i].lblTempMin, lblTempArray[i].u16XposLblTempMin , lblTempArray[i].u16YposLblTempMin);
@@ -701,7 +709,7 @@ int8_t InitHeatingConfig(void)
         lv_obj_set_pos(lblTimeArray[i].lblTimeMin, lblTimeArray[i].u16XposLblTimeMin , lblTimeArray[i].u16YposLblTimeMin);
         lv_obj_set_pos(lblTimeArray[i].lblTimeMax, lblTimeArray[i].u16XposLblTimeMax , lblTimeArray[i].u16YposLblTimeMax);
     }
-
+*/
     if(bInitFs == false)
     {
         esp_vfs_spiffs_conf_t conf = 
@@ -734,7 +742,7 @@ int8_t InitHeatingConfig(void)
 
 void action_heating_save_config(lv_event_t *e) 
 {
-    if(OpenFile('w') != -1)
+    if(OpenFile("w") != -1)
     {
         if(ReadConfig(heatingConfigArrayTmp) != -1)
         {
@@ -744,7 +752,7 @@ void action_heating_save_config(lv_event_t *e)
     // save only if user change values
     if(memcmp(heatingConfigArrayTmp,heatingConfigArray,sizeof(heatingConfigArray)) != 0)
     {
-        if(OpenFile('w') != -1)
+        if(OpenFile("w") != -1)
         {
             if(WriteConfig(heatingConfigArray) != -1)
             {

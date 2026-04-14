@@ -1,8 +1,31 @@
+#if defined(EEZ_FOR_LVGL)
+#include <eez/core/vars.h>
+#endif
+
 #include "ui.h"
 #include "screens.h"
 #include "images.h"
 #include "actions.h"
 #include "vars.h"
+
+
+
+
+
+
+
+#if defined(EEZ_FOR_LVGL)
+
+void ui_init() {
+    eez_flow_init(assets, sizeof(assets), (lv_obj_t **)&objects, sizeof(objects), images, sizeof(images), actions);
+}
+
+void ui_tick() {
+    eez_flow_tick();
+    tick_screen(g_currentScreen);
+}
+
+#else
 
 #include <string.h>
 
@@ -23,10 +46,12 @@ void loadScreen(enum ScreensEnum screenId) {
 
 void ui_init() {
     create_screens();
-    loadScreen(SCREEN_ID_HEATING_SCREEN);
+    loadScreen(SCREEN_ID_MAIN);
 
 }
 
 void ui_tick() {
     tick_screen(currentScreen);
 }
+
+#endif
