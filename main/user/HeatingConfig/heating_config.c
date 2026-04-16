@@ -72,6 +72,16 @@ void action_heating_screen_config(lv_event_t *e)
     // Download Configuration from spifs
     memset(heatingConfigArray,0,sizeof(heatingConfigArray));
 
+    for(int i = 0; i < HEATING_CONFIG_ARRAY_SIZE;i++)
+    {
+        lv_obj_set_pos(lblTempArray[i].lblTempMin, lblTempArray[i].u16XposLblTempMin , lblTempArray[i].u16YposLblTempMin);
+        lv_obj_set_pos(lblTempArray[i].lblTempMax, lblTempArray[i].u16XposLblTempMax , lblTempArray[i].u16YposLblTempMax);
+
+        lv_obj_set_pos(lblTimeArray[i].lblTimeMin, lblTimeArray[i].u16XposLblTimeMin , lblTimeArray[i].u16YposLblTimeMin);
+        lv_obj_set_pos(lblTimeArray[i].lblTimeMax, lblTimeArray[i].u16XposLblTimeMax , lblTimeArray[i].u16YposLblTimeMax);
+    }
+
+
     if(OpenFile("r") != -1)
     {
         if(ReadConfig(heatingConfigArray) != -1)
@@ -243,6 +253,7 @@ void action_heating_screen_config(lv_event_t *e)
     {
         ESP_LOGE(TAG, "Error To Open File");
     }
+
 #if 0
     switch(heatingConfigArray[0].enConfigType)
     {
@@ -699,7 +710,9 @@ int8_t InitHeatingConfig(void)
     lblTimeArray[6].u16YposLblTimeMin = 440;
     lblTimeArray[6].lblTimeMax = objects.sunday_time_max;
     lblTimeArray[6].u16XposLblTimeMax = 964;
-    lblTimeArray[6].u16YposLblTimeMax = 440;    
+    lblTimeArray[6].u16YposLblTimeMax = 440;   
+    
+    //memeset(heatingConfigArray,0,sizeof(heatingConfigArray));
 /*
     for(int i = 0; i < HEATING_CONFIG_ARRAY_SIZE;i++)
     {
