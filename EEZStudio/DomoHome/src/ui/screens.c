@@ -2217,7 +2217,7 @@ void create_screen_heating_screen() {
             lv_obj_set_size(obj, 194, LV_SIZE_CONTENT);
             lv_dropdown_set_options(obj, "Off\nTemperature Select\nTimer Select");
             lv_dropdown_set_selected(obj, 0);
-            lv_obj_add_event_cb(obj, action_heating_sw, LV_EVENT_VALUE_CHANGED, (void *)1);
+            lv_obj_add_event_cb(obj, action_heating_sw, LV_EVENT_VALUE_CHANGED, (void *)2);
         }
         {
             // slider_temp_tuesday

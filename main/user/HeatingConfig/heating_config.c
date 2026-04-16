@@ -70,8 +70,143 @@ void action_heating_screen_config(lv_event_t *e)
     objects_t objs = objects;    
 
     // Download Configuration from spifs
-    memset(heatingConfigArray,0,sizeof(heatingConfigArray));
 
+    heatingConfigArray[0].enConfigType = lv_dropdown_get_selected(objs.drop_day_monday);
+    heatingConfigArray[1].enConfigType = lv_dropdown_get_selected(objs.drop_day_tuesday);
+    heatingConfigArray[2].enConfigType = lv_dropdown_get_selected(objs.drop_day_wednesday);
+    heatingConfigArray[3].enConfigType = lv_dropdown_get_selected(objs.drop_day_thursday);
+    heatingConfigArray[4].enConfigType = lv_dropdown_get_selected(objs.drop_day_friday);
+    heatingConfigArray[5].enConfigType = lv_dropdown_get_selected(objs.drop_day_saturday);
+    heatingConfigArray[6].enConfigType = lv_dropdown_get_selected(objs.drop_day_sunday);
+
+
+    heatingConfigArray[0].stTempRange.u8TempMin = lv_slider_get_min_value(objs.slider_temp_monday);
+    heatingConfigArray[0].stTempRange.u8TempMax = lv_slider_get_max_value(objs.slider_temp_monday);
+    heatingConfigArray[1].stTempRange.u8TempMin = lv_slider_get_min_value(objs.slider_temp_tuesday);
+    heatingConfigArray[1].stTempRange.u8TempMax = lv_slider_get_max_value(objs.slider_temp_tuesday);
+    heatingConfigArray[2].stTempRange.u8TempMin = lv_slider_get_min_value(objs.slider_temp_wednesday);
+    heatingConfigArray[2].stTempRange.u8TempMax = lv_slider_get_max_value(objs.slider_temp_wednesday);
+    heatingConfigArray[3].stTempRange.u8TempMin = lv_slider_get_min_value(objs.slider_temp_thursday);
+    heatingConfigArray[3].stTempRange.u8TempMax = lv_slider_get_max_value(objs.slider_temp_thursday);
+    heatingConfigArray[4].stTempRange.u8TempMin = lv_slider_get_min_value(objs.slider_temp_friday);
+    heatingConfigArray[4].stTempRange.u8TempMax = lv_slider_get_max_value(objs.slider_temp_friday);
+    heatingConfigArray[5].stTempRange.u8TempMin = lv_slider_get_min_value(objs.slider_temp_saturday);
+    heatingConfigArray[5].stTempRange.u8TempMax = lv_slider_get_max_value(objs.slider_temp_saturday);
+    heatingConfigArray[6].stTempRange.u8TempMin = lv_slider_get_min_value(objs.slider_temp_sunday);
+    heatingConfigArray[6].stTempRange.u8TempMax = lv_slider_get_max_value(objs.slider_temp_sunday);
+
+    heatingConfigArray[0].stTimerRange.u8ClockMin = lv_slider_get_min_value(objs.slider_timer_monday);
+    heatingConfigArray[0].stTimerRange.u8ClockMax = lv_slider_get_max_value(objs.slider_timer_monday);
+    heatingConfigArray[1].stTimerRange.u8ClockMin = lv_slider_get_min_value(objs.slider_timer_tuesday);
+    heatingConfigArray[1].stTimerRange.u8ClockMax = lv_slider_get_max_value(objs.slider_timer_tuesday);
+    heatingConfigArray[2].stTimerRange.u8ClockMin = lv_slider_get_min_value(objs.slider_timer_wednesday);
+    heatingConfigArray[2].stTimerRange.u8ClockMax = lv_slider_get_max_value(objs.slider_timer_wednesday);
+    heatingConfigArray[3].stTimerRange.u8ClockMin = lv_slider_get_min_value(objs.slider_timer_thursday);
+    heatingConfigArray[3].stTimerRange.u8ClockMax = lv_slider_get_max_value(objs.slider_timer_thursday);
+    heatingConfigArray[4].stTimerRange.u8ClockMin = lv_slider_get_min_value(objs.slider_timer_friday);
+    heatingConfigArray[4].stTimerRange.u8ClockMax = lv_slider_get_max_value(objs.slider_timer_friday);
+    heatingConfigArray[5].stTimerRange.u8ClockMin = lv_slider_get_min_value(objs.slider_timer_saturday);
+    heatingConfigArray[5].stTimerRange.u8ClockMax = lv_slider_get_max_value(objs.slider_timer_saturday);
+    heatingConfigArray[6].stTimerRange.u8ClockMin = lv_slider_get_min_value(objs.slider_timer_sunday);
+    heatingConfigArray[6].stTimerRange.u8ClockMax = lv_slider_get_max_value(objs.slider_timer_sunday);
+
+    // Monday
+    lblTempArray[0].lblTempMin = objects.monday_temp_min;
+    lblTempArray[0].u16XposLblTempMin = 368;
+    lblTempArray[0].u16YposLblTempMin = 84;
+    lblTempArray[0].lblTempMax = objects.monday_temp_max;
+    lblTempArray[0].u16XposLblTempMax = 637;
+    lblTempArray[0].u16YposLblTempMax = 84;
+    lblTimeArray[0].lblTimeMin = objects.monday_time_min;
+    lblTimeArray[0].u16XposLblTimeMin = 692;
+    lblTimeArray[0].u16YposLblTimeMin = 84;
+    lblTimeArray[0].lblTimeMax = objects.monday_time_max;
+    lblTimeArray[0].u16XposLblTimeMax = 964;
+    lblTimeArray[0].u16YposLblTimeMax = 84;
+
+    //Tuesday
+    lblTempArray[1].lblTempMin = objects.tuesday_temp_min;
+    lblTempArray[1].u16XposLblTempMin = 368;
+    lblTempArray[1].u16YposLblTempMin = 143;
+    lblTempArray[1].lblTempMax = objects.tuesday_temp_max;
+    lblTempArray[1].u16XposLblTempMax = 637;
+    lblTempArray[1].u16YposLblTempMax = 143;
+    lblTimeArray[1].lblTimeMin = objects.tuesday_time_min;
+    lblTimeArray[1].u16XposLblTimeMin = 692;
+    lblTimeArray[1].u16YposLblTimeMin = 143;
+    lblTimeArray[1].lblTimeMax = objects.tuesday_time_max;
+    lblTimeArray[1].u16XposLblTimeMax = 964;
+    lblTimeArray[1].u16YposLblTimeMax = 143;
+
+    // Wednesday
+    lblTempArray[2].lblTempMin = objects.wednesday_temp_min;
+    lblTempArray[2].u16XposLblTempMin = 368;
+    lblTempArray[2].u16YposLblTempMin = 203;
+    lblTempArray[2].lblTempMax = objects.wednesday_temp_max;
+    lblTempArray[2].u16XposLblTempMax = 637;
+    lblTempArray[2].u16YposLblTempMax = 203;
+    lblTimeArray[2].lblTimeMin = objects.wednesday_time_min;
+    lblTimeArray[2].u16XposLblTimeMin = 692;
+    lblTimeArray[2].u16YposLblTimeMin = 203;
+    lblTimeArray[2].lblTimeMax = objects.wednesday_time_max;
+    lblTimeArray[2].u16XposLblTimeMax = 964;
+    lblTimeArray[2].u16YposLblTimeMax = 203;
+
+    // Thursday
+    lblTempArray[3].lblTempMin = objects.thursday_temp_min;
+    lblTempArray[3].u16XposLblTempMin = 368;
+    lblTempArray[3].u16YposLblTempMin = 263;
+    lblTempArray[3].lblTempMax = objects.thursday_temp_max;
+    lblTempArray[3].u16XposLblTempMax = 637;
+    lblTempArray[3].u16YposLblTempMax = 263;
+    lblTimeArray[3].lblTimeMin = objects.thursday_time_min;
+    lblTimeArray[3].u16XposLblTimeMin = 692;
+    lblTimeArray[3].u16YposLblTimeMin = 263;
+    lblTimeArray[3].lblTimeMax = objects.thursday_time_max;
+    lblTimeArray[3].u16XposLblTimeMax = 964;
+    lblTimeArray[3].u16YposLblTimeMax = 263;
+
+    // Friday
+    lblTempArray[4].lblTempMin = objects.friday_temp_min;
+    lblTempArray[4].u16XposLblTempMin = 368;
+    lblTempArray[4].u16YposLblTempMin = 320;
+    lblTempArray[4].lblTempMax = objects.friday_temp_max;
+    lblTempArray[4].u16XposLblTempMax = 637;
+    lblTempArray[4].u16YposLblTempMax = 320;
+    lblTimeArray[4].lblTimeMin = objects.friday_time_min;
+    lblTimeArray[4].u16XposLblTimeMin = 692;
+    lblTimeArray[4].u16YposLblTimeMin = 320;
+    lblTimeArray[4].lblTimeMax = objects.friday_time_max;
+    lblTimeArray[4].u16XposLblTimeMax = 964;
+    lblTimeArray[4].u16YposLblTimeMax = 320;
+
+    lblTempArray[5].lblTempMin = objects.saturday_temp_min;
+    lblTempArray[5].u16XposLblTempMin = 368;
+    lblTempArray[5].u16YposLblTempMin = 381;
+    lblTempArray[5].lblTempMax = objects.saturday_temp_max;
+    lblTempArray[5].u16XposLblTempMax = 637;
+    lblTempArray[5].u16YposLblTempMax = 381;
+    lblTimeArray[5].lblTimeMin = objects.saturday_time_min;
+    lblTimeArray[5].u16XposLblTimeMin = 692;
+    lblTimeArray[5].u16YposLblTimeMin = 381;
+    lblTimeArray[5].lblTimeMax = objects.saturday_time_max;
+    lblTimeArray[5].u16XposLblTimeMax = 964;
+    lblTimeArray[5].u16YposLblTimeMax = 381;
+    
+    lblTempArray[6].lblTempMin = objects.sunday_temp_min;
+    lblTempArray[6].u16XposLblTempMin = 368;
+    lblTempArray[6].u16YposLblTempMin = 440;
+    lblTempArray[6].lblTempMax = objects.sunday_temp_max;
+    lblTempArray[6].u16XposLblTempMax = 637;
+    lblTempArray[6].u16YposLblTempMax = 440;
+    lblTimeArray[6].lblTimeMin = objects.sunday_time_min;
+    lblTimeArray[6].u16XposLblTimeMin = 692;
+    lblTimeArray[6].u16YposLblTimeMin = 440;
+    lblTimeArray[6].lblTimeMax = objects.sunday_time_max;
+    lblTimeArray[6].u16XposLblTimeMax = 964;
+    lblTimeArray[6].u16YposLblTimeMax = 440;   
+  
+/*
     for(int i = 0; i < HEATING_CONFIG_ARRAY_SIZE;i++)
     {
         lv_obj_set_pos(lblTempArray[i].lblTempMin, lblTempArray[i].u16XposLblTempMin , lblTempArray[i].u16YposLblTempMin);
@@ -80,14 +215,14 @@ void action_heating_screen_config(lv_event_t *e)
         lv_obj_set_pos(lblTimeArray[i].lblTimeMin, lblTimeArray[i].u16XposLblTimeMin , lblTimeArray[i].u16YposLblTimeMin);
         lv_obj_set_pos(lblTimeArray[i].lblTimeMax, lblTimeArray[i].u16XposLblTimeMax , lblTimeArray[i].u16YposLblTimeMax);
     }
-
+*/
 
     if(OpenFile("r") != -1)
     {
         if(ReadConfig(heatingConfigArray) != -1)
         {
             CloseFile();
-            
+#if 0            
             ESP_LOGI(TAG, "###############################################################");
             for(int i = 0; i < HEATING_CONFIG_ARRAY_SIZE;i++)
             {
@@ -243,6 +378,7 @@ void action_heating_screen_config(lv_event_t *e)
                 lv_obj_add_state(objs.slider_temp_sunday,LV_STATE_DISABLED); 
                 lv_slider_set_range(objs.slider_temp_sunday, heatingConfigArray[6].stTimerRange.u8ClockMin, heatingConfigArray[6].stTimerRange.u8ClockMax);
             }
+#endif                
         }
         else
         {
@@ -254,6 +390,161 @@ void action_heating_screen_config(lv_event_t *e)
         ESP_LOGE(TAG, "Error To Open File");
     }
 
+                ESP_LOGI(TAG, "###############################################################");
+            for(int i = 0; i < HEATING_CONFIG_ARRAY_SIZE;i++)
+            {
+                switch(heatingConfigArray[0].enConfigType)
+                {
+                    case OFF:
+                    ESP_LOGI(TAG, "Heating Setting: OFF");
+                    break;
+
+                    case TEMPERATURE:
+                    ESP_LOGI(TAG, "Heating Setting: TEMPERATURE");
+                    ESP_LOGI(TAG, "Day: %d Temp Min: %d Temp Max: %d", (i+1),heatingConfigArray[i].stTempRange.u8TempMin,heatingConfigArray[i].stTempRange.u8TempMax);
+                    break;
+
+                    case TIMER:
+                    ESP_LOGI(TAG, "Heating Setting: TIMER");
+                    ESP_LOGI(TAG, "Day: %d Temp Min: %d Temp Max: %d", (i+1),heatingConfigArray[i].stTimerRange.u8ClockMin,heatingConfigArray[i].stTimerRange.u8ClockMax);
+                    break;
+
+                    default:
+                    break;
+                }
+            }    
+            ESP_LOGI(TAG, "###############################################################");
+            
+            lv_dropdown_set_selected(objs.drop_day_monday, (uint16_t)heatingConfigArray[0].enConfigType);
+            // monday
+            if(heatingConfigArray[0].enConfigType == OFF)
+            {
+                lv_obj_add_state(objs.slider_temp_monday,     LV_STATE_DISABLED);
+                lv_obj_add_state(objs.slider_timer_monday,    LV_STATE_DISABLED);
+            }
+            else  
+            if(heatingConfigArray[0].enConfigType == TEMPERATURE)
+            {
+                lv_obj_add_state(objs.slider_timer_monday,LV_STATE_DISABLED);
+                lv_slider_set_range(objs.slider_temp_monday, heatingConfigArray[0].stTempRange.u8TempMin, heatingConfigArray[0].stTempRange.u8TempMax);
+            }
+            else
+            {
+                lv_obj_add_state(objs.slider_temp_monday,LV_STATE_DISABLED);
+                lv_slider_set_range(objs.slider_temp_monday, heatingConfigArray[0].stTimerRange.u8ClockMin, heatingConfigArray[0].stTimerRange.u8ClockMax);
+            }
+            // tuesday
+            lv_dropdown_set_selected(objs.drop_day_monday, (uint16_t)heatingConfigArray[1].enConfigType);
+            if(heatingConfigArray[1].enConfigType == OFF)
+            {
+                lv_obj_add_state(objs.slider_temp_tuesday,    LV_STATE_DISABLED);
+                lv_obj_add_state(objs.slider_timer_tuesday,   LV_STATE_DISABLED);
+            }
+            else  
+            if(heatingConfigArray[1].enConfigType == TEMPERATURE)
+            {
+                lv_obj_add_state(objs.slider_timer_tuesday,LV_STATE_DISABLED);
+                lv_slider_set_range(objs.slider_temp_tuesday, heatingConfigArray[1].stTempRange.u8TempMin, heatingConfigArray[1].stTempRange.u8TempMax);
+            }
+            else
+            {
+                lv_obj_add_state(objs.slider_temp_tuesday,LV_STATE_DISABLED);   
+                lv_slider_set_range(objs.slider_temp_tuesday, heatingConfigArray[1].stTimerRange.u8ClockMin, heatingConfigArray[1].stTimerRange.u8ClockMax);     
+            }
+
+            // wednesday
+            lv_dropdown_set_selected(objs.drop_day_wednesday, (uint16_t)heatingConfigArray[2].enConfigType);
+            if(heatingConfigArray[2].enConfigType == OFF)
+            {
+                lv_obj_add_state(objs.slider_temp_wednesday,  LV_STATE_DISABLED);
+                lv_obj_add_state(objs.slider_timer_wednesday, LV_STATE_DISABLED);
+            }
+            else  
+            if(heatingConfigArray[2].enConfigType == TEMPERATURE)
+            {
+                lv_obj_add_state(objs.slider_timer_wednesday,LV_STATE_DISABLED);
+                lv_slider_set_range(objs.slider_temp_wednesday, heatingConfigArray[2].stTempRange.u8TempMin, heatingConfigArray[2].stTempRange.u8TempMax);
+            }
+            else
+            {
+                lv_obj_add_state(objs.slider_temp_wednesday,LV_STATE_DISABLED);   
+                lv_slider_set_range(objs.slider_temp_wednesday, heatingConfigArray[2].stTimerRange.u8ClockMin, heatingConfigArray[2].stTimerRange.u8ClockMax);           
+            }
+
+            // thursday   
+            lv_dropdown_set_selected(objs.drop_day_thursday, (uint16_t)heatingConfigArray[3].enConfigType);
+            if(heatingConfigArray[2].enConfigType == OFF)
+            {
+                lv_obj_add_state(objs.slider_temp_thursday,   LV_STATE_DISABLED);
+                lv_obj_add_state(objs.slider_timer_thursday,  LV_STATE_DISABLED);
+            }
+            else  
+            if(heatingConfigArray[2].enConfigType == TEMPERATURE)
+            {
+                lv_obj_add_state(objs.slider_timer_thursday,LV_STATE_DISABLED);
+                lv_slider_set_range(objs.slider_temp_thursday, heatingConfigArray[3].stTempRange.u8TempMin, heatingConfigArray[3].stTempRange.u8TempMax);
+            }
+            else
+            {
+                lv_obj_add_state(objs.slider_temp_thursday,LV_STATE_DISABLED);  
+                lv_slider_set_range(objs.slider_temp_thursday, heatingConfigArray[3].stTimerRange.u8ClockMin, heatingConfigArray[3].stTimerRange.u8ClockMax);           
+            }
+            // friday
+            lv_dropdown_set_selected(objs.drop_day_friday, (uint16_t)heatingConfigArray[4].enConfigType);
+            if(heatingConfigArray[2].enConfigType == OFF)
+            {
+                lv_obj_add_state(objs.slider_temp_friday,     LV_STATE_DISABLED);
+                lv_obj_add_state(objs.slider_timer_friday,    LV_STATE_DISABLED); 
+            }
+            else  
+            if(heatingConfigArray[2].enConfigType == TEMPERATURE)
+            {
+                lv_obj_add_state(objs.slider_timer_friday,LV_STATE_DISABLED);
+                lv_slider_set_range(objs.slider_temp_friday, heatingConfigArray[4].stTempRange.u8TempMin, heatingConfigArray[4].stTempRange.u8TempMax);
+            }
+            else
+            {
+                lv_obj_add_state(objs.slider_temp_friday,LV_STATE_DISABLED); 
+                lv_slider_set_range(objs.slider_temp_friday, heatingConfigArray[4].stTimerRange.u8ClockMin, heatingConfigArray[4].stTimerRange.u8ClockMax);           
+            }
+
+            // saturday
+            lv_dropdown_set_selected(objs.drop_day_saturday, (uint16_t)heatingConfigArray[5].enConfigType);
+            if(heatingConfigArray[2].enConfigType == OFF)
+            {
+                lv_obj_add_state(objs.slider_temp_saturday,   LV_STATE_DISABLED);
+                lv_obj_add_state(objs.slider_timer_saturday,  LV_STATE_DISABLED);
+            }
+            else  
+            if(heatingConfigArray[2].enConfigType == TEMPERATURE)
+            {
+                lv_obj_add_state(objs.slider_timer_saturday,LV_STATE_DISABLED);
+                lv_slider_set_range(objs.slider_temp_saturday, heatingConfigArray[5].stTempRange.u8TempMin, heatingConfigArray[5].stTempRange.u8TempMax);
+            }
+            else
+            {
+                lv_obj_add_state(objs.slider_temp_saturday,LV_STATE_DISABLED);   
+                lv_slider_set_range(objs.slider_temp_saturday, heatingConfigArray[5].stTimerRange.u8ClockMin, heatingConfigArray[5].stTimerRange.u8ClockMax);
+            }
+
+            // sunday
+            lv_dropdown_set_selected(objs.drop_day_sunday, (uint16_t)heatingConfigArray[6].enConfigType);
+            if(heatingConfigArray[2].enConfigType == OFF)
+            {
+                lv_obj_add_state(objs.slider_temp_sunday,     LV_STATE_DISABLED);
+                lv_obj_add_state(objs.slider_timer_sunday,    LV_STATE_DISABLED);
+            }
+            else  
+            if(heatingConfigArray[2].enConfigType == TEMPERATURE)
+            {
+                lv_obj_add_state(objs.slider_timer_sunday,LV_STATE_DISABLED);
+                lv_slider_set_range(objs.slider_temp_sunday, heatingConfigArray[6].stTempRange.u8TempMin, heatingConfigArray[6].stTempRange.u8TempMax);
+            }
+            else
+            {
+                lv_obj_add_state(objs.slider_temp_sunday,LV_STATE_DISABLED); 
+                lv_slider_set_range(objs.slider_temp_sunday, heatingConfigArray[6].stTimerRange.u8ClockMin, heatingConfigArray[6].stTimerRange.u8ClockMax);
+            }
 #if 0
     switch(heatingConfigArray[0].enConfigType)
     {
@@ -341,9 +632,11 @@ void action_heating_sw_init(lv_event_t *e)
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t *obj        = lv_event_get_target(e);    
     char strBuffer[16];
-
-    if(code == LV_EVENT_SCREEN_LOADED) 
+    
+    if(code == LV_EVENT_VALUE_CHANGED) 
     {
+        //ESP_LOGI(TAG, "%s ", wifi_scann_list[lv_dropdown_get_selected(obj)].ssid);  // Log RSSI (signal strength)
+
         switch(userData)
         {
             case 1:
@@ -352,20 +645,25 @@ void action_heating_sw_init(lv_event_t *e)
         }
     }
 }
-
+ 
 void action_heating_slider_temperature(lv_event_t *e) 
 {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t * slider    = lv_event_get_target(e);
     uint8_t userData     = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+    objects_t objs = objects;
 
     if(code == LV_EVENT_VALUE_CHANGED) 
     {
-        heatingConfigArray[userData-1].stTempRange.u8TempMin = lv_slider_get_value(slider);
+        /* Legge il valore del cursore a SINISTRA (inizio) */        
+        heatingConfigArray[userData-1].stTempRange.u8TempMin = lv_slider_get_left_value(slider);
         lv_label_set_text_fmt(lblTempArray[userData-1].lblTempMin, "%d", heatingConfigArray[userData-1].stTempRange.u8TempMin);
 
+        /* Legge il valore del cursore a DESTRA (fine) */
         heatingConfigArray[userData-1].stTempRange.u8TempMax = lv_slider_get_value(slider);
         lv_label_set_text_fmt(lblTempArray[userData-1].lblTempMax, "%d", heatingConfigArray[userData-1].stTempRange.u8TempMax);
+         ESP_LOGI(TAG, "action_heating_slider_temperature[%d] Min Value: %d, Max Value: %d",userData, (int)heatingConfigArray[userData-1].stTempRange.u8TempMin, (int)heatingConfigArray[userData-1].stTempRange.u8TempMax);
+
 
         #if 0
         switch(userData)
@@ -432,22 +730,31 @@ void action_heating_sw(lv_event_t *e)
     lv_obj_t *obj        = lv_event_get_target(e);    
     uint8_t userData     = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
     uint16_t index;
+    char buf[25];
 
     if(code == LV_EVENT_VALUE_CHANGED) 
     { 
+        ESP_LOGI(TAG, "User Data: %d",userData); 
         switch(userData)
         {
             case 1:
                 ESP_LOGI(TAG, "Monday Selected "); 
-                index = lv_dropdown_get_selected(obj);               
+                // 1. Ottieni l'indice della voce selezionata (0, 1, 2...)
+                index = lv_dropdown_get_selected(obj);   
                 if(index == 1) // TEMP
-                {
-                    lv_obj_clear_state(objs.slider_timer_monday, LV_STATE_DISABLED);
-                    lv_slider_set_range(objs.slider_temp_monday, heatingConfigArray[0].stTempRange.u8TempMin, heatingConfigArray[0].stTempRange.u8TempMax);
+                {                    
+                    lv_obj_clear_state(objs.slider_temp_monday, LV_STATE_DISABLED);
+
+                    /* 2. Imposta il valore a SINISTRA (inizio) */
+                    lv_slider_set_left_value(objs.slider_temp_monday, heatingConfigArray[0].stTempRange.u8TempMin, LV_ANIM_ON);
+
+                    /* 3. Imposta il valore a DESTRA (fine) */
+                    lv_slider_set_value(objs.slider_temp_monday, heatingConfigArray[0].stTempRange.u8TempMax, LV_ANIM_ON);
+
                 }
                 else if(index == 2) //TIMER
                 {
-                    lv_obj_clear_state(objs.slider_temp_monday, LV_STATE_DISABLED);
+                    lv_obj_clear_state(objs.slider_timer_monday, LV_STATE_DISABLED);
                     lv_slider_set_range(objs.slider_timer_monday, heatingConfigArray[0].stTimerRange.u8ClockMin, heatingConfigArray[0].stTimerRange.u8ClockMax);
                 }
                 else // NONE
@@ -615,7 +922,8 @@ int8_t InitHeatingConfig(void)
 {
     static bool bInitFs = false;
     int8_t iRet = 0;
-
+    
+#if 0
     // Monday
     lblTempArray[0].lblTempMin = objects.monday_temp_min;
     lblTempArray[0].u16XposLblTempMin = 368;
@@ -711,7 +1019,7 @@ int8_t InitHeatingConfig(void)
     lblTimeArray[6].lblTimeMax = objects.sunday_time_max;
     lblTimeArray[6].u16XposLblTimeMax = 964;
     lblTimeArray[6].u16YposLblTimeMax = 440;   
-    
+    #endif
     //memeset(heatingConfigArray,0,sizeof(heatingConfigArray));
 /*
     for(int i = 0; i < HEATING_CONFIG_ARRAY_SIZE;i++)
